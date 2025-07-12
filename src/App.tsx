@@ -14,6 +14,7 @@ import IntelligentDisruptionManager from './components/IntelligentDisruptionMana
 import QuantumSocialAnalyzer from './components/QuantumSocialAnalyzer';
 import EmergentIntelligenceTracker from './components/EmergentIntelligenceTracker';
 import CognitiveResonanceMapper from './components/CognitiveResonanceMapper';
+import CulturalInsightsPanel from './components/CulturalInsightsPanel';
 import { Activity, BarChart3, User, Target, Brain, Zap, AlertTriangle, Users, Settings, Play, Pause, RotateCcw, Search, FileText, Cpu, Atom, Network, Waves } from 'lucide-react';
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
   const [poliSynthCore] = useState(() => new PoliSynthCore());
   const [state, setState] = useState<SimulationState>(engine.getState());
   const [selectedPrimatom, setSelectedPrimatom] = useState<Primatom | null>(null);
-  const [activeTab, setActiveTab] = useState<'simulation' | 'metrics' | 'details' | 'scenarios' | 'disruption' | 'population' | 'analytics' | 'ai-disruption' | 'quantum' | 'emergence' | 'resonance'>('simulation');
+  const [activeTab, setActiveTab] = useState<'simulation' | 'metrics' | 'details' | 'scenarios' | 'disruption' | 'population' | 'analytics' | 'ai-disruption' | 'quantum' | 'emergence' | 'resonance' | 'cultural'>('simulation');
   const [isIntelligentZoom, setIsIntelligentZoom] = useState(false);
 
   useEffect(() => {
@@ -95,6 +96,7 @@ function App() {
     { id: 'quantum', label: 'Analyse Quantique', icon: <Atom className="w-4 h-4" /> },
     { id: 'emergence', label: 'Intelligence Émergente', icon: <Network className="w-4 h-4" /> },
     { id: 'resonance', label: 'Résonance Cognitive', icon: <Waves className="w-4 h-4" /> },
+    { id: 'cultural', label: 'Insights Culturels', icon: <Globe className="w-4 h-4" /> },
     { id: 'details', label: 'Zoom Intelligent', icon: <Search className="w-4 h-4" /> },
     { id: 'analytics', label: 'Analytics Pro', icon: <FileText className="w-4 h-4" /> },
     { id: 'scenarios', label: 'Scénarios', icon: <Target className="w-4 h-4" /> },
@@ -291,6 +293,13 @@ function App() {
               <CognitiveResonanceMapper
                 state={state}
                 poliSynthCore={poliSynthCore}
+                isRunning={state.isRunning}
+              />
+            )}
+
+            {activeTab === 'cultural' && (
+              <CulturalInsightsPanel
+                state={state}
                 isRunning={state.isRunning}
               />
             )}

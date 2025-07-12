@@ -1,5 +1,6 @@
 import { Primatom, Coalition, SocialMetric, SimulationState, DisruptiveEvent } from '../types';
 import { DisruptionEngine } from './DisruptionEngine';
+import { qlooService } from '../services/QlooAPIService';
 
 export class SocialDynamicsEngine {
   private state: SimulationState;
@@ -489,6 +490,9 @@ export class SocialDynamicsEngine {
       const adaptationRate = (primatom.adaptabilityScore || 50) / 2000;
       const stressFactor = 1 + (primatom.stressLevel || 0) * 0.008;
       
+      // Intégration des influences culturelles Qloo
+      this.applyCulturalInfluences(primatom);
+      
       primatom.trust += socialInfluence.trust * adaptationRate * stressFactor;
       primatom.cooperation += socialInfluence.cooperation * adaptationRate;
       primatom.innovation += socialInfluence.innovation * adaptationRate;
@@ -532,6 +536,26 @@ export class SocialDynamicsEngine {
     }, { trust: 0, cooperation: 0, innovation: 0 });
 
     return influence;
+  }
+
+  private async applyCulturalInfluences(primatom: Primatom) {
+    try {
+      // Appliquer les influences culturelles basées sur les tendances Qloo
+      const trends = await qlooService.getGlobalTrends();
+      
+      // Ajuster les comportements selon les tendances globales
+      const culturalImpact = trends.global_sentiment.innovation_appetite / 1000; // Facteur d'influence subtil
+      primatom.innovation += culturalImpact;
+      
+      const socialCohesionImpact = trends.global_sentiment.social_cohesion / 1000;
+      primatom.cooperation += socialCohesionImpact;
+      
+      const optimismImpact = trends.global_sentiment.optimism / 1000;
+      primatom.trust += optimismImpact;
+      
+    } catch (error) {
+      // Silently fail if API is not available
+    }
   }
 
   private updateMetrics() {
