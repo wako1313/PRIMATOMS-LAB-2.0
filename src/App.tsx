@@ -15,7 +15,7 @@ import QuantumSocialAnalyzer from './components/QuantumSocialAnalyzer';
 import EmergentIntelligenceTracker from './components/EmergentIntelligenceTracker';
 import CognitiveResonanceMapper from './components/CognitiveResonanceMapper';
 import CulturalInsightsPanel from './components/CulturalInsightsPanel';
-import { Activity, BarChart3, User, Target, Brain, Zap, AlertTriangle, Users, Settings, Play, Pause, RotateCcw, Search, FileText, Cpu, Atom, Network, Waves } from 'lucide-react';
+import { Activity, BarChart3, User, Target, Brain, Zap, AlertTriangle, Users, Settings, Play, Pause, RotateCcw, Search, FileText, Cpu, Atom, Network, Waves, Globe } from 'lucide-react';
 
 function App() {
   const [engine] = useState(() => new SocialDynamicsEngine());
