@@ -384,6 +384,7 @@ class QlooAPIService {
     try {
       await this.makeRequest('/v2/insights', {
         'filter.type': 'urn:entity:artist',
+        'signal.demographics.age': '36_to_55',
         'take': '1'
       });
       return true;
