@@ -117,6 +117,7 @@ class QlooAPIService {
     try {
       const response = await this.makeRequest('/v2/insights', {
         'filter.type': 'urn:entity:artist',
+        'signal.location.query': 'New York City',
         'take': '50',
         'bias.trends': 'high'
       });
@@ -157,6 +158,7 @@ class QlooAPIService {
       const response = await this.makeRequest('/v2/insights', {
         'filter.type': 'urn:entity:artist',
         'signal.demographics.age': primatom.innovation > 70 ? '35_and_younger' : '36_to_55',
+        'signal.location.query': 'New York City',
         'take': '10'
       });
 
@@ -200,6 +202,7 @@ class QlooAPIService {
       const response = await this.makeRequest('/v2/insights', {
         'filter.type': 'urn:entity:place',
         'signal.demographics.age': avgInnovation > 70 ? '35_and_younger' : '36_to_55',
+        'signal.location.query': 'New York City',
         'take': '10'
       });
 
@@ -236,6 +239,7 @@ class QlooAPIService {
     try {
       const response = await this.makeRequest('/v2/insights', {
         'filter.type': 'urn:entity:artist',
+        'signal.location.query': 'New York City',
         'bias.trends': 'high',
         'take': '5'
       });
