@@ -62,7 +62,7 @@ class QlooAPIService {
   private cacheTimeout: number = 300000; // 5 minutes
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_QLOO_API_KEY |L8q5OjsxUNnY7_NFTuQmKXKYHtKshbhf8-P1zOurvY8| '';
+    this.apiKey = import.meta.env.VITE_QLOO_API_KEY || '';
     if (!this.apiKey) {
       console.warn('Qloo API key not found. Cultural data features will be limited.');
     }
