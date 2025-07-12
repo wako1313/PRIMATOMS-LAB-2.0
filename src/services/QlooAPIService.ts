@@ -57,7 +57,7 @@ export interface QlooRecommendation {
 
 class QlooAPIService {
   private apiKey: string;
-  private baseUrl: string = 'https://api.qloo.com/v1';
+  private baseUrl: string = 'https://hackathon.api.qloo.com';
   private cache: Map<string, any> = new Map();
   private cacheTimeout: number = 300000; // 5 minutes
 
