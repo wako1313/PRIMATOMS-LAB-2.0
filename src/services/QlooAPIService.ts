@@ -86,12 +86,14 @@ class QlooAPIService {
       
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'x-api-key': this.apiKey,
           'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Qloo API Error Response:', errorText);
         throw new Error(`Qloo API error: ${response.status} ${response.statusText}`);
       }
 
@@ -113,24 +115,34 @@ class QlooAPIService {
   // Obtenir les tendances culturelles globales
   async getGlobalTrends(): Promise<QlooTrendingData> {
     try {
-      const response = await this.makeRequest('/trends/global', {
-        limit: 50,
-        include_sentiment: true,
-        include_demographics: true
+      const response = await this.makeRequest('/v2/insights', {
+        'filter.type': 'urn:entity:artist',
+        'take': '50',
+        'bias.trends': 'high'
       });
 
       return {
         timestamp: Date.now(),
-        trending_entities: response.trending || [],
+        trending_entities: response.results?.map((item: any) => ({
+          id: item.id || 'unknown',
+          name: item.properties?.name || 'Unknown',
+          type: 'music',
+          popularity: item.affinity || 50,
+          sentiment: 75,
+          cultural_impact: item.affinity || 50,
+          demographics: { age_groups: {}, regions: {}, interests: [] },
+          affinities: [],
+          trending_score: item.affinity || 50
+        })) || [],
         cultural_shifts: {
-          emerging_trends: response.emerging || [],
-          declining_trends: response.declining || [],
-          stable_preferences: response.stable || []
+          emerging_trends: ['AI Music', 'Virtual Concerts', 'Genre Fusion'],
+          declining_trends: ['Traditional Radio', 'Physical Albums'],
+          stable_preferences: ['Pop Music', 'Rock', 'Hip-Hop']
         },
         global_sentiment: {
-          optimism: response.sentiment?.optimism || 50,
-          social_cohesion: response.sentiment?.cohesion || 50,
-          innovation_appetite: response.sentiment?.innovation || 50
+          optimism: 65,
+          social_cohesion: 58,
+          innovation_appetite: 72
         }
       };
     } catch (error) {
@@ -142,33 +154,35 @@ class QlooAPIService {
   // Générer un profil culturel pour un Primatom
   async generateCulturalProfile(primatom: Primatom): Promise<QlooConsumerProfile> {
     try {
-      const behaviorVector = {
-        innovation: primatom.innovation,
-        cooperation: primatom.cooperation,
-        trust: primatom.trust,
-        energy: primatom.energy,
-        behavior_type: primatom.behaviorType
-      };
-
-      const response = await this.makeRequest('/profiles/generate', {
-        behavior_vector: JSON.stringify(behaviorVector),
-        include_affinities: true,
-        include_sentiment: true
+      const response = await this.makeRequest('/v2/insights', {
+        'filter.type': 'urn:entity:artist',
+        'signal.demographics.age': primatom.innovation > 70 ? '35_and_younger' : '36_to_55',
+        'take': '10'
       });
 
       return {
         id: primatom.id,
-        affinities: response.affinities || [],
+        affinities: response.results?.slice(0, 5).map((item: any) => ({
+          id: item.id || 'unknown',
+          name: item.properties?.name || 'Unknown',
+          type: 'music',
+          popularity: item.affinity || 50,
+          sentiment: 75,
+          cultural_impact: item.affinity || 50,
+          demographics: { age_groups: {}, regions: {}, interests: [] },
+          affinities: [],
+          trending_score: item.affinity || 50
+        })) || [],
         behavior_patterns: {
-          discovery_tendency: response.patterns?.discovery || primatom.innovation,
-          social_influence: response.patterns?.influence || primatom.influence || 50,
-          brand_loyalty: response.patterns?.loyalty || primatom.trust,
-          cultural_openness: response.patterns?.openness || primatom.cooperation
+          discovery_tendency: primatom.innovation,
+          social_influence: primatom.influence || 50,
+          brand_loyalty: primatom.trust,
+          cultural_openness: primatom.cooperation
         },
         sentiment_analysis: {
-          overall_mood: response.sentiment?.mood || (100 - (primatom.stressLevel || 0)),
-          cultural_engagement: response.sentiment?.engagement || primatom.energy,
-          social_connectivity: response.sentiment?.connectivity || primatom.cooperation
+          overall_mood: 100 - (primatom.stressLevel || 0),
+          cultural_engagement: primatom.energy,
+          social_connectivity: primatom.cooperation
         }
       };
     } catch (error) {
@@ -181,21 +195,31 @@ class QlooAPIService {
   async getCoalitionRecommendations(coalition: Coalition, primatoms: Primatom[]): Promise<QlooRecommendation[]> {
     try {
       const coalitionMembers = primatoms.filter(p => coalition.members.includes(p.id));
-      const avgBehavior = {
-        innovation: coalitionMembers.reduce((sum, p) => sum + p.innovation, 0) / coalitionMembers.length,
-        cooperation: coalitionMembers.reduce((sum, p) => sum + p.cooperation, 0) / coalitionMembers.length,
-        trust: coalitionMembers.reduce((sum, p) => sum + p.trust, 0) / coalitionMembers.length,
-        energy: coalitionMembers.reduce((sum, p) => sum + p.energy, 0) / coalitionMembers.length
-      };
-
-      const response = await this.makeRequest('/recommendations/group', {
-        group_profile: JSON.stringify(avgBehavior),
-        group_size: coalitionMembers.length,
-        cohesion: coalition.cohesion,
-        limit: 10
+      const avgInnovation = coalitionMembers.reduce((sum, p) => sum + p.innovation, 0) / coalitionMembers.length;
+      
+      const response = await this.makeRequest('/v2/insights', {
+        'filter.type': 'urn:entity:place',
+        'signal.demographics.age': avgInnovation > 70 ? '35_and_younger' : '36_to_55',
+        'take': '10'
       });
 
-      return response.recommendations || [];
+      return response.results?.map((item: any) => ({
+        entity: {
+          id: item.id || 'unknown',
+          name: item.properties?.name || 'Unknown',
+          type: 'travel',
+          popularity: item.affinity || 50,
+          sentiment: 75,
+          cultural_impact: item.affinity || 50,
+          demographics: { age_groups: {}, regions: {}, interests: [] },
+          affinities: [],
+          trending_score: item.affinity || 50
+        },
+        confidence: (item.affinity || 50) / 100,
+        reasoning: `Recommended based on coalition's average innovation score of ${avgInnovation.toFixed(1)}`,
+        cultural_context: 'Emerging trend in collective experiences',
+        predicted_adoption: (item.affinity || 50) / 100
+      })) || this.getMockRecommendations();
     } catch (error) {
       console.error('Failed to get coalition recommendations:', error);
       return this.getMockRecommendations();
@@ -210,17 +234,17 @@ class QlooAPIService {
     trend_acceleration: string[];
   }> {
     try {
-      const response = await this.makeRequest('/analysis/cultural-impact', {
-        disruption_type: disruptionType,
-        intensity: intensity,
-        include_predictions: true
+      const response = await this.makeRequest('/v2/insights', {
+        'filter.type': 'urn:entity:artist',
+        'bias.trends': 'high',
+        'take': '5'
       });
 
       return {
-        cultural_shift_prediction: response.shift_prediction || intensity * 10,
-        affected_demographics: response.demographics || [],
-        sentiment_impact: response.sentiment_impact || -intensity * 5,
-        trend_acceleration: response.accelerated_trends || []
+        cultural_shift_prediction: intensity * 10,
+        affected_demographics: ['digital_natives', 'early_adopters'],
+        sentiment_impact: -intensity * 5,
+        trend_acceleration: response.results?.map((item: any) => item.properties?.name || 'Unknown').slice(0, 3) || []
       };
     } catch (error) {
       console.error('Failed to analyze cultural impact:', error);
@@ -241,24 +265,18 @@ class QlooAPIService {
     recommendation_overlap: number;
   }> {
     try {
-      const response = await this.makeRequest('/analysis/affinity', {
-        profile1: JSON.stringify({
-          behavior_type: primatom1.behaviorType,
-          innovation: primatom1.innovation,
-          cooperation: primatom1.cooperation
-        }),
-        profile2: JSON.stringify({
-          behavior_type: primatom2.behaviorType,
-          innovation: primatom2.innovation,
-          cooperation: primatom2.cooperation
-        })
-      });
+      const profile1 = await this.generateCulturalProfile(primatom1);
+      const profile2 = await this.generateCulturalProfile(primatom2);
+      
+      const sharedInterests = profile1.affinities
+        .filter(a1 => profile2.affinities.some(a2 => a2.name === a1.name))
+        .map(a => a.name);
 
       return {
-        affinity_score: response.affinity_score || this.calculateBasicAffinity(primatom1, primatom2),
-        shared_interests: response.shared_interests || [],
-        cultural_compatibility: response.compatibility || 50,
-        recommendation_overlap: response.overlap || 30
+        affinity_score: this.calculateBasicAffinity(primatom1, primatom2),
+        shared_interests: sharedInterests,
+        cultural_compatibility: sharedInterests.length * 20,
+        recommendation_overlap: (sharedInterests.length / Math.max(profile1.affinities.length, 1)) * 100
       };
     } catch (error) {
       console.error('Failed to detect cultural affinities:', error);
@@ -279,7 +297,7 @@ class QlooAPIService {
         {
           id: 'trend-1',
           name: 'Sustainable Living',
-          type: 'lifestyle',
+          type: 'brands',
           popularity: 85,
           sentiment: 75,
           cultural_impact: 80,
@@ -325,7 +343,7 @@ class QlooAPIService {
         entity: {
           id: 'rec-1',
           name: 'Collaborative Innovation',
-          type: 'concept',
+          type: 'brands',
           popularity: 75,
           sentiment: 80,
           cultural_impact: 85,
@@ -364,7 +382,10 @@ class QlooAPIService {
   // Méthode pour vérifier la connectivité API
   async testConnection(): Promise<boolean> {
     try {
-      await this.makeRequest('/health');
+      await this.makeRequest('/v2/insights', {
+        'filter.type': 'urn:entity:artist',
+        'take': '1'
+      });
       return true;
     } catch (error) {
       console.error('Qloo API connection test failed:', error);
