@@ -15,14 +15,17 @@ const QlooConnectionTester: React.FC = () => {
 
   const testConnection = async () => {
     setIsTesting(true);
-    setTestResults(['🔍 Testing Qloo API v2 connection...']);
+    setTestResults([
+      '🔍 Starting comprehensive Qloo API diagnostics...',
+      `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`
+    ]);
     
     try {
       const connected = await qlooService.testConnection();
       setIsConnected(connected);
       
       if (connected) {
-        setTestResults(prev => [...prev, '✅ Qloo API v2 connected successfully!']);
+        setTestResults(prev => [...prev, '✅ Qloo API connection successful!']);
         
         // Test de l'endpoint Insights API v2
         try {
@@ -34,11 +37,18 @@ const QlooConnectionTester: React.FC = () => {
         }
         
       } else {
-        setTestResults(prev => [...prev, '🔧 Using advanced simulation mode']);
+        setTestResults(prev => [...prev, 
+          '❌ All API endpoints failed',
+          '🔧 Switching to advanced simulation mode',
+          '💡 Check console for detailed diagnostics'
+        ]);
       }
     } catch (error) {
       setIsConnected(false);
-      setTestResults(prev => [...prev, `❌ Connection failed: ${error}`]);
+      setTestResults(prev => [...prev, 
+        `❌ Connection failed: ${error}`,
+        '💡 See browser console for detailed error analysis'
+      ]);
     } finally {
       setIsTesting(false);
     }
@@ -104,6 +114,17 @@ const QlooConnectionTester: React.FC = () => {
         </div>
       </div>
 
+      <div className="bg-slate-700/50 rounded-lg p-4 mb-4">
+        <h4 className="font-medium text-white mb-2">Diagnostic Information</h4>
+        <div className="text-xs text-gray-300 space-y-1">
+          <div>🔍 Testing multiple endpoints and authentication methods</div>
+          <div>⏱️ 10-second timeout per endpoint</div>
+          <div>📋 Detailed logs available in browser console</div>
+          <div>🔧 Advanced simulation mode as fallback</div>
+          <div>💡 Open browser DevTools → Console for full diagnostics</div>
+        </div>
+      </div>
+
       <div className="bg-slate-700/50 rounded-lg p-4">
         <h4 className="font-medium text-white mb-2">Test Results</h4>
         <div className="space-y-1 max-h-32 overflow-y-auto">
@@ -118,8 +139,12 @@ const QlooConnectionTester: React.FC = () => {
       {!isConnected && (
         <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <p className="text-xs text-yellow-400">
-            ⚠️ Qloo API v2 not connected. Using advanced simulation mode with realistic data patterns.
-            Configure your API key in .env file: VITE_QLOO_API_KEY=your_key_here
+            ⚠️ Qloo API not accessible. Possible causes:<br/>
+            • API key invalid or expired<br/>
+            • Network/CORS restrictions<br/>
+            • Endpoint changes<br/>
+            • Rate limiting<br/>
+            <strong>→ Using advanced simulation mode with realistic data patterns</strong>
           </p>
         </div>
       )}

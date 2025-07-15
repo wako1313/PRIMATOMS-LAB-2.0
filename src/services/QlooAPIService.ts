@@ -114,43 +114,110 @@ class QlooAPIService {
   // Test de connexion avec les vrais endpoints Qloo v2
   async testConnection(): Promise<boolean> {
     if (!this.apiKey) {
-      console.log('🔧 No API key - Using simulation mode');
+      console.log('❌ No API key - Using simulation mode');
       this.isConnected = false;
       return false;
     }
 
-    // Test avec l'endpoint officiel Insights API v2
-    const testEndpoint = `${this.baseUrl}/v2/insights/?filter.type=urn:entity:place&limit=1`;
-
-    try {
-      console.log(`🔍 Testing official Qloo v2 endpoint: ${testEndpoint}`);
-      
-      const response = await fetch(testEndpoint, {
-        method: 'GET',
+    console.log(`🔑 API Key configured: ${this.apiKey.substring(0, 8)}...${this.apiKey.substring(this.apiKey.length - 4)}`);
+    
+    // Tests multiples avec différents endpoints et configurations
+    const testConfigurations = [
+      {
+        name: 'Official v2 Insights API',
+        url: `${this.baseUrl}/v2/insights/?filter.type=urn:entity:place&limit=1`,
         headers: {
           'X-Api-Key': this.apiKey,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
-      });
-
-      console.log(`📡 Response status: ${response.status}`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Qloo API v2 connected successfully!', { endpoint: testEndpoint, data });
-        this.isConnected = true;
-        this.connectionTested = true;
-        return true;
-      } else {
-        const errorText = await response.text();
-        console.log(`❌ Qloo API failed: ${response.status} - ${errorText}`);
+      },
+      {
+        name: 'Alternative v2 endpoint',
+        url: `${this.baseUrl}/v2/insights/`,
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json'
+        }
+      },
+      {
+        name: 'Legacy v1 endpoint test',
+        url: `${this.baseUrl}/v1/cultural/insights`,
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      },
+      {
+        name: 'Hackathon endpoint test',
+        url: `https://hackathon.api.qloo.com/v2/insights/?limit=1`,
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json'
+        }
       }
-    } catch (error) {
-      console.log(`❌ Connection error:`, error);
+    ];
+
+    for (const config of testConfigurations) {
+      try {
+        console.log(`🔍 Testing ${config.name}: ${config.url}`);
+        console.log(`📋 Headers:`, Object.keys(config.headers).join(', '));
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
+        
+        const response = await fetch(config.url, {
+          method: 'GET',
+          headers: config.headers,
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+        console.log(`📡 ${config.name} - Status: ${response.status} ${response.statusText}`);
+        console.log(`📋 Response headers:`, Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+          try {
+            const data = await response.json();
+            console.log(`✅ ${config.name} - SUCCESS!`, { 
+              url: config.url, 
+              status: response.status,
+              dataKeys: Object.keys(data),
+              sampleData: data
+            });
+            this.isConnected = true;
+            this.connectionTested = true;
+            return true;
+          } catch (jsonError) {
+            console.log(`⚠️ ${config.name} - Response not JSON:`, jsonError);
+            const text = await response.text();
+            console.log(`📄 Response text:`, text.substring(0, 200));
+          }
+        } else {
+          const errorText = await response.text();
+          console.log(`❌ ${config.name} - HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+          
+          // Analyser les erreurs spécifiques
+          if (response.status === 401) {
+            console.log(`🔑 ${config.name} - Authentication failed. Check API key validity.`);
+          } else if (response.status === 403) {
+            console.log(`🚫 ${config.name} - Access forbidden. Check API key permissions.`);
+          } else if (response.status === 404) {
+            console.log(`🔍 ${config.name} - Endpoint not found. URL may be incorrect.`);
+          } else if (response.status === 429) {
+            console.log(`⏱️ ${config.name} - Rate limit exceeded. Wait before retrying.`);
+          }
+        }
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log(`⏱️ ${config.name} - Request timeout (10s)`);
+        } else {
+          console.log(`❌ ${config.name} - Network error:`, error.message);
+        }
+      }
     }
 
-    console.log('🔧 Using simulation mode');
+    console.log('🔧 All endpoints failed - Using advanced simulation mode');
     this.isConnected = false;
     this.connectionTested = true;
     return false;
