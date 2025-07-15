@@ -29,7 +29,11 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   useEffect(() => {
     if (isRunning && isConnected) {
       const interval = setInterval(() => {
-        updateCulturalData();
+        try {
+          updateCulturalData();
+        } catch (error) {
+          console.error("Error updating cultural data:", error);
+        }
       }, 30000); // Update every 30 seconds
 
       return () => clearInterval(interval);
@@ -51,6 +55,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   const updateCulturalData = async () => {
     if (!isConnected) {
       // Générer des données simulées de qualité
+      console.log("🔄 Generating simulated cultural data");
       const mockTrends = {
         timestamp: Date.now(),
         trending_entities: [
@@ -95,7 +100,10 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
       
       // Générer des profils simulés
       const profiles = new Map();
-      state.primatoms.slice(0, 10).forEach(primatom => {
+      const samplePrimatoms = state.primatoms.slice(0, 10);
+      console.log(`🧪 Generating ${samplePrimatoms.length} simulated profiles`);
+      
+      samplePrimatoms.forEach(primatom => {
         profiles.set(primatom.id, {
           id: primatom.id,
           affinities: [],

@@ -47,9 +47,7 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
   useEffect(() => {
     checkQlooConnection();
     if (isRunning) {
-      const interval = setInterval(() => {
-        updateCulturalData();
-      }, 30000);
+      const interval = setInterval(updateCulturalData, 30000);
       return () => clearInterval(interval);
     }
   }, [isRunning]);
@@ -70,15 +68,62 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
 
   const checkQlooConnection = async () => {
     try {
-      const connected = await qlooService.testConnection();
-      setQlooConnected(connected);
+      // Force simulation mode for now
+      setQlooConnected(false);
+      console.log("🔄 Using simulation mode for Culture Engine");
     } catch (error) {
       setQlooConnected(false);
     }
   };
 
   const updateCulturalData = async () => {
-    if (!qlooConnected) return;
+    if (!qlooConnected) {
+      // Generate mock data
+      console.log("🔄 Generating simulated cultural data for Culture Engine");
+      const mockTrends = {
+        timestamp: Date.now(),
+        trending_entities: [
+          {
+            id: 'trend-ai-collab',
+            name: 'AI-Human Creative Collaboration',
+            type: 'brands',
+            popularity: 89,
+            sentiment: 82,
+            cultural_impact: 94,
+            demographics: { age_groups: { '18-34': 65, '35-54': 25 }, regions: {}, interests: [] },
+            affinities: ['innovation', 'creativity', 'technology'],
+            trending_score: 95
+          }
+        ],
+        cultural_shifts: {
+          emerging_trends: ['IA Collaborative', 'Réseaux Sociaux Quantiques', 'Organisations Biomimétiques'],
+          declining_trends: ['Autorité Centralisée', 'Silos d\'Information'],
+          stable_preferences: ['Connexions Authentiques', 'Innovation Collaborative']
+        },
+        global_sentiment: {
+          optimism: 78,
+          social_cohesion: 72,
+          innovation_appetite: 87
+        },
+        predictive_analytics: {
+          next_viral_trends: [
+            { trend: "Plateformes d'Intelligence Collective", probability: 0.91, time_to_peak: 30, affected_demographics: ['tech_leaders'] }
+          ],
+          social_tension_index: 23,
+          collective_intelligence_score: 84,
+          cultural_disruption_likelihood: 67
+        },
+        market_implications: {
+          consumer_behavior_shifts: ['Demande d\'algorithmes transparents'],
+          investment_opportunities: ['Plateformes de dynamiques sociales'],
+          risk_factors: ['Préoccupations de biais algorithmiques']
+        }
+      };
+      
+      setCulturalData(mockTrends);
+      setLastUpdate(Date.now());
+      return;
+    }
     
     try {
       const trends = await qlooService.getGlobalTrends();

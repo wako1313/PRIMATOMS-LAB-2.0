@@ -64,8 +64,13 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
   useEffect(() => {
     if (isRunning) {
       const interval = setInterval(() => {
-        mapCognitiveResonance();
-        updateCognitiveWaves();
+        try {
+          mapCognitiveResonance();
+          updateCognitiveWaves();
+          console.log("🌊 Mapping cognitive resonance patterns");
+        } catch (error) {
+          console.error("Error mapping cognitive resonance:", error);
+        }
       }, 1500);
 
       return () => clearInterval(interval);

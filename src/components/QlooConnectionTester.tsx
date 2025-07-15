@@ -16,7 +16,7 @@ const QlooConnectionTester: React.FC = () => {
   const testConnection = async () => {
     setIsTesting(true);
     setTestResults([
-      '🔍 Starting Qloo Hackathon API connection test...',
+      '🔍 Starting Qloo Hackathon API connection test (v2)...',
       `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`,
       '🏆 Hackathon Server: https://hackathon.api.qloo.com',
       '📋 Using required parameters: filter.type=urn:entity:place, filter.location.query=New York',
@@ -76,6 +76,7 @@ const QlooConnectionTester: React.FC = () => {
   const runSystematicDebugging = async () => {
     setTestResults(prev => [...prev, '🔬 Lancement du debugging systématique...']);
     setTestResults(prev => [...prev, '📋 Ouvrez la Console (F12) pour voir l\'analyse complète']);
+    setTestResults(prev => [...prev, '⚠️ Activation du mode simulation avancé pour assurer la continuité']);
     try {
       await qlooService.systematicDebugging();
       setTestResults(prev => [...prev, '✅ Debugging systématique terminé - Voir console pour détails']);
@@ -182,11 +183,12 @@ const QlooConnectionTester: React.FC = () => {
         <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <p className="text-xs text-yellow-400">
             ⚠️ Qloo API not accessible. Possible causes:<br/>
-            • API key invalid or expired<br/>
-            • Network/CORS restrictions<br/>
-            • Endpoint changes<br/>
-            • Rate limiting<br/>
-            <strong>→ Using advanced simulation mode with realistic data patterns</strong>
+            • API key invalid or expired (most likely)<br/>
+            • Required parameters missing or incorrect<br/>
+            • Network/CORS restrictions (browser security)<br/>
+            • Endpoint changes or server maintenance<br/>
+            <strong>→ Using advanced simulation mode with realistic data patterns</strong><br/>
+            <strong>→ All features will work with simulated data</strong>
           </p>
         </div>
       )}
@@ -194,8 +196,9 @@ const QlooConnectionTester: React.FC = () => {
       {isConnected && (
         <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
           <p className="text-xs text-green-400">
-            ✅ Qloo Hackathon API connected! Real-time cultural insights from Hackathon server are now available.
-            Using hackathon.api.qloo.com with your competition API key.
+            ✅ Qloo Hackathon API connected! Real-time cultural insights from Hackathon server are now available.<br/>
+            Using hackathon.api.qloo.com with your competition API key.<br/>
+            Required parameters: filter.type=urn:entity:place, filter.location.query=New York
           </p>
         </div>
       )}

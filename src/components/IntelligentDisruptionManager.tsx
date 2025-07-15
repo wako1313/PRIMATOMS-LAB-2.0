@@ -36,15 +36,19 @@ const IntelligentDisruptionManager: React.FC<IntelligentDisruptionManagerProps> 
   // Gestion de la persistance du mode auto
   useEffect(() => {
     if (autoMode && isRunning) {
-      // Démarrer l'intervalle seulement si pas déjà actif
-      if (!intervalRef.current) {
-        intervalRef.current = setInterval(() => {
-          // Vérifier que le mode auto est toujours actif
+      const interval = setInterval(() => {
+        try {
           if (autoModeRef.current) {
             analyzeAndTrigger();
+            console.log("🤖 Auto-triggering intelligent disruption");
           }
-        }, 5000); // Vérification toutes les 5 secondes
-      }
+          performSystemAnalysis();
+        } catch (error) {
+          console.error("Error in intelligent disruption:", error);
+        }
+      }, 5000);
+      
+      return () => clearInterval(interval);
     } else {
       // Arrêter l'intervalle si mode auto désactivé ou simulation arrêtée
       if (intervalRef.current) {
@@ -52,14 +56,6 @@ const IntelligentDisruptionManager: React.FC<IntelligentDisruptionManagerProps> 
         intervalRef.current = null;
       }
     }
-
-    // Cleanup à la destruction du composant
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
   }, [autoMode, isRunning]);
 
   useEffect(() => {

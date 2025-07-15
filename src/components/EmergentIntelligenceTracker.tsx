@@ -50,7 +50,12 @@ const EmergentIntelligenceTracker: React.FC<EmergentIntelligenceTrackerProps> = 
   useEffect(() => {
     if (isRunning) {
       const interval = setInterval(() => {
-        scanForEmergentIntelligence();
+        try {
+          scanForEmergentIntelligence();
+          console.log("🧠 Scanning for emergent intelligence patterns");
+        } catch (error) {
+          console.error("Error scanning for emergent intelligence:", error);
+        }
       }, 3000);
 
       return () => clearInterval(interval);

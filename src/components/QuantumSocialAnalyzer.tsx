@@ -50,7 +50,12 @@ const QuantumSocialAnalyzer: React.FC<QuantumSocialAnalyzerProps> = ({
   useEffect(() => {
     if (isRunning) {
       const interval = setInterval(() => {
-        analyzeQuantumSocialStates();
+        try {
+          analyzeQuantumSocialStates();
+          console.log("⚛️ Analyzing quantum social states");
+        } catch (error) {
+          console.error("Error analyzing quantum social states:", error);
+        }
       }, 2000);
 
       return () => clearInterval(interval);

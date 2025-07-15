@@ -98,7 +98,7 @@ class QlooAPIService {
   private apiKey: string;
   private baseUrl: string = 'https://hackathon.api.qloo.com';
   private cache: Map<string, any> = new Map();
-  private cacheTimeout: number = 300000; // 5 minutes
+  private cacheTimeout: number = 600000; // 10 minutes
   private connectionTested: boolean = false;
   private isConnected: boolean = false;
   
@@ -108,6 +108,9 @@ class QlooAPIService {
     if (!this.apiKey) {
       console.warn('⚠️ Qloo API key not found. Using advanced simulation mode.');
       this.isConnected = false;
+      // Force simulation mode to be active
+      this.connectionTested = true;
+      return false;
     }
   }
 
@@ -642,9 +645,9 @@ class QlooAPIService {
   async getGlobalTrends(): Promise<QlooTrendingData> {
     try {
       // Test connection first
-      if (!this.connectionTested) {
-        await this.testConnection();
-      }
+      // Force simulation mode for now
+      this.isConnected = false;
+      this.connectionTested = true;
 
       if (!this.isConnected) {
         console.log('🔧 Using advanced simulation for global trends');
@@ -667,9 +670,10 @@ class QlooAPIService {
 
   async generateCulturalProfile(primatom: Primatom): Promise<QlooConsumerProfile> {
     try {
-      if (!this.isConnected) {
-        return this.getAdvancedMockCulturalProfile(primatom);
-      }
+      // Force simulation mode for now
+      this.isConnected = false;
+      this.connectionTested = true;
+      return this.getAdvancedMockCulturalProfile(primatom);
 
       // Utiliser l'endpoint Insights pour générer un profil basé sur le comportement
       const behaviorEntity = this.mapBehaviorToEntity(primatom.behaviorType);
@@ -688,9 +692,10 @@ class QlooAPIService {
 
   async getCoalitionRecommendations(coalition: Coalition, primatoms: Primatom[]): Promise<QlooRecommendation[]> {
     try {
-      if (!this.isConnected) {
-        return this.getAdvancedMockRecommendations(coalition);
-      }
+      // Force simulation mode for now
+      this.isConnected = false;
+      this.connectionTested = true;
+      return this.getAdvancedMockRecommendations(coalition);
 
       const coalitionMembers = primatoms.filter(p => coalition.members.includes(p.id));
       const dominantBehavior = this.getDominantBehavior(coalitionMembers);
@@ -961,6 +966,7 @@ class QlooAPIService {
 
   // Données de simulation avancées (fallback)
   private getAdvancedMockTrendingData(): QlooTrendingData {
+    console.log('📊 Generating advanced mock trending data');
     return {
       timestamp: Date.now(),
       trending_entities: [
@@ -1027,6 +1033,7 @@ class QlooAPIService {
   }
 
   private getAdvancedMockCulturalProfile(primatom: Primatom): QlooConsumerProfile {
+    console.log(`👤 Generating advanced mock cultural profile for ${primatom.name}`);
     return {
       id: primatom.id,
       affinities: [
@@ -1069,6 +1076,7 @@ class QlooAPIService {
   }
 
   private getAdvancedMockRecommendations(coalition: Coalition): QlooRecommendation[] {
+    console.log(`🤝 Generating advanced mock recommendations for coalition ${coalition.name}`);
     return [{
       entity: {
         id: 'rec-adaptive-framework',
