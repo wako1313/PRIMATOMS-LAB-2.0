@@ -585,10 +585,12 @@
             </div>
           </div>
         </div>
-    );
-  };
+      </div>
+    </div>
+  );
+};
 
-  export default PopulationControls;
+export default PopulationControls;
 
 export default CulturalInsightsPanel;import React, { useState, useEffect } from 'react';
 import { SimulationState } from '../types';
