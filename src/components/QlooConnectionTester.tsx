@@ -72,6 +72,17 @@ const QlooConnectionTester: React.FC = () => {
     }
   };
 
+  const runSystematicDebugging = async () => {
+    setTestResults(prev => [...prev, '🔬 Lancement du debugging systématique...']);
+    setTestResults(prev => [...prev, '📋 Ouvrez la Console (F12) pour voir l\'analyse complète']);
+    try {
+      await qlooService.systematicDebugging();
+      setTestResults(prev => [...prev, '✅ Debugging systématique terminé - Voir console pour détails']);
+    } catch (error) {
+      setTestResults(prev => [...prev, `❌ Erreur debugging: ${error}`]);
+    }
+  };
+
   const getStatusColor = () => {
     if (isConnected === null) return 'text-gray-400';
     return isConnected ? 'text-green-400' : 'text-yellow-400';
@@ -105,6 +116,12 @@ const QlooConnectionTester: React.FC = () => {
         >
           <RefreshCw className={`w-4 h-4 ${isTesting ? 'animate-spin' : ''}`} />
           Test Connection
+        </button>
+        <button
+          onClick={runSystematicDebugging}
+          className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm transition-colors"
+        >
+          🔬 Debug Systématique
         </button>
         <button
           onClick={testDirectly}

@@ -111,6 +111,314 @@ class QlooAPIService {
     }
   }
 
+  // 🔬 MÉTHODOLOGIE SYSTÉMATIQUE DE DEBUGGING
+  async systematicDebugging(): Promise<void> {
+    console.log('\n🔬 === QLOO API SYSTEMATIC DEBUGGING ===');
+    console.log('📋 Following systematic methodology to identify root cause\n');
+    
+    // ÉTAPE 1: Validation des prérequis
+    console.log('🔍 ÉTAPE 1: VALIDATION DES PRÉREQUIS');
+    await this.step1_validatePrerequisites();
+    
+    // ÉTAPE 2: Test de connectivité réseau
+    console.log('\n🌐 ÉTAPE 2: TEST DE CONNECTIVITÉ RÉSEAU');
+    await this.step2_networkConnectivity();
+    
+    // ÉTAPE 3: Test d'authentification
+    console.log('\n🔑 ÉTAPE 3: TEST D\'AUTHENTIFICATION');
+    await this.step3_authenticationTest();
+    
+    // ÉTAPE 4: Test des endpoints
+    console.log('\n📡 ÉTAPE 4: TEST DES ENDPOINTS');
+    await this.step4_endpointTesting();
+    
+    // ÉTAPE 5: Analyse des headers
+    console.log('\n📋 ÉTAPE 5: ANALYSE DES HEADERS');
+    await this.step5_headerAnalysis();
+    
+    // ÉTAPE 6: Test de payload
+    console.log('\n📦 ÉTAPE 6: TEST DE PAYLOAD');
+    await this.step6_payloadTesting();
+    
+    // ÉTAPE 7: Diagnostic final
+    console.log('\n🎯 ÉTAPE 7: DIAGNOSTIC FINAL');
+    this.step7_finalDiagnosis();
+  }
+
+  private async step1_validatePrerequisites(): Promise<void> {
+    console.log('✅ API Key présente:', !!this.apiKey);
+    console.log('📏 API Key longueur:', this.apiKey.length);
+    console.log('🔤 API Key format:', this.apiKey.match(/^[A-Za-z0-9_-]+$/) ? 'Valide' : 'Invalide');
+    console.log('🌐 Base URL:', this.baseUrl);
+    console.log('🔧 Environment:', import.meta.env.MODE);
+    console.log('📦 User Agent:', navigator.userAgent.substring(0, 50) + '...');
+  }
+
+  private async step2_networkConnectivity(): Promise<void> {
+    try {
+      console.log('🌐 Test de connectivité basique...');
+      const startTime = Date.now();
+      
+      const response = await fetch(this.baseUrl, {
+        method: 'HEAD',
+        mode: 'no-cors'
+      });
+      
+      const endTime = Date.now();
+      console.log('⏱️ Temps de réponse:', endTime - startTime, 'ms');
+      console.log('📡 Status (no-cors):', response.type);
+      
+    } catch (error) {
+      console.log('❌ Erreur de connectivité:', error);
+    }
+    
+    // Test DNS
+    try {
+      console.log('🔍 Test de résolution DNS...');
+      const url = new URL(this.baseUrl);
+      console.log('🏠 Hostname:', url.hostname);
+      console.log('🔌 Port:', url.port || '443');
+      console.log('🔒 Protocol:', url.protocol);
+    } catch (error) {
+      console.log('❌ Erreur DNS:', error);
+    }
+  }
+
+  private async step3_authenticationTest(): Promise<void> {
+    const authMethods = [
+      {
+        name: 'X-Api-Key Header',
+        headers: { 'X-Api-Key': this.apiKey }
+      },
+      {
+        name: 'Authorization Bearer',
+        headers: { 'Authorization': `Bearer ${this.apiKey}` }
+      },
+      {
+        name: 'Authorization Basic',
+        headers: { 'Authorization': `Basic ${btoa(this.apiKey + ':')}`}
+      },
+      {
+        name: 'API Key Query Param',
+        headers: {},
+        queryParam: `api_key=${this.apiKey}`
+      }
+    ];
+
+    for (const method of authMethods) {
+      console.log(`🔑 Test: ${method.name}`);
+      try {
+        const url = `${this.baseUrl}/v2/insights/?limit=1${method.queryParam ? '&' + method.queryParam : ''}`;
+        console.log('📡 URL:', url);
+        console.log('📋 Headers:', method.headers);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...method.headers
+          }
+        });
+        
+        console.log(`📊 ${method.name} - Status:`, response.status, response.statusText);
+        console.log(`📋 ${method.name} - Headers:`, Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ ${method.name} - SUCCESS!`, data);
+          return; // Arrêter si on trouve une méthode qui marche
+        } else {
+          const errorText = await response.text();
+          console.log(`❌ ${method.name} - Error:`, errorText.substring(0, 200));
+        }
+        
+      } catch (error) {
+        console.log(`💥 ${method.name} - Exception:`, error);
+      }
+      console.log(''); // Ligne vide pour séparer
+    }
+  }
+
+  private async step4_endpointTesting(): Promise<void> {
+    const endpoints = [
+      '/v2/insights/',
+      '/v2/insights',
+      '/v1/insights',
+      '/v1/insights/',
+      '/insights',
+      '/api/v2/insights/',
+      '/api/insights'
+    ];
+
+    for (const endpoint of endpoints) {
+      console.log(`📡 Test endpoint: ${endpoint}`);
+      try {
+        const url = `${this.baseUrl}${endpoint}?limit=1`;
+        console.log('🔗 URL complète:', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'X-Api-Key': this.apiKey,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log(`📊 ${endpoint} - Status:`, response.status, response.statusText);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ ${endpoint} - SUCCESS!`, data);
+          return; // Arrêter si on trouve un endpoint qui marche
+        } else if (response.status === 404) {
+          console.log(`❌ ${endpoint} - Not Found (404)`);
+        } else {
+          const errorText = await response.text();
+          console.log(`❌ ${endpoint} - Error:`, response.status, errorText.substring(0, 100));
+        }
+        
+      } catch (error) {
+        console.log(`💥 ${endpoint} - Exception:`, error.message);
+      }
+      console.log(''); // Ligne vide
+    }
+  }
+
+  private async step5_headerAnalysis(): Promise<void> {
+    console.log('📋 Test avec différentes combinaisons de headers...');
+    
+    const headerCombinations = [
+      {
+        name: 'Minimal Headers',
+        headers: { 'X-Api-Key': this.apiKey }
+      },
+      {
+        name: 'Standard Headers',
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      },
+      {
+        name: 'Extended Headers',
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'PrimatomsLab/1.0',
+          'Origin': window.location.origin
+        }
+      },
+      {
+        name: 'CORS Headers',
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Request-Method': 'GET',
+          'Access-Control-Request-Headers': 'X-Api-Key'
+        }
+      }
+    ];
+
+    for (const combo of headerCombinations) {
+      console.log(`📋 Test: ${combo.name}`);
+      console.log('📋 Headers:', combo.headers);
+      
+      try {
+        const response = await fetch(`${this.baseUrl}/v2/insights/?limit=1`, {
+          method: 'GET',
+          headers: combo.headers
+        });
+        
+        console.log(`📊 ${combo.name} - Status:`, response.status);
+        console.log(`📋 ${combo.name} - Response Headers:`, Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+          console.log(`✅ ${combo.name} - SUCCESS!`);
+          return;
+        }
+        
+      } catch (error) {
+        console.log(`💥 ${combo.name} - Exception:`, error.message);
+      }
+      console.log(''); // Ligne vide
+    }
+  }
+
+  private async step6_payloadTesting(): Promise<void> {
+    console.log('📦 Test avec différents paramètres...');
+    
+    const parameterSets = [
+      { name: 'Minimal', params: '?limit=1' },
+      { name: 'With Filter', params: '?limit=1&filter.type=urn:entity:place' },
+      { name: 'With Signal', params: '?limit=1&signal.interests.entities=FCE8B172-4795-43E4-B222-3B550DC05FD9' },
+      { name: 'Empty', params: '' },
+      { name: 'Complex', params: '?limit=5&filter.type=urn:entity:place&filter.location.query=New%20York' }
+    ];
+
+    for (const paramSet of parameterSets) {
+      console.log(`📦 Test: ${paramSet.name}`);
+      const url = `${this.baseUrl}/v2/insights/${paramSet.params}`;
+      console.log('🔗 URL:', url);
+      
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'X-Api-Key': this.apiKey,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log(`📊 ${paramSet.name} - Status:`, response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ ${paramSet.name} - SUCCESS!`, data);
+          return;
+        } else {
+          const errorText = await response.text();
+          console.log(`❌ ${paramSet.name} - Error:`, errorText.substring(0, 100));
+        }
+        
+      } catch (error) {
+        console.log(`💥 ${paramSet.name} - Exception:`, error.message);
+      }
+      console.log(''); // Ligne vide
+    }
+  }
+
+  private step7_finalDiagnosis(): void {
+    console.log('🎯 === DIAGNOSTIC FINAL ===');
+    console.log('📋 Résumé des tests effectués:');
+    console.log('  ✅ Prérequis validés');
+    console.log('  ✅ Connectivité réseau testée');
+    console.log('  ✅ Méthodes d\'authentification testées');
+    console.log('  ✅ Endpoints multiples testés');
+    console.log('  ✅ Headers analysés');
+    console.log('  ✅ Paramètres testés');
+    console.log('');
+    console.log('🔍 CAUSES PROBABLES:');
+    console.log('  1. 🚫 CORS: Serveur hackathon bloque les requêtes browser');
+    console.log('  2. 🔑 Auth: Méthode d\'authentification différente requise');
+    console.log('  3. 📡 Endpoint: URL ou version d\'API différente');
+    console.log('  4. 🏗️ Serveur: Temporairement indisponible ou en maintenance');
+    console.log('  5. 🔒 Firewall: Restrictions réseau ou proxy');
+    console.log('');
+    console.log('💡 RECOMMANDATIONS:');
+    console.log('  1. Contacter l\'équipe Qloo pour vérifier le serveur hackathon');
+    console.log('  2. Tester depuis un autre réseau/navigateur');
+    console.log('  3. Utiliser le mode simulation (données réalistes disponibles)');
+    console.log('  4. Vérifier la documentation hackathon mise à jour');
+    console.log('');
+    console.log('🔧 Le mode simulation avancé fournit des données culturelles réalistes');
+    console.log('   basées sur les patterns Qloo pour continuer le développement.');
+  }
+
   // Test manuel direct - pour diagnostic
   async testDirectEndpoint(): Promise<void> {
     const testUrl = 'https://hackathon.api.qloo.com/v2/insights/?limit=1';
