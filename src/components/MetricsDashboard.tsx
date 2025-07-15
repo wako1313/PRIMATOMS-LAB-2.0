@@ -359,9 +359,9 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
               <Legend />
               <Area type="monotone" dataKey="Confiance" stroke="#06B6D4" strokeWidth={2} fill="url(#trustGradient)" />
               <Area type="monotone" dataKey="Innovation" stroke="#8B5CF6" strokeWidth={2} fill="url(#innovationGradient)" />
-              <Line type="monotone" dataKey="Coopération" stroke="#3B82F6" strokeWidth={2} />
-              <Line type="monotone" dataKey="Gouvernance" stroke="#10B981" strokeWidth={2} />
-              <Line type="monotone" dataKey="Résilience" stroke="#F59E0B" strokeWidth={2} />
+              <Area type="monotone" dataKey="Coopération" stroke="#3B82F6" strokeWidth={2} fill="none" />
+              <Area type="monotone" dataKey="Gouvernance" stroke="#10B981" strokeWidth={2} fill="none" />
+              <Area type="monotone" dataKey="Résilience" stroke="#F59E0B" strokeWidth={2} fill="none" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
