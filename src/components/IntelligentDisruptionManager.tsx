@@ -81,18 +81,96 @@ const IntelligentDisruptionManager: React.FC<IntelligentDisruptionManagerProps> 
     const shouldTrigger = evaluateDisruptionNeed();
     
     if (shouldTrigger) {
-      const intelligentEvent = poliSynthCore.generateIntelligentDisruption(state);
+      // Génération d'événement intelligent basé sur l'analyse du système
+      const intelligentEvent = generateContextualDisruption();
       
       if (intelligentEvent) {
         onInjectEvent(intelligentEvent);
         setLastAutoEvent(now);
         
         // Log de l'événement intelligent
-        console.log(`[PoliSynth] Disruption intelligente déclenchée: ${intelligentEvent.name}`);
+        console.log(`[IA Disruption] Événement déclenché: ${intelligentEvent.name} (Intensité: ${intelligentEvent.intensity})`);
       }
     }
   };
 
+  const generateContextualDisruption = (): Partial<DisruptiveEvent> | null => {
+    const systemStability = state.systemStability || 75;
+    const coalitionCount = state.coalitions.length;
+    const avgStress = state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / state.primatoms.length;
+    const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
+    
+    // Logique intelligente de sélection d'événement
+    if (systemStability > 85 && avgStress < 20) {
+      // Système trop stable - Injecter un défi
+      return {
+        type: 'resource_scarcity',
+        name: `Défi de Résilience Adaptatif (IA-${intelligenceLevel})`,
+        description: 'Test intelligent de la capacité d\'adaptation collective face à une contrainte de ressources',
+        intensity: Math.min(8, 4 + intelligenceLevel),
+        duration: 30 + (intelligenceLevel * 10),
+        effects: {
+          trustModifier: -0.1 - (intelligenceLevel * 0.05),
+          energyModifier: -0.3 - (intelligenceLevel * 0.1),
+          cooperationModifier: 0.2 + (intelligenceLevel * 0.1),
+          innovationModifier: 0.4 + (intelligenceLevel * 0.15)
+        }
+      };
+    }
+    
+    if (avgInnovation > 80 && coalitionCount > 3) {
+      // Potentiel d'innovation élevé - Catalyseur
+      return {
+        type: 'innovation_catalyst',
+        name: `Catalyseur d'Innovation Collective (IA-${intelligenceLevel})`,
+        description: 'Amplification intelligente du potentiel créatif détecté dans le système',
+        intensity: 6 + intelligenceLevel,
+        duration: 40 + (intelligenceLevel * 5),
+        effects: {
+          trustModifier: 0.2 + (intelligenceLevel * 0.05),
+          energyModifier: 0.3 + (intelligenceLevel * 0.1),
+          cooperationModifier: 0.4 + (intelligenceLevel * 0.1),
+          innovationModifier: 0.6 + (intelligenceLevel * 0.2)
+        }
+      };
+    }
+    
+    if (coalitionCount > 5 && systemStability < 60) {
+      // Fragmentation détectée - Médiation
+      return {
+        type: 'governance_crisis',
+        name: `Intervention de Médiation Intelligente (IA-${intelligenceLevel})`,
+        description: 'Restructuration adaptative des dynamiques de pouvoir pour optimiser la cohésion',
+        intensity: 5 + Math.floor(intelligenceLevel / 2),
+        duration: 50 + (intelligenceLevel * 8),
+        effects: {
+          trustModifier: -0.1 + (intelligenceLevel * 0.05),
+          energyModifier: 0.1,
+          cooperationModifier: 0.3 + (intelligenceLevel * 0.1),
+          innovationModifier: 0.2 + (intelligenceLevel * 0.1)
+        }
+      };
+    }
+    
+    if (avgStress < 10 && avgInnovation < 60) {
+      // Système en stagnation - Stimulation
+      return {
+        type: 'environmental_change',
+        name: `Stimulation Environnementale Adaptative (IA-${intelligenceLevel})`,
+        description: 'Modification contextuelle pour stimuler l\'évolution et l\'adaptation',
+        intensity: 4 + intelligenceLevel,
+        duration: 35 + (intelligenceLevel * 7),
+        effects: {
+          trustModifier: 0.1,
+          energyModifier: -0.2 + (intelligenceLevel * 0.05),
+          cooperationModifier: 0.3 + (intelligenceLevel * 0.1),
+          innovationModifier: 0.5 + (intelligenceLevel * 0.15)
+        }
+      };
+    }
+    
+    return null;
+  };
   const getAdaptiveInterval = (): number => {
     if (!adaptiveFrequency) return 30000; // 30 secondes fixe
 
@@ -219,26 +297,63 @@ const IntelligentDisruptionManager: React.FC<IntelligentDisruptionManagerProps> 
   const generateEventPrediction = (analysis: any): string => {
     if (!analysis) return 'Analyse en cours...';
     
+    const systemStability = state.systemStability || 75;
+    const avgStress = state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / state.primatoms.length;
+    const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
+    
+    // Prédictions contextuelles intelligentes
+    if (systemStability > 85 && avgStress < 20) {
+      return `Défi de résilience recommandé dans ${Math.round(getAdaptiveInterval() / 1000)}s - Système trop stable`;
+    }
+    
+    if (avgInnovation > 80 && state.coalitions.length > 3) {
+      return `Catalyseur d'innovation optimal détecté - Déclenchement imminent`;
+    }
+    
+    if (state.coalitions.length > 5 && systemStability < 60) {
+      return `Intervention de médiation nécessaire - Fragmentation détectée`;
+    }
+    
     if (analysis.emergentRisks.length > 2) {
-      return 'Disruption de stabilisation probable dans les prochaines minutes';
+      return `Disruption de stabilisation dans ${Math.round(getAdaptiveInterval() / 1000)}s - ${analysis.emergentRisks.length} risques détectés`;
     }
     
     if (analysis.opportunities.length > 2) {
-      return 'Catalyseur de croissance recommandé pour optimiser le potentiel';
+      return `Catalyseur de croissance dans ${Math.round(getAdaptiveInterval() / 1000)}s - ${analysis.opportunities.length} opportunités`;
     }
     
     if (analysis.coalitionDynamics.fragmentationRisk === 'high') {
-      return 'Intervention de médiation suggérée pour prévenir la fragmentation';
+      return `Médiation urgente dans ${Math.round(getAdaptiveInterval() / 1000)}s - Risque de fragmentation élevé`;
     }
     
-    return 'Système en équilibre - surveillance continue';
+    return `Système en équilibre - Prochaine analyse dans ${Math.round(getAdaptiveInterval() / 1000)}s`;
   };
 
   const manualTriggerIntelligent = () => {
-    const intelligentEvent = poliSynthCore.generateIntelligentDisruption(state);
+    const intelligentEvent = generateContextualDisruption();
     
     if (intelligentEvent) {
       onInjectEvent(intelligentEvent);
+      setLastAutoEvent(Date.now());
+      
+      // Feedback immédiat à l'utilisateur
+      console.log(`[IA Disruption] Trigger manuel: ${intelligentEvent.name}`);
+    } else {
+      // Générer un événement par défaut si aucun contexte spécifique
+      const defaultEvent = {
+        type: 'innovation_catalyst' as const,
+        name: `Disruption Manuelle (IA-${intelligenceLevel})`,
+        description: 'Événement déclenché manuellement par l\'intelligence artificielle',
+        intensity: 5 + intelligenceLevel,
+        duration: 30 + (intelligenceLevel * 5),
+        effects: {
+          trustModifier: 0.1,
+          energyModifier: 0.2,
+          cooperationModifier: 0.3,
+          innovationModifier: 0.4
+        }
+      };
+      onInjectEvent(defaultEvent);
       setLastAutoEvent(Date.now());
     }
   };
