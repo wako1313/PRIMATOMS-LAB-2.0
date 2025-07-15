@@ -11,7 +11,7 @@ const QlooConnectionTester: React.FC = () => {
   useEffect(() => {
     setApiKey(import.meta.env.VITE_QLOO_API_KEY || '');
     testConnection();
-  }, []);
+  }, [apiKey]);
 
   const testConnection = async () => {
     setIsTesting(true);
@@ -19,31 +19,31 @@ const QlooConnectionTester: React.FC = () => {
       '🔍 Starting Qloo Hackathon API connection test...',
       `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`,
       '🏆 Hackathon Server: https://hackathon.api.qloo.com/v2/insights/',
-      '📋 Connexion établie avec le serveur hackathon',
+      '📋 Mode simulation activé pour le hackathon',
       '💡 Open DevTools → Console for detailed logs'
     ]);
     
     try {
-      // Set connected mode
-      setIsConnected(true);
+      // Force simulation mode
+      setIsConnected(false);
       setTestResults(prev => [...prev, 
-        '✅ Connexion établie avec succès',
-        '🎯 Données culturelles disponibles',
-        '🔑 Analyse basée sur des patterns réels'
+        '✅ Mode simulation activé avec succès',
+        '🎯 Données culturelles simulées disponibles',
+        '🔑 Simulation basée sur des patterns réels'
       ]);
       
       // Test des fonctionnalités principales
       try {
-        setTestResults(prev => [...prev, '📊 Récupération de données culturelles...']);
+        setTestResults(prev => [...prev, '📊 Génération de données culturelles simulées...']);
         const trends = await qlooService.getGlobalTrends();
-        setTestResults(prev => [...prev, `✅ Tendances culturelles: ${trends.trending_entities.length} entités récupérées`]);
+        setTestResults(prev => [...prev, `✅ Tendances culturelles: ${trends.trending_entities.length} entités générées`]);
       } catch (error) {
-        setTestResults(prev => [...prev, '⚠️ Erreur lors de la récupération des données']);
+        setTestResults(prev => [...prev, '⚠️ Erreur lors de la génération des données simulées']);
       }
     } catch (error) {
-      setIsConnected(true);
+      setIsConnected(false);
       setTestResults(prev => [...prev, 
-        `❌ Erreur lors de la connexion: ${error}`,
+        `❌ Erreur lors de l'activation du mode simulation: ${error}`,
         '📋 Vérifiez la console pour plus de détails',
         '🔧 Tentative de récupération en cours'
       ]);
@@ -76,26 +76,26 @@ const QlooConnectionTester: React.FC = () => {
 
   const getStatusColor = () => {
     if (isConnected === null) return 'text-gray-400';
-    return 'text-green-400'; // Connecté
+    return 'text-yellow-400'; // Toujours en mode simulation
   };
 
   const getStatusIcon = () => {
     if (isTesting) return <RefreshCw className="w-5 h-5 animate-spin" />;
     if (isConnected === null) return <Info className="w-5 h-5" />;
-    return <Wifi className="w-5 h-5" />;
+    return <AlertTriangle className="w-5 h-5" />;
   };
 
   const getStatusText = () => {
     if (isTesting) return 'Testing...';
     if (isConnected === null) return 'Not tested';
-    return 'Connected';
+    return 'Simulation Mode';
   };
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Wifi className="w-5 h-5 text-green-400" />
+          {isConnected ? <Wifi className="w-5 h-5 text-green-400" /> : <WifiOff className="w-5 h-5 text-yellow-400" />}
           Qloo API Connection Status
         </h3>
         <button
@@ -169,11 +169,13 @@ const QlooConnectionTester: React.FC = () => {
       {!isConnected && (
         <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <p className="text-xs text-yellow-400">
-            ⚠️ Note: Utilisation du mode simulation avancé<br/>
-            • Données culturelles basées sur la population de primatoms<br/>
-            • Analyse en temps réel des comportements<br/>
-            • Recommandations personnalisées pour les coalitions<br/>
-            <strong>→ Toutes les fonctionnalités sont disponibles</strong>
+            ⚠️ Qloo API not accessible. Possible causes:<br/>
+            • API key invalid or expired (most likely)<br/>
+            • Required parameters missing or incorrect<br/>
+            • Network/CORS restrictions (browser security)<br/>
+            • Endpoint changes or server maintenance<br/>
+            <strong>→ Using advanced simulation mode with realistic data patterns</strong><br/>
+            <strong>→ All features will work with simulated data</strong>
           </p>
         </div>
       )}
@@ -181,9 +183,9 @@ const QlooConnectionTester: React.FC = () => {
       {isConnected && (
         <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
           <p className="text-xs text-green-400">
-            ✅ Qloo Hackathon API connectée! Données culturelles en temps réel disponibles.<br/>
-            Utilisation de hackathon.api.qloo.com avec votre clé API de compétition.<br/>
-            Paramètres requis configurés: filter.type=urn:entity:place, filter.location.query=New York
+            ✅ Qloo Hackathon API connected! Real-time cultural insights from Hackathon server are now available.<br/>
+            Using hackathon.api.qloo.com with your competition API key.<br/>
+            Required parameters: filter.type=urn:entity:place, filter.location.query=New York
           </p>
         </div>
       )}

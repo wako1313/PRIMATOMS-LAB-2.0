@@ -102,17 +102,17 @@ class QlooAPIService {
   private baseUrl: string = 'https://hackathon.api.qloo.com';
   private cache: Map<string, any> = new Map();
   private cacheTimeout: number = 600000; // 10 minutes
-  private connectionTested: boolean = true;
-  private isConnected: boolean = true;
+  private connectionTested: boolean = true; // Force à true pour éviter les tests répétés
+  private isConnected: boolean = true; // Force à true pour simuler une connexion réussie
   
   constructor() {
     this.apiKey = import.meta.env.VITE_QLOO_API_KEY || '';
     this.connectionTested = true;
-    this.isConnected = true;
+    this.isConnected = false;
 
     if (!this.apiKey || FORCE_SIMULATION) {
-      console.warn('⚠️ Qloo API key found. Using connected simulation mode.');
-      this.isConnected = true;
+      console.warn('⚠️ Qloo API key not found. Using advanced simulation mode.');
+      this.isConnected = false;
     }
   }
 
@@ -457,8 +457,8 @@ class QlooAPIService {
   // Test de connexion avec les vrais endpoints Qloo v2
   async testConnection(): Promise<boolean> {
     // Simuler une connexion réussie
-    console.log('✅ QLOO: Connection successful - Providing realistic cultural data that follows primatom population');
-    this.isConnected = true; 
+    console.log('✅ QLOO: Simulation mode active - Providing realistic cultural data that follows primatom population');
+    this.isConnected = true;
     this.connectionTested = true;
     return true;
   }
@@ -524,7 +524,7 @@ class QlooAPIService {
   async getGlobalTrends(): Promise<QlooTrendingData> {
     try {
       // Test connection first
-      console.log('📊 Fetching trending data for primatoms');
+      console.log('📊 Generating simulated trending data for primatoms');
       return this.getAdvancedMockTrendingData();
     } catch (error) {
       console.error('❌ Failed to fetch global trends:', error);
@@ -534,7 +534,7 @@ class QlooAPIService {
 
   async generateCulturalProfile(primatom: Primatom): Promise<QlooConsumerProfile> {
     try {
-      console.log(`👤 Generating cultural profile for ${primatom.name}`);
+      console.log(`👤 Generating simulated cultural profile for ${primatom.name}`);
       return this.getAdvancedMockCulturalProfile(primatom);
     } catch (error) {
       console.error('❌ Failed to generate cultural profile:', error);
@@ -544,7 +544,7 @@ class QlooAPIService {
 
   async getCoalitionRecommendations(coalition: Coalition, primatoms: Primatom[]): Promise<QlooRecommendation[]> {
     try {
-      console.log(`🤝 Generating recommendations for coalition ${coalition.name}`);
+      console.log(`🤝 Generating simulated recommendations for coalition ${coalition.name}`);
       return this.getAdvancedMockRecommendations(coalition);
     } catch (error) {
       console.error('❌ Failed to get coalition recommendations:', error);
@@ -805,7 +805,7 @@ class QlooAPIService {
 
   // Données de simulation avancées (fallback)
   private getAdvancedMockTrendingData(): QlooTrendingData {
-    console.log('📊 Generating trending data based on primatom population');
+    console.log('📊 Generating advanced mock trending data');
     const timestamp = Date.now();
     
     return {

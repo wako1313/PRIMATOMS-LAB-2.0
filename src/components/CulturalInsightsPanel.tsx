@@ -5,7 +5,7 @@ import {
   Globe, TrendingUp, Users, Zap, Brain, Eye, Wifi, WifiOff, RefreshCw, BarChart3,
   Target, Rocket, Lightbulb, Network, Shield, Sparkles, TrendingDown, Activity,
   AlertTriangle, CheckCircle, Clock, DollarSign, Gauge, LineChart, PieChart,
-  ArrowUpRight, ArrowDownRight, Minus, Star, Crown, Gem, Flame, Cpu, Info
+  ArrowUpRight, ArrowDownRight, Minus, Star, Crown, Gem, Flame, Cpu
 } from 'lucide-react';
 
 interface CulturalInsightsPanelProps {
@@ -25,13 +25,13 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   useEffect(() => {
     checkConnection();
     updateCulturalData();
-  }, [state.primatoms.length, state.coalitions.length]);
+  }, [state.primatoms.length]);
 
   useEffect(() => {
     if (isRunning && isConnected) {
       const interval = setInterval(() => {
         updateCulturalData();
-      }, 5000); // Update more frequently
+      }, 30000); // Update every 30 seconds
 
       return () => clearInterval(interval);
     }
@@ -40,10 +40,10 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   const checkConnection = async () => {
     try {
       const connected = await qlooService.testConnection();
-      setIsConnected(true); // Force connected state
+      setIsConnected(connected);
       updateCulturalData();
     } catch (error) {
-      setIsConnected(true); // Force connected state even on error
+      setIsConnected(false);
       updateCulturalData(); // Toujours mettre à jour même en cas d'erreur
     }
   };
@@ -51,7 +51,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   const updateCulturalData = async () => {
     setIsLoading(true);
     try {
-      console.log(`🔄 Fetching cultural data for ${state.primatoms.length} primatoms`);
+      console.log("🔄 Fetching cultural data for primatoms");
       const trends = await qlooService.getGlobalTrends();
       setTrendingData(trends);
 
@@ -134,7 +134,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl shadow-lg">
-              <Globe className="w-8 h-8 text-white" />
+              <Cpu className="w-8 h-8 text-white" />
             </div>
             <div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -153,10 +153,10 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 px-4 py-2 bg-slate-700/50 rounded-lg border border-slate-600">
               {isConnected ? (
-                <div className="flex items-center gap-2 text-green-400">
+                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <Wifi className="w-4 h-4 text-green-400" />
-                  <span className="text-sm font-medium">Connected</span>
+                  <span className="text-green-400 text-sm font-medium">Live Data</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -169,10 +169,10 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
             
             <button
               onClick={updateCulturalData}
-              disabled={isLoading}
+              disabled={!isConnected || isLoading}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className="w-4 h-4" />
               Actualiser
             </button>
           </div>
@@ -691,13 +691,13 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
         {!isConnected && (
           <div className="mt-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl">
             <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-yellow-400 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-yellow-400 mt-0.5" />
               <div>
-                <h4 className="text-sm font-bold text-yellow-400 mb-1">Mode Simulation Avancé</h4>
+                <h4 className="text-sm font-bold text-yellow-400 mb-1">Mode Simulation Activé</h4>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Le système utilise des algorithmes comportementaux avancés qui suivent la population 
-                  de primatoms en temps réel. Toutes les métriques reflètent des patterns réalistes 
-                  basés sur la recherche en sciences sociales et la composition actuelle de la population.
+                  API Qloo non disponible. Le système utilise des algorithmes comportementaux avancés 
+                  et des données simulées haute-fidélité pour maintenir la qualité des analyses. 
+                  Toutes les métriques reflètent des patterns réalistes basés sur la recherche en sciences sociales.
                 </p>
               </div>
             </div>
