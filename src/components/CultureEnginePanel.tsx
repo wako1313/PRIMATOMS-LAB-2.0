@@ -126,6 +126,7 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
           coalitionMember: !!p.coalition,
           memoryCount: p.memories.length,
           culturalNorms: p.culturalNorms.length
+        })),
         adoptionRates: calculateAdoptionRates(),
         frictionZones: identifyFrictionZones(),
         propagationPath: analyzePropagationPath(),
