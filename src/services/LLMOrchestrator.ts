@@ -1,5 +1,5 @@
-const SIM_MODE = import.meta.env.VITE_SIMULATION === 'true';
 import { LLMProvider, SimulationData } from '../types';
+const SIM_MODE = import.meta.env.VITE_SIMULATION === 'true';
 
 export interface LLMConfig {
   provider: 'openai' | 'gemini';
@@ -58,8 +58,10 @@ export class LLMOrchestrator {
     }
   }
 
-  async generateWhatIfScenario(data: SimulationData, parameter: string, newValue: any): Promise<string> {
-    const prompt = this.buildWhatIfPrompt(data, parameter, newValue);
+    async generateWhatIfScenario(data: SimulationData, parameter: string, newValue: any): Promise<string> {
+    if (SIM_MODE) {
+      return `Scénario simulé : si "${parameter}" = "${newValue}", impact anticipé sur l’adoption : +12% chez les innovateurs, -3% chez les traditionalistes.`;
+    }
     
     try {
       const response = await this.callLLM(prompt, 'whatif');
