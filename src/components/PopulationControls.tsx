@@ -579,12 +579,14 @@
                 </span>
                 <span className="text-green-400">
                   ⚡ {trendingEntities.length} tendances suivies
-                </span>
-            </div>
-          </div>
-        </div>
-      </div>
+                const PopulationControls = () => {
+  // ... votre logique
+
+  return (
+    <div>
+      {/* votre JSX */}
     </div>
+  );
 };
 
 export default PopulationControls;
