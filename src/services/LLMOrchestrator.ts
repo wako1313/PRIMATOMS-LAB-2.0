@@ -53,112 +53,10 @@ export class LLMOrchestrator {
       return this.parseAnalysisResponse(response);
     } catch (error) {
       console.error('LLM Analysis failed:', error);
-      return this.getEnhancedFallbackAnalysis(data);
+      return this.getFallbackAnalysis(data);
     }
   }
 
-  private getEnhancedFallbackAnalysis(data: SimulationData): LLMAnalysisResult {
-    // Analyse approfondie des données de simulation
-    const totalPersonas = data.personas.length;
-    const avgAdoption = Object.values(data.adoptionRates).reduce((sum, rate) => sum + rate, 0) / Object.keys(data.adoptionRates).length;
-    const highAdopters = Object.entries(data.adoptionRates).filter(([_, rate]) => rate > 70);
-    const lowAdopters = Object.entries(data.adoptionRates).filter(([_, rate]) => rate < 40);
-    
-    // Analyse des patterns culturels
-    const culturalDrivers = Object.entries(data.culturalDrivers || {})
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 5);
-    
-    // Analyse des zones de friction
-    const frictionAnalysis = data.frictionZones.map(zone => {
-      if (zone.includes('stress')) return 'Résistance liée au stress collectif élevé';
-      if (zone.includes('fragmentation')) return 'Fragmentation des structures sociales';
-      if (zone.includes('isolement')) return 'Isolement social croissant';
-      return zone;
-    });
-    
-    return {
-      executiveSummary: `Analyse de ${totalPersonas} personas révèle un taux d'adoption moyen de ${avgAdoption.toFixed(1)}%. ${highAdopters.length} segments montrent une adoption élevée (>${70}%) tandis que ${lowAdopters.length} segments résistent (<40%). Les données Qloo indiquent des patterns culturels distincts influençant significativement la propagation.`,
-      
-      segmentAnalysis: [
-        `Segments haute adoption (${highAdopters.length}): ${highAdopters.map(([type]) => type).join(', ')} - Corrélation forte avec affinités musicales alternatives et ouverture culturelle`,
-        `Segments résistants (${lowAdopters.length}): ${lowAdopters.map(([type]) => type).join(', ')} - Préférences traditionnelles et validation communautaire requise`,
-        `Segment intermédiaire: Adoption progressive via influences sociales et leaders d'opinion locaux`,
-        `Pattern émergent: Les innovateurs musicaux agissent comme catalyseurs de propagation culturelle`
-      ],
-      
-      culturalInsights: [
-        'Corrélation forte (r=0.85) entre préférences musicales et vitesse d\'adoption technologique',
-        'Les habitudes alimentaires influencent les comportements sociaux collectifs',
-        'Impact des affinités de divertissement sur la propagation virale',
-        'Les clusters d\'affinités croisées Qloo prédisent l\'adoption avec 87% de précision',
-        'Phénomène de résonance culturelle détecté entre segments apparemment distincts'
-      ],
-      
-      resistanceFactors: frictionAnalysis.concat([
-        'Incompatibilité avec valeurs culturelles établies selon données Qloo',
-        'Manque de validation par leaders d\'opinion du segment',
-        'Friction cognitive avec habitudes de consommation existantes',
-        'Barrières générationnelles dans l\'adoption de nouvelles pratiques'
-      ]),
-      
-      recommendations: [
-        'Cibler prioritairement les innovateurs musicaux pour amorcer la propagation virale',
-        'Adapter le message aux codes culturels spécifiques de chaque segment Qloo',
-        'Utiliser les affinités croisées pour optimiser la diffusion inter-segments',
-        'Implémenter une stratégie de validation par les leaders d\'opinion locaux',
-        'Exploiter les patterns de consommation média pour timing optimal'
-      ],
-      
-      whatIfScenarios: [
-        {
-          scenario: 'Ciblage segment musical alternatif en priorité',
-          prediction: 'Adoption 40% plus rapide avec propagation naturelle vers segments adjacents via affinités croisées Qloo',
-          confidence: 0.87
-        },
-        {
-          scenario: 'Focus sur affinités culinaires comme vecteur',
-          prediction: 'Adoption plus lente mais plus stable et durable, avec ancrage culturel profond',
-          confidence: 0.82
-        },
-        {
-          scenario: 'Stratégie multi-domaines simultanée',
-          prediction: 'Saturation rapide mais risque de dilution du message, efficacité réduite de 25%',
-          confidence: 0.75
-        }
-      ],
-      
-      keyDrivers: culturalDrivers.map(([factor, impact]) => ({
-        factor: this.translateCulturalFactor(factor),
-        impact: impact * 100,
-        explanation: this.explainCulturalImpact(factor, impact)
-      }))
-    };
-  }
-  
-  private translateCulturalFactor(factor: string): string {
-    const translations: Record<string, string> = {
-      'musical_affinity': 'Affinités Musicales',
-      'food_preferences': 'Préférences Alimentaires',
-      'entertainment_habits': 'Habitudes de Divertissement',
-      'fashion_trends': 'Tendances Mode',
-      'social_media_usage': 'Usage Réseaux Sociaux',
-      'lifestyle_choices': 'Choix de Vie'
-    };
-    return translations[factor] || factor;
-  }
-  
-  private explainCulturalImpact(factor: string, impact: number): string {
-    const explanations: Record<string, string> = {
-      'musical_affinity': 'Principal prédicteur d\'adoption selon données Qloo - Les goûts musicaux révèlent l\'ouverture au changement',
-      'food_preferences': 'Influence significative sur vitesse de propagation - Corrélation avec habitudes sociales',
-      'entertainment_habits': 'Impact sur stabilité d\'adoption long terme - Patterns de consommation média',
-      'fashion_trends': 'Indicateur d\'adoption précoce - Sensibilité aux influences esthétiques',
-      'social_media_usage': 'Amplificateur de propagation virale - Effet réseau multiplicateur',
-      'lifestyle_choices': 'Ancrage culturel profond - Résistance ou facilitation selon alignement'
-    };
-    return explanations[factor] || `Impact de ${(impact * 100).toFixed(0)}% sur l'adoption culturelle`;
-  }
   async generateWhatIfScenario(data: SimulationData, parameter: string, newValue: any): Promise<string> {
     const prompt = this.buildWhatIfPrompt(data, parameter, newValue);
     
@@ -261,12 +159,38 @@ Style: bullet points clairs et actionnables.`;
 
 ## DONNÉES COMPLÈTES DE SESSION
 **Durée:** ${sessionMetrics.duration || 'N/A'}
-**Profils culturels Qloo:** ${sessionMetrics.culturalProfiles || 0}
+**Personas simulées:** ${data.personas.length}
+**Événements culturels:** ${data.timelineEvents.length}
+**Taux d'adoption final:** ${JSON.stringify(data.adoptionRates)}
+**Métriques système:** ${JSON.stringify(sessionMetrics)}
+
 ## MISSION CRITIQUE
+Génère un rapport de recherche scientifique complet intégrant:
+
+### 1. SYNTHÈSE EXÉCUTIVE
+- Impact global de la simulation
+- Découvertes majeures Qloo + IA
 - Implications pour la recherche culturelle
 
+### 2. MÉTHODOLOGIE
+- Utilisation des données Qloo
+- Algorithmes de propagation culturelle
+- Validation des prédictions
 
+### 3. RÉSULTATS DÉTAILLÉS
+- Analyse segment par segment
+- Patterns culturels émergents
+- Corrélations Qloo identifiées
 
+### 4. INSIGHTS SCIENTIFIQUES
+- Nouvelles découvertes comportementales
+- Validation/invalidation d'hypothèses
+- Applications futures
+
+### 5. RECOMMANDATIONS STRATÉGIQUES
+- Pour les marques/organisations
+- Pour la recherche académique
+- Pour l'innovation culturelle
 
 ## FORMAT
 Rapport scientifique professionnel, 1000-1500 mots, style académique mais accessible.

@@ -87,13 +87,13 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
       const samplePrimatoms = state.primatoms.slice(0, 10);
       for (const primatom of samplePrimatoms) {
         const profile = await qlooService.generateCulturalProfile(primatom);
-      const samplePrimatoms = state.primatoms.slice(0, Math.min(20, state.primatoms.length)); // Analyse plus de Primatoms
+        profiles.set(primatom.id, profile);
       }
       
       setCulturalData({ trends, profiles });
       setLastUpdate(Date.now());
     } catch (error) {
-      for (const coalition of state.coalitions.slice(0, Math.min(8, state.coalitions.length))) {
+      console.error('Failed to update cultural data:', error);
     }
   };
 
@@ -122,33 +122,11 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
           }
         })),
         culturalAffinities: culturalData?.trends?.trending_entities || [],
-          relationships: Object.keys(p.relationships).length,
-          coalitionMember: !!p.coalition,
-          memoryCount: p.memories.length,
-          culturalNorms: p.culturalNorms.length
-        })),
         adoptionRates: calculateAdoptionRates(),
         frictionZones: identifyFrictionZones(),
         propagationPath: analyzePropagationPath(),
-        timelineEvents: state.metrics.slice(-50), // Plus d'historique
-        culturalDrivers: calculateCulturalDrivers(),
-        // NOUVELLES DONNÉES ENRICHIES
-        systemMetrics: {
-          stability: state.systemStability || 75,
-          generation: state.generation,
-          activeDisruptions: state.activeDisruptions?.length || 0,
-          emergentPhenomena: state.emergentPhenomena?.length || 0,
-          globalKnowledge: state.globalKnowledge.length
-        },
-        coalitionDynamics: state.coalitions.map(c => ({
-          id: c.id,
-          name: c.name,
-          memberCount: c.members.length,
-          cohesion: c.cohesion,
-          goals: c.goals,
-          created: c.created,
-          adaptationStrategies: c.adaptationStrategies || []
-        }))
+        timelineEvents: state.metrics.slice(-20),
+        culturalDrivers: calculateCulturalDrivers()
       };
 
       // Lancer l'analyse LLM
@@ -161,11 +139,6 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
         totalEvents: state.metrics.length,
         coalitions: state.coalitions.length,
         stability: state.systemStability
-        culturalProfiles: culturalProfiles.size,
-        qlooRecommendations: Array.from(coalitionRecommendations.values()).reduce((sum, recs) => sum + recs.length, 0),
-        disruptionHistory: state.activeDisruptions?.length || 0,
-        emergentPhenomena: state.emergentPhenomena || [],
-        innovationLevel: state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length
       });
       setSessionReport(report);
       
@@ -212,21 +185,8 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
     
     behaviorTypes.forEach(type => {
       const primatoms = state.primatoms.filter(p => p.behaviorType === type);
-      if (primatoms.length > 0) {
-        const avgInnovation = primatoms.reduce((sum, p) => sum + p.innovation, 0) / primatoms.length;
-        const avgCooperation = primatoms.reduce((sum, p) => sum + p.cooperation, 0) / primatoms.length;
-        const avgEnergy = primatoms.reduce((sum, p) => sum + p.energy, 0) / primatoms.length;
-        const avgStress = primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / primatoms.length;
-        
-        // Calcul sophistiqué basé sur multiple facteurs
-        const baseRate = (avgInnovation * 0.4 + avgCooperation * 0.3 + avgEnergy * 0.2 + (100 - avgStress) * 0.1);
-        const culturalBonus = culturalData?.profiles.size > 0 ? 5 : 0;
-        const coalitionBonus = primatoms.filter(p => p.coalition).length / primatoms.length * 10;
-        
-        rates[type] = Math.min(95, Math.max(15, baseRate + culturalBonus + coalitionBonus));
-      } else {
-        rates[type] = 50; // Valeur par défaut
-      }
+      const avgInnovation = primatoms.reduce((sum, p) => sum + p.innovation, 0) / Math.max(primatoms.length, 1);
+      rates[type] = Math.min(95, avgInnovation + Math.random() * 20);
     });
     
     return rates;
