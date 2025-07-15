@@ -16,8 +16,11 @@ const QlooConnectionTester: React.FC = () => {
   const testConnection = async () => {
     setIsTesting(true);
     setTestResults([
-      '🔍 Starting comprehensive Qloo API diagnostics...',
-      `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`
+      '🔍 Starting comprehensive Qloo Hackathon API diagnostics...',
+      `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`,
+      '🏆 Hackathon Server: https://hackathon.api.qloo.com',
+      '📋 Testing multiple endpoints and auth methods...',
+      '💡 Open DevTools → Console for detailed logs'
     ]);
     
     try {
@@ -25,29 +28,34 @@ const QlooConnectionTester: React.FC = () => {
       setIsConnected(connected);
       
       if (connected) {
-        setTestResults(prev => [...prev, '✅ Qloo API connection successful!']);
+        setTestResults(prev => [...prev, 
+          '✅ Qloo Hackathon API connection successful!',
+          '🎯 Real-time cultural data now available'
+        ]);
         
-        // Test de l'endpoint Insights API v2
+        // Test des fonctionnalités principales
         try {
-          setTestResults(prev => [...prev, '📊 Testing Insights API v2...']);
+          setTestResults(prev => [...prev, '📊 Testing cultural insights...']);
           const trends = await qlooService.getGlobalTrends();
-          setTestResults(prev => [...prev, `✅ Insights API v2: ${trends.trending_entities.length} entities loaded`]);
+          setTestResults(prev => [...prev, `✅ Cultural trends: ${trends.trending_entities.length} entities loaded`]);
         } catch (error) {
-          setTestResults(prev => [...prev, '⚠️ Insights API using simulation mode']);
+          setTestResults(prev => [...prev, '⚠️ Cultural insights using simulation mode']);
         }
         
       } else {
         setTestResults(prev => [...prev, 
-          '❌ All API endpoints failed',
-          '🔧 Switching to advanced simulation mode',
-          '💡 Check console for detailed diagnostics'
+          '❌ All Hackathon API endpoints failed',
+          '🔧 Using advanced simulation mode',
+          '📋 Check console for detailed error analysis',
+          '💡 Simulation provides realistic cultural data patterns'
         ]);
       }
     } catch (error) {
       setIsConnected(false);
       setTestResults(prev => [...prev, 
-        `❌ Connection failed: ${error}`,
-        '💡 See browser console for detailed error analysis'
+        `❌ Hackathon API connection failed: ${error}`,
+        '📋 See browser console for detailed diagnostics',
+        '🔧 Advanced simulation mode activated'
       ]);
     } finally {
       setIsTesting(false);

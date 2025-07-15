@@ -114,17 +114,27 @@ class QlooAPIService {
   // Test de connexion avec les vrais endpoints Qloo v2
   async testConnection(): Promise<boolean> {
     if (!this.apiKey) {
-      console.log('❌ No API key - Using simulation mode');
+      console.log('❌ QLOO: No API key configured - Using simulation mode');
       this.isConnected = false;
       return false;
     }
 
-    console.log(`🔑 API Key configured: ${this.apiKey.substring(0, 8)}...${this.apiKey.substring(this.apiKey.length - 4)}`);
+    console.log(`🔑 QLOO: API Key configured: ${this.apiKey.substring(0, 8)}...${this.apiKey.substring(this.apiKey.length - 4)}`);
+    console.log(`🌐 QLOO: Base URL: ${this.baseUrl}`);
     
     // Tests multiples avec différents endpoints et configurations
     const testConfigurations = [
       {
-        name: 'Hackathon v2 Insights API',
+        name: 'Hackathon v2 Basic Test',
+        url: `${this.baseUrl}/v2/insights/?limit=1`,
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      },
+      {
+        name: 'Hackathon v2 Places Filter',
         url: `${this.baseUrl}/v2/insights/?filter.type=urn:entity:place&limit=1`,
         headers: {
           'X-Api-Key': this.apiKey,
@@ -133,7 +143,15 @@ class QlooAPIService {
         }
       },
       {
-        name: 'Hackathon v2 alternative',
+        name: 'Hackathon v1 Legacy',
+        url: `${this.baseUrl}/v1/insights?limit=1`,
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json'
+        }
+      },
+      {
+        name: 'Hackathon Root Test',
         url: `${this.baseUrl}/v2/insights/`,
         headers: {
           'X-Api-Key': this.apiKey,
@@ -141,15 +159,7 @@ class QlooAPIService {
         }
       },
       {
-        name: 'Hackathon v1 fallback',
-        url: `${this.baseUrl}/v1/insights`,
-        headers: {
-          'X-Api-Key': this.apiKey,
-          'Content-Type': 'application/json'
-        }
-      },
-      {
-        name: 'Hackathon Bearer auth test',
+        name: 'Hackathon Bearer Auth Test',
         url: `${this.baseUrl}/v2/insights/?limit=1`,
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -160,8 +170,9 @@ class QlooAPIService {
 
     for (const config of testConfigurations) {
       try {
-        console.log(`🔍 Testing ${config.name}: ${config.url}`);
-        console.log(`📋 Headers:`, Object.keys(config.headers).join(', '));
+        console.log(`\n🔍 QLOO: Testing ${config.name}`);
+        console.log(`📡 QLOO: URL: ${config.url}`);
+        console.log(`📋 QLOO: Headers:`, config.headers);
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
@@ -173,51 +184,60 @@ class QlooAPIService {
         });
 
         clearTimeout(timeoutId);
-        console.log(`📡 ${config.name} - Status: ${response.status} ${response.statusText}`);
-        console.log(`📋 Response headers:`, Object.fromEntries(response.headers.entries()));
+        console.log(`📡 QLOO: ${config.name} - Status: ${response.status} ${response.statusText}`);
+        console.log(`📋 QLOO: Response headers:`, Object.fromEntries(response.headers.entries()));
+        console.log(`🔍 QLOO: Response URL: ${response.url}`);
         
         if (response.ok) {
           try {
             const data = await response.json();
-            console.log(`✅ ${config.name} - SUCCESS!`, { 
+            console.log(`✅ QLOO: ${config.name} - SUCCESS!`, { 
               url: config.url, 
               status: response.status,
               dataKeys: Object.keys(data),
-              sampleData: data
+              sampleData: JSON.stringify(data).substring(0, 200) + '...'
             });
             this.isConnected = true;
             this.connectionTested = true;
             return true;
           } catch (jsonError) {
-            console.log(`⚠️ ${config.name} - Response not JSON:`, jsonError);
+            console.log(`⚠️ QLOO: ${config.name} - Response not JSON:`, jsonError);
             const text = await response.text();
-            console.log(`📄 Response text:`, text.substring(0, 200));
+            console.log(`📄 QLOO: Response text:`, text.substring(0, 200) + '...');
           }
         } else {
           const errorText = await response.text();
-          console.log(`❌ ${config.name} - HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+          console.log(`❌ QLOO: ${config.name} - HTTP ${response.status}`);
+          console.log(`📄 QLOO: Error response:`, errorText.substring(0, 300) + '...');
           
           // Analyser les erreurs spécifiques
           if (response.status === 401) {
-            console.log(`🔑 ${config.name} - Authentication failed. Check API key validity.`);
+            console.log(`🔑 QLOO: ${config.name} - Authentication failed. API key may be invalid.`);
           } else if (response.status === 403) {
-            console.log(`🚫 ${config.name} - Access forbidden. Check API key permissions.`);
+            console.log(`🚫 QLOO: ${config.name} - Access forbidden. Check API key permissions.`);
           } else if (response.status === 404) {
-            console.log(`🔍 ${config.name} - Endpoint not found. URL may be incorrect.`);
+            console.log(`🔍 QLOO: ${config.name} - Endpoint not found. URL may be incorrect.`);
           } else if (response.status === 429) {
-            console.log(`⏱️ ${config.name} - Rate limit exceeded. Wait before retrying.`);
+            console.log(`⏱️ QLOO: ${config.name} - Rate limit exceeded. Wait before retrying.`);
+          } else if (response.status === 500) {
+            console.log(`🔧 QLOO: ${config.name} - Server error. Hackathon server may be down.`);
           }
         }
       } catch (error) {
         if (error.name === 'AbortError') {
-          console.log(`⏱️ ${config.name} - Request timeout (10s)`);
+          console.log(`⏱️ QLOO: ${config.name} - Request timeout (10s)`);
+        } else if (error.message.includes('CORS')) {
+          console.log(`🚫 QLOO: ${config.name} - CORS error:`, error.message);
+        } else if (error.message.includes('network')) {
+          console.log(`🌐 QLOO: ${config.name} - Network error:`, error.message);
         } else {
-          console.log(`❌ ${config.name} - Network error:`, error.message);
+          console.log(`❌ QLOO: ${config.name} - Unexpected error:`, error);
         }
       }
     }
 
-    console.log('🔧 All endpoints failed - Using advanced simulation mode');
+    console.log('\n🔧 QLOO: All endpoints failed - Using advanced simulation mode');
+    console.log('💡 QLOO: This is normal for hackathon environment - simulation provides realistic data');
     this.isConnected = false;
     this.connectionTested = true;
     return false;
