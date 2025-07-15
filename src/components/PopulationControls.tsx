@@ -578,7 +578,8 @@
                   🎯 {Array.from(coalitionRecommendations.values()).reduce((sum, recs) => sum + recs.length, 0)} recommandations actives
                 </span>
                 <span className="text-green-400">
-                  </span>
+                  ⚡ {trendingEntities.length} tendances suivies
+                </span>
                 </div>
               </div>
             </div>
@@ -589,7 +590,6 @@
   };
 
   export default PopulationControls;
-export default PopulationControls;
 
 export default CulturalInsightsPanel;import React, { useState, useEffect } from 'react';
 import { SimulationState } from '../types';
