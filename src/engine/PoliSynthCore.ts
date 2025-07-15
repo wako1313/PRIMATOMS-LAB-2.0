@@ -533,25 +533,59 @@ export class PoliSynthCore {
     return recommendations;
   }
 
-  private assessDataQuality(): number {
+  private assessDataQuality(state: SimulationState): number {
     // Évaluation de la qualité des données basée sur la cohérence et la complétude
     let qualityScore = 100;
     
+    // Vérification de la cohérence des données de base
+    if (state.primatoms.length === 0) qualityScore -= 50;
+    if (state.metrics.length === 0) qualityScore -= 20;
+    
+    // Vérification de la cohérence des métriques
+    const invalidPrimatoms = state.primatoms.filter(p => 
+      p.trust < 0 || p.trust > 100 || 
+      p.cooperation < 0 || p.cooperation > 100 ||
+      p.innovation < 0 || p.innovation > 100
+    );
+    if (invalidPrimatoms.length > 0) qualityScore -= (invalidPrimatoms.length / state.primatoms.length) * 30;
+    
     const invalidEvents = this.events.filter(e => !this.validateData(e, 'quality_assessment'));
-    qualityScore -= (invalidEvents.length / this.events.length) * 20;
+    if (this.events.length > 0) {
+      qualityScore -= (invalidEvents.length / this.events.length) * 20;
+    }
+    
+    // Bonus pour la richesse des données
+    if (state.coalitions.length > 0) qualityScore += 5;
+    if (state.globalKnowledge.length > 0) qualityScore += 5;
+    if (state.emergentPhenomena && state.emergentPhenomena.length > 0) qualityScore += 10;
     
     return Math.max(0, Math.min(100, qualityScore));
   }
 
-  private calculateConfidenceLevel(): number {
+  private calculateConfidenceLevel(state: SimulationState): number {
     // Calcul du niveau de confiance basé sur la quantité et la qualité des données
     const eventCount = this.events.length;
-    const dataQuality = this.assessDataQuality();
+    const dataQuality = this.assessDataQuality(state);
+    const sessionDuration = Date.now() - this.sessionStartTime;
+    const populationSize = state.primatoms.length;
     
-    let confidence = Math.min(90, eventCount * 2); // Base sur le nombre d'événements
+    let confidence = Math.min(70, eventCount * 3); // Base sur le nombre d'événements
+    
+    // Bonus pour la durée de session
+    if (sessionDuration > 60000) confidence += 10; // Plus d'1 minute
+    if (sessionDuration > 300000) confidence += 10; // Plus de 5 minutes
+    
+    // Bonus pour la taille de population
+    if (populationSize > 100) confidence += 5;
+    if (populationSize > 200) confidence += 5;
+    
+    // Bonus pour la richesse des données
+    if (state.coalitions.length > 0) confidence += 5;
+    if (state.generation > 10) confidence += 5;
+    
     confidence = (confidence + dataQuality) / 2; // Pondération avec la qualité
     
-    return Math.max(50, Math.min(95, confidence));
+    return Math.max(60, Math.min(95, confidence));
   }
 
   // Méthodes publiques pour l'interface

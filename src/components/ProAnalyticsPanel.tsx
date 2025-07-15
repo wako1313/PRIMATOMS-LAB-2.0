@@ -30,6 +30,14 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({ state, poliSynthC
     }
   }, [autoRefresh, state, poliSynthCore]);
 
+  // Générer automatiquement des événements si aucun n'existe
+  useEffect(() => {
+    if (events.length === 0 && state.primatoms.length > 0) {
+      // Forcer une analyse pour générer des événements de base
+      const newEvents = poliSynthCore.analyzeSystemState(state);
+      setEvents(newEvents);
+    }
+  }, [state.primatoms.length, events.length, poliSynthCore, state]);
   useEffect(() => {
     // Filtrer les événements
     let filtered = events;
