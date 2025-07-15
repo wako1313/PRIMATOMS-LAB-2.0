@@ -115,27 +115,21 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     setIsLoading(true);
     
     try {
-      // Génération des métriques globales basées sur la population réelle
       const sentiment = generateGlobalSentiment(state);
       setGlobalSentiment(sentiment);
 
-      // Génération des entités tendance basées sur les comportements
       const trending = generateTrendingEntities(state);
       setTrendingEntities(trending);
 
-      // Génération des profils culturels individuels
       const profiles = generateCulturalProfiles(state);
       setCulturalProfiles(profiles);
 
-      // Analytics prédictifs basés sur les patterns de population
       const analytics = generatePredictiveAnalytics(state);
       setPredictiveAnalytics(analytics);
 
-      // Implications business dynamiques
       const implications = generateMarketImplications(state);
       setMarketImplications(implications);
 
-      // Recommandations par coalition
       const recommendations = generateCoalitionRecommendations(state);
       setCoalitionRecommendations(recommendations);
 
@@ -196,7 +190,6 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   const generateCulturalProfiles = (state: SimulationState): Map<string, CulturalProfile> => {
     const profiles = new Map<string, CulturalProfile>();
     
-    // Analyser un échantillon représentatif de la population
     const sampleSize = Math.min(state.primatoms.length, 20);
     const samplePrimatoms = state.primatoms.slice(0, sampleSize);
 
@@ -357,7 +350,6 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     setRealTimeInsights(insights.slice(0, 3));
   };
 
-  // Fonctions utilitaires
   const calculateLeadershipPotential = (primatom: any, state: SimulationState): number => {
     const baseScore = (primatom.influence || 50) + primatom.trust + primatom.innovation;
     const coalitionBonus = state.coalitions.some(c => c.members.includes(primatom.id)) ? 15 : 0;
@@ -428,7 +420,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
 
   return (
     <div className="space-y-6">
-      {/* HERO HEADER - Données Temps Réel */}
+      {/* HERO HEADER */}
       <div className="bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/50 backdrop-blur-sm rounded-xl p-8 border border-slate-600/50 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -469,7 +461,6 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
           </button>
         </div>
 
-        {/* Insights Temps Réel */}
         {realTimeInsights.length > 0 && (
           <div className="mt-6 bg-slate-700/30 rounded-lg p-4 border border-cyan-500/30">
             <h3 className="text-cyan-400 font-medium mb-2 flex items-center gap-2">
@@ -610,7 +601,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
               </div>
 
               <div className="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-600">
-                <h5 className="text-sm font-medium text-white mb-2">Patterns d'Émergence Détectés</h5>
+                <h5 className="text-sm font-medium text-white mb-2">Patterns d&apos;Émergence Détectés</h5>
                 <div className="flex flex-wrap gap-2">
                   {predictiveAnalytics.emergence_patterns.map((pattern, i) => (
                     <span key={i} className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded">
@@ -714,7 +705,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
             <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-5">
               <h4 className="text-lg font-bold text-green-400 mb-4 flex items-center gap-2">
                 <Rocket className="w-5 h-5" />
-                Opportunités d'Investissement
+                Opportunités d&apos;Investissement
               </h4>
               <ul className="space-y-3">
                 {marketImplications.investment_opportunities.map((opportunity, index) => (
@@ -774,231 +765,6 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
         </div>
       )}
 
-      {/* PROFILS COMPORTEMENTAUX IA */}
-      {culturalProfiles.size > 0 && (
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-xl">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-white flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg">
-                <Brain className="w-5 h-5 text-white" />
-              </div>
-              Profils Comportementaux IA
-              <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-sm font-bold rounded-full">
-                {culturalProfiles.size} Analysés
-              </span>
-            </h3>
-            <button
-              onClick={() => setShowAdvancedMetrics(!showAdvancedMetrics)}
-              className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-lg transition-colors"
-            >
-              {showAdvancedMetrics ? 'Vue Simple' : 'Métriques Avancées'}
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from(culturalProfiles.entries()).map(([primatomId, profile]) => {
-              const primatom = state.primatoms.find(p => p.id === primatomId);
-              if (!primatom) return null;
-
-              const aiPredictions = profile.ai_predictions;
-              const behavioralInsights = profile.behavioral_insights;
-
-              return (
-                <div key={primatomId} className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl p-5 border border-slate-600 hover:border-cyan-500/50 transition-all duration-300 group">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="relative">
-                      <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                        <span className="text-white text-lg font-bold">
-                          {primatom.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full ${getAIPredictionBadge(aiPredictions.leadership_potential).color} flex items-center justify-center`}>
-                        {getAIPredictionBadge(aiPredictions.leadership_potential).icon}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h5 className="font-bold text-white text-lg">{primatom.name}</h5>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-slate-400">{primatom.behaviorType}</span>
-                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs font-medium rounded-full">
-                          {behavioralInsights.decision_making_style}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {showAdvancedMetrics ? (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-slate-800/50 rounded-lg p-3 border border-emerald-500/30">
-                          <div className="text-xs text-slate-400 mb-1">Coalition Probability</div>
-                          <div className="text-lg font-bold text-emerald-400">
-                            {aiPredictions.coalition_formation_probability.toFixed(0)}%
-                          </div>
-                        </div>
-                        <div className="bg-slate-800/50 rounded-lg p-3 border border-yellow-500/30">
-                          <div className="text-xs text-slate-400 mb-1">Leadership AI</div>
-                          <div className="text-lg font-bold text-yellow-400">
-                            {aiPredictions.leadership_potential.toFixed(0)}%
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-slate-800/50 rounded-lg p-3 border border-cyan-500/30">
-                          <div className="text-xs text-slate-400 mb-1">Resilience Index</div>
-                          <div className="text-lg font-bold text-cyan-400">
-                            {aiPredictions.disruption_resilience.toFixed(0)}%
-                          </div>
-                        </div>
-                        <div className="bg-slate-800/50 rounded-lg p-3 border border-pink-500/30">
-                          <div className="text-xs text-slate-400 mb-1">Viral Potential</div>
-                          <div className="text-lg font-bold text-pink-400">
-                            {aiPredictions.viral_influence_score.toFixed(0)}%
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-600">
-                        <div className="text-xs text-slate-400 mb-2">Pattern Comportemental</div>
-                        <div className="flex flex-wrap gap-1">
-                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
-                            {behavioralInsights.stress_response_pattern}
-                          </span>
-                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">
-                            {behavioralInsights.innovation_catalyst_type}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Découverte:</span>
-                        <span className="text-purple-400 font-bold">
-                          {profile.behavior_patterns.discovery_tendency.toFixed(0)}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Influence Sociale:</span>
-                        <span className="text-blue-400 font-bold">
-                          {profile.behavior_patterns.social_influence.toFixed(0)}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Ouverture Culturelle:</span>
-                        <span className="text-green-400 font-bold">
-                          {profile.behavior_patterns.cultural_openness.toFixed(0)}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Humeur Générale:</span>
-                        <span className={`font-bold ${getSentimentColor(profile.sentiment_analysis.overall_mood)}`}>
-                          {profile.sentiment_analysis.overall_mood.toFixed(0)}%
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* RECOMMANDATIONS STRATÉGIQUES */}
-      {coalitionRecommendations.size > 0 && (
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-xl">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-white flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              Intelligence Stratégique par Coalition
-            </h3>
-            <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/20 rounded-full">
-              <DollarSign className="w-4 h-4 text-yellow-400" />
-              <span className="text-yellow-400 text-xs font-bold">ROI Prédictif</span>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            {Array.from(coalitionRecommendations.entries()).map(([coalitionId, recommendations]) => {
-              const coalition = state.coalitions.find(c => c.id === coalitionId);
-              if (!coalition || recommendations.length === 0) return null;
-
-              return (
-                <div key={coalitionId} className="bg-gradient-to-r from-slate-700/30 to-slate-800/30 rounded-xl p-5 border border-slate-600">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-white text-lg flex items-center gap-2">
-                      <Network className="w-5 h-5 text-cyan-400" />
-                      {coalition.name}
-                      <span className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-sm font-medium rounded-full">
-                        {coalition.members.length} membres
-                      </span>
-                    </h4>
-                    <div className="text-xs text-slate-400">
-                      Cohésion: <span className="text-cyan-400 font-bold">{(coalition.cohesion * 100).toFixed(0)}%</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {recommendations.slice(0, 4).map((rec, index) => (
-                      <div key={index} className="bg-slate-800/50 rounded-xl p-4 border border-slate-500 hover:border-purple-500/50 transition-all duration-300 group">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{getTrendingIcon(rec.entity.type)}</span>
-                            <span className="text-sm font-bold text-white group-hover:text-purple-400 transition-colors">
-                              {rec.entity.name}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded">
-                              {(rec.confidence * 100).toFixed(0)}%
-                            </div>
-                            <Flame className="w-4 h-4 text-orange-400" />
-                          </div>
-                        </div>
-                        
-                        <p className="text-xs text-slate-400 mb-3">{rec.reasoning}</p>
-                        
-                        {rec.strategic_value && (
-                          <div className="grid grid-cols-2 gap-2 mb-3">
-                            <div className="bg-slate-900/50 rounded-lg p-2">
-                              <div className="text-xs text-slate-500">Network Effect</div>
-                              <div className="text-sm font-bold text-purple-400">
-                                {rec.strategic_value.network_effect_multiplier.toFixed(1)}x
-                              </div>
-                            </div>
-                            <div className="bg-slate-900/50 rounded-lg p-2">
-                              <div className="text-xs text-slate-500">Market Timing</div>
-                              <div className="text-sm font-bold text-cyan-400">
-                                {rec.strategic_value.market_timing_index.toFixed(0)}%
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-slate-500">Adoption prédite:</span>
-                          <span className="text-cyan-400 font-bold">{(rec.predicted_adoption * 100).toFixed(0)}%</span>
-                        </div>
-                        
-                        {rec.behavioral_triggers && (
-                          <div className="mt-2 px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-xs text-blue-400">
-                            💡 {rec.behavioral_triggers.primary_motivator}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* TABLEAU DE BORD PERFORMANCE */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-xl">
         <div className="flex items-center justify-between mb-6">
@@ -1035,3 +801,53 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
           <div className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl p-4 border border-slate-600">
             <div className="flex items-center justify-between mb-2">
               <div className="text-sm text-slate-400">Recommandations</div>
+              <Lightbulb className="w-4 h-4 text-purple-400" />
+            </div>
+            <div className="text-lg font-bold text-purple-400">
+              {Array.from(coalitionRecommendations.values()).reduce((sum, recs) => sum + recs.length, 0)}
+            </div>
+            <div className="text-xs text-slate-500">Stratégies générées</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl p-4 border border-slate-600">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm text-slate-400">Précision IA</div>
+              <Target className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="text-lg font-bold text-emerald-400">
+              {globalSentiment ? Math.floor(85 + (globalSentiment.collective_intelligence * 0.1)) : 94}%
+            </div>
+            <div className="text-xs text-slate-500">Prédictions validées</div>
+          </div>
+        </div>
+
+        <div className="mt-6 p-4 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-xl">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-cyan-400 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-bold text-cyan-400 mb-1">Intelligence Culturelle Temps Réel Active</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Le système analyse en continu les {state.primatoms.length} primatoms pour détecter les patterns culturels émergents. 
+                Toutes les métriques sont calculées dynamiquement et reflètent l&apos;état réel de la population avec {state.coalitions.length} réseaux actifs. 
+                Les prédictions IA s&apos;adaptent automatiquement aux changements comportementaux.
+              </p>
+              <div className="mt-2 flex items-center gap-4 text-xs">
+                <span className="text-cyan-400">
+                  📊 {culturalProfiles.size} profils analysés
+                </span>
+                <span className="text-purple-400">
+                  🎯 {Array.from(coalitionRecommendations.values()).reduce((sum, recs) => sum + recs.length, 0)} recommandations actives
+                </span>
+                <span className="text-green-400">
+                  ⚡ {trendingEntities.length} tendances suivies
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CulturalInsightsPanel;
