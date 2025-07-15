@@ -162,11 +162,9 @@ class QlooAPIService {
   // TRANSFORMATION INTELLIGENTE DES TENDANCES GLOBALES
   async getGlobalTrends(): Promise<QlooTrendingData> {
     try {
-      const response = await this.makeRequest('/v2/insights', {
+      const response = await this.makeRequest('/insights', {
         'filter.type': 'urn:entity:artist',
-        'signal.location.query': 'New York City',
-        'take': '50',
-        'bias.trends': 'high'
+        'take': '50'
       });
 
       // TRANSFORMATION MAGIQUE : Données réelles → Insights comportementaux
@@ -230,10 +228,8 @@ class QlooAPIService {
   // PROFIL CULTUREL AVEC IA PRÉDICTIVE
   async generateCulturalProfile(primatom: Primatom): Promise<QlooConsumerProfile> {
     try {
-      const response = await this.makeRequest('/v2/insights', {
+      const response = await this.makeRequest('/insights', {
         'filter.type': 'urn:entity:artist',
-        'signal.demographics.age': primatom.innovation > 70 ? '35_and_younger' : '36_to_55',
-        'signal.location.query': 'New York City',
         'take': '10'
       });
 
@@ -280,10 +276,8 @@ class QlooAPIService {
       const coalitionMembers = primatoms.filter(p => coalition.members.includes(p.id));
       const coalitionDynamics = this.analyzeCoalitionDynamics(coalitionMembers);
       
-      const response = await this.makeRequest('/v2/insights', {
-        'filter.type': 'urn:entity:place',
-        'signal.demographics.age': coalitionDynamics.avgInnovation > 70 ? '35_and_younger' : '36_to_55',
-        'signal.location.query': 'New York City',
+      const response = await this.makeRequest('/insights', {
+        'filter.type': 'urn:entity:artist',
         'take': '10'
       });
 
@@ -651,9 +645,8 @@ class QlooAPIService {
 
   async testConnection(): Promise<boolean> {
     try {
-      await this.makeRequest('/v2/insights', {
+      await this.makeRequest('/insights', {
         'filter.type': 'urn:entity:artist',
-        'signal.location.query': 'New York City',
         'take': '1'
       });
       return true;

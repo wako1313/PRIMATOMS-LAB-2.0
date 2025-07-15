@@ -50,7 +50,15 @@ export class LLMOrchestrator {
     
     try {
       const response = await this.callLLM(prompt, 'analysis');
-      return this.parseAnalysisResponse(response);
+      
+      // Essayer de parser en JSON, sinon fallback
+      try {
+        const parsed = JSON.parse(response);
+        return this.parseAnalysisResponse(response);
+      } catch (parseError) {
+        console.warn('LLM response not JSON, using fallback');
+        return this.getFallbackAnalysis(data);
+      }
     } catch (error) {
       console.error('LLM Analysis failed:', error);
       return this.getFallbackAnalysis(data);
@@ -198,12 +206,17 @@ Intègre les données Qloo comme preuves empiriques.`;
   }
 
   private async callLLM(prompt: string, type: string): Promise<string> {
+    if (!this.config.apiKey) {
+      throw new Error(`API key not configured for ${this.config.provider}`);
+    }
+
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.config.apiKey}`
     };
 
     if (this.config.provider === 'openai') {
+      headers['Authorization'] = `Bearer ${this.config.apiKey}`;
+      
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers,
@@ -224,8 +237,12 @@ Intègre les données Qloo comme preuves empiriques.`;
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
       const data = await response.json();
-      return data.choices[0].message.content;
+      return data.choices?.[0]?.message?.content || 'Analyse indisponible';
     } else {
       // Gemini implementation
       const response = await fetch(`${this.baseUrl}/models/gemini-pro:generateContent?key=${this.config.apiKey}`, {
@@ -242,8 +259,12 @@ Intègre les données Qloo comme preuves empiriques.`;
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
+
       const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Analyse indisponible';
     }
   }
 
