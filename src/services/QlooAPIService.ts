@@ -1,5 +1,8 @@
 import { Primatom, Coalition, SimulationState } from '../types';
 
+// Force simulation mode
+const FORCE_SIMULATION = true;
+
 export interface QlooEntity {
   id: string;
   name: string;
@@ -104,13 +107,12 @@ class QlooAPIService {
   
   constructor() {
     this.apiKey = import.meta.env.VITE_QLOO_API_KEY || '';
-    
-    if (!this.apiKey) {
+    this.connectionTested = true;
+    this.isConnected = false;
+
+    if (!this.apiKey || FORCE_SIMULATION) {
       console.warn('⚠️ Qloo API key not found. Using advanced simulation mode.');
       this.isConnected = false;
-      // Force simulation mode to be active
-      this.connectionTested = true;
-      return false;
     }
   }
 
@@ -455,7 +457,7 @@ class QlooAPIService {
   // Test de connexion avec les vrais endpoints Qloo v2
   async testConnection(): Promise<boolean> {
     // Simuler une connexion réussie
-    console.log('✅ QLOO: Simulation mode active - Providing realistic cultural data');
+    console.log('✅ QLOO: Simulation mode active - Providing realistic cultural data that follows primatom population');
     this.isConnected = true;
     this.connectionTested = true;
     return true;
@@ -522,11 +524,7 @@ class QlooAPIService {
   async getGlobalTrends(): Promise<QlooTrendingData> {
     try {
       // Test connection first
-      if (!this.connectionTested) {
-        await this.testConnection();
-      }
-      
-      console.log('📊 Generating simulated trending data');
+      console.log('📊 Generating simulated trending data for primatoms');
       return this.getAdvancedMockTrendingData();
     } catch (error) {
       console.error('❌ Failed to fetch global trends:', error);
@@ -536,10 +534,6 @@ class QlooAPIService {
 
   async generateCulturalProfile(primatom: Primatom): Promise<QlooConsumerProfile> {
     try {
-      if (!this.connectionTested) {
-        await this.testConnection();
-      }
-      
       console.log(`👤 Generating simulated cultural profile for ${primatom.name}`);
       return this.getAdvancedMockCulturalProfile(primatom);
     } catch (error) {
@@ -550,10 +544,6 @@ class QlooAPIService {
 
   async getCoalitionRecommendations(coalition: Coalition, primatoms: Primatom[]): Promise<QlooRecommendation[]> {
     try {
-      if (!this.connectionTested) {
-        await this.testConnection();
-      }
-      
       console.log(`🤝 Generating simulated recommendations for coalition ${coalition.name}`);
       return this.getAdvancedMockRecommendations(coalition);
     } catch (error) {
@@ -816,8 +806,10 @@ class QlooAPIService {
   // Données de simulation avancées (fallback)
   private getAdvancedMockTrendingData(): QlooTrendingData {
     console.log('📊 Generating advanced mock trending data');
+    const timestamp = Date.now();
+    
     return {
-      timestamp: Date.now(),
+      timestamp,
       trending_entities: [
         {
           id: 'trend-ai-collab',
@@ -884,7 +876,7 @@ class QlooAPIService {
   private getAdvancedMockCulturalProfile(primatom: Primatom): QlooConsumerProfile {
     console.log(`👤 Generating advanced mock cultural profile for ${primatom.name}`);
     return {
-      id: primatom.id,
+      id: primatom.id || `profile-${Math.random()}`,
       affinities: [
         {
           id: 'affinity-creative',
@@ -895,7 +887,7 @@ class QlooAPIService {
           cultural_impact: 90,
           demographics: { age_groups: {}, regions: {}, interests: [] },
           affinities: [],
-          trending_score: 88
+          trending_score: Math.min(100, 70 + primatom.innovation / 2)
         }
       ],
       behavior_patterns: {
@@ -927,33 +919,33 @@ class QlooAPIService {
   private getAdvancedMockRecommendations(coalition: Coalition): QlooRecommendation[] {
     console.log(`🤝 Generating advanced mock recommendations for coalition ${coalition.name}`);
     return [{
-      entity: {
-        id: 'rec-adaptive-framework',
-        name: 'Adaptive Collaboration Framework',
-        type: 'brands',
-        popularity: 91,
-        sentiment: 88,
-        cultural_impact: 95,
-        demographics: { age_groups: {}, regions: {}, interests: [] },
-        affinities: [],
-        trending_score: 93
-      },
-      confidence: 0.94,
-      reasoning: `AI-optimized for coalition size ${coalition.members.length}`,
-      cultural_context: 'Next-generation collaborative intelligence paradigm',
-      predicted_adoption: 0.89,
-      strategic_value: {
-        coalition_strengthening_factor: 96,
-        network_effect_multiplier: 2.7,
-        competitive_advantage_score: 92,
-        market_timing_index: 94
-      },
-      behavioral_triggers: {
-        primary_motivator: 'Exponential collective growth through cultural alignment',
-        resistance_factors: ['Integration complexity', 'Cultural adaptation challenges'],
-        optimal_introduction_strategy: 'Pilot program with cultural validation'
-      }
-    }];
+        entity: {
+          id: `rec-${coalition.id}-${Date.now()}`,
+          name: `Stratégie Collaborative pour ${coalition.name}`,
+          type: 'brands',
+          popularity: Math.min(100, 70 + coalition.cohesion / 2),
+          sentiment: Math.min(100, 75 + coalition.cohesion / 4),
+          cultural_impact: Math.min(100, 80 + coalition.members.length),
+          demographics: { age_groups: {}, regions: {}, interests: [] },
+          affinities: [],
+          trending_score: Math.min(100, 85 + coalition.members.length / 2)
+        },
+        confidence: Math.min(0.99, 0.75 + coalition.cohesion / 400),
+        reasoning: `Optimisé pour une coalition de ${coalition.members.length} membres avec cohésion ${coalition.cohesion.toFixed(0)}%`,
+        cultural_context: 'Paradigme d\'intelligence collaborative nouvelle génération',
+        predicted_adoption: Math.min(0.95, 0.7 + coalition.cohesion / 300),
+        strategic_value: {
+          coalition_strengthening_factor: Math.min(100, 80 + coalition.cohesion / 5),
+          network_effect_multiplier: Math.min(3.0, 1.5 + coalition.members.length / 20),
+          competitive_advantage_score: Math.min(100, 75 + coalition.cohesion / 4),
+          market_timing_index: Math.min(100, 80 + coalition.members.length / 2)
+        },
+        behavioral_triggers: {
+          primary_motivator: 'Croissance collective exponentielle par alignement culturel',
+          resistance_factors: ['Complexité d\'intégration', 'Défis d\'adaptation culturelle'],
+          optimal_introduction_strategy: 'Programme pilote avec validation culturelle'
+        }
+      }];
   }
 
   // Méthodes d'analyse culturelle existantes (conservées)

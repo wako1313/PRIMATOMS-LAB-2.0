@@ -24,7 +24,8 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
 
   useEffect(() => {
     checkConnection();
-  }, []);
+    updateCulturalData();
+  }, [state.primatoms.length]);
 
   useEffect(() => {
     if (isRunning && isConnected) {
@@ -50,13 +51,14 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   const updateCulturalData = async () => {
     setIsLoading(true);
     try {
-      console.log("🔄 Fetching cultural data (simulation or real)");
+      console.log("🔄 Fetching cultural data for primatoms");
       const trends = await qlooService.getGlobalTrends();
       setTrendingData(trends);
 
       // Generate cultural profiles for selected Primatoms
       const profiles = new Map<string, QlooConsumerProfile>();
-      const samplePrimatoms = state.primatoms.slice(0, 10); // Limit to avoid API rate limits
+      // Use more primatoms to better reflect the population
+      const samplePrimatoms = state.primatoms.slice(0, Math.min(state.primatoms.length, 50));
       
       for (const primatom of samplePrimatoms) {
         try {
@@ -70,7 +72,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
 
       // Get recommendations for coalitions
       const recommendations = new Map<string, QlooRecommendation[]>();
-      for (const coalition of state.coalitions.slice(0, 5)) {
+      for (const coalition of state.coalitions) {
         try {
           const recs = await qlooService.getCoalitionRecommendations(coalition, state.primatoms);
           recommendations.set(coalition.id, recs);
@@ -91,8 +93,8 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   const getSentimentColor = (sentiment: number): string => {
     if (sentiment > 80) return 'text-emerald-400';
     if (sentiment > 70) return 'text-green-400';
-    if (sentiment > 50) return 'text-yellow-400';
-    if (sentiment > 30) return 'text-orange-400';
+    if (sentiment > 60) return 'text-yellow-400';
+    if (sentiment > 40) return 'text-orange-400';
     return 'text-red-400';
   };
 
