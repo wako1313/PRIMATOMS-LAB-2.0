@@ -16,10 +16,10 @@ const QlooConnectionTester: React.FC = () => {
   const testConnection = async () => {
     setIsTesting(true);
     setTestResults([
-      '🔍 Starting Qloo Hackathon API connection test (v2)...',
+      '🔍 Starting Qloo Hackathon API connection test...',
       `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`,
       '🏆 Hackathon Server: https://hackathon.api.qloo.com',
-      '📋 Using required parameters: filter.type=urn:entity:place, filter.location.query=New York',
+      '📋 Mode simulation activé pour le hackathon',
       '💡 Open DevTools → Console for detailed logs'
     ]);
     
@@ -29,34 +29,34 @@ const QlooConnectionTester: React.FC = () => {
       
       if (connected) {
         setTestResults(prev => [...prev, 
-          '✅ Qloo Hackathon API connection SUCCESSFUL!',
-          '🎯 Real-time cultural data now available',
-          '🔑 Paramètres requis: filter.type + filter.location.query'
+          '✅ Mode simulation activé avec succès',
+          '🎯 Données culturelles simulées disponibles',
+          '🔑 Simulation basée sur des patterns réels'
         ]);
         
         // Test des fonctionnalités principales
         try {
-          setTestResults(prev => [...prev, '📊 Testing cultural insights...']);
+          setTestResults(prev => [...prev, '📊 Génération de données culturelles simulées...']);
           const trends = await qlooService.getGlobalTrends();
-          setTestResults(prev => [...prev, `✅ Cultural trends: ${trends.trending_entities.length} entities loaded`]);
+          setTestResults(prev => [...prev, `✅ Tendances culturelles: ${trends.trending_entities.length} entités générées`]);
         } catch (error) {
-          setTestResults(prev => [...prev, '⚠️ Cultural insights using simulation mode']);
+          setTestResults(prev => [...prev, '⚠️ Erreur lors de la génération des données simulées']);
         }
         
       } else {
         setTestResults(prev => [...prev, 
-          '❌ Hackathon API connection failed',
-          '🔧 Using advanced simulation mode',
-          '📋 Check console for detailed error analysis',
-          '💡 Simulation provides realistic cultural data patterns'
+          '❌ Problème avec le mode simulation',
+          '🔧 Vérifiez la console pour plus de détails',
+          '📋 Tentative de récupération en cours',
+          '💡 Les données simulées seront utilisées si possible'
         ]);
       }
     } catch (error) {
       setIsConnected(false);
       setTestResults(prev => [...prev, 
-        `❌ Hackathon API connection failed: ${error}`,
-        '📋 See browser console for detailed diagnostics',
-        '🔧 Advanced simulation mode activated'
+        `❌ Erreur lors de l'activation du mode simulation: ${error}`,
+        '📋 Vérifiez la console pour plus de détails',
+        '🔧 Tentative de récupération en cours'
       ]);
     } finally {
       setIsTesting(false);
