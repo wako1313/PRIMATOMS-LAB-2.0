@@ -106,6 +106,14 @@ export interface SimulationState {
   influenceZones?: InfluenceZone[];
 }
 
+export interface BehaviorDistribution {
+  leader: number;
+  innovator: number;
+  mediator: number;
+  explorer: number;
+  follower: number;
+}
+
 export interface CognitiveDisruptionAnalysis {
   disruptionIntensity: number;
   adaptationPatterns: string[];
@@ -113,12 +121,4 @@ export interface CognitiveDisruptionAnalysis {
   resilientStrategies: string[];
   vulnerabilityPoints: string[];
   innovationCatalysts: string[];
-}
-
-export interface BehaviorDistribution {
-  leader: number;
-  innovator: number;
-  mediator: number;
-  explorer: number;
-  follower: number;
 }
