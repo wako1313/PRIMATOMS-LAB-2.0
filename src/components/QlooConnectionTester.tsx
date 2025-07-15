@@ -16,10 +16,10 @@ const QlooConnectionTester: React.FC = () => {
   const testConnection = async () => {
     setIsTesting(true);
     setTestResults([
-      '🔍 Starting comprehensive Qloo Hackathon API diagnostics...',
+      '🔍 Starting Qloo Hackathon API connection test...',
       `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`,
       '🏆 Hackathon Server: https://hackathon.api.qloo.com',
-      '📋 Testing multiple endpoints and auth methods...',
+      '📋 Using required parameters: filter.type=urn:entity:place, filter.location.query=New York',
       '💡 Open DevTools → Console for detailed logs'
     ]);
     
@@ -29,8 +29,9 @@ const QlooConnectionTester: React.FC = () => {
       
       if (connected) {
         setTestResults(prev => [...prev, 
-          '✅ Qloo Hackathon API connection successful!',
-          '🎯 Real-time cultural data now available'
+          '✅ Qloo Hackathon API connection SUCCESSFUL!',
+          '🎯 Real-time cultural data now available',
+          '🔑 Paramètres requis: filter.type + filter.location.query'
         ]);
         
         // Test des fonctionnalités principales
@@ -44,7 +45,7 @@ const QlooConnectionTester: React.FC = () => {
         
       } else {
         setTestResults(prev => [...prev, 
-          '❌ All Hackathon API endpoints failed',
+          '❌ Hackathon API connection failed',
           '🔧 Using advanced simulation mode',
           '📋 Check console for detailed error analysis',
           '💡 Simulation provides realistic cultural data patterns'

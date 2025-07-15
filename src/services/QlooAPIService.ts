@@ -594,8 +594,16 @@ class QlooAPIService {
       return cached.data;
     }
 
+    // Paramètres obligatoires pour l'API Qloo Hackathon
+    const requiredParams = {
+      'filter.type': 'urn:entity:place',
+      'filter.location.query': 'New York',
+      'limit': '5',
+      ...params
+    };
+    
     const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
+    Object.entries(requiredParams).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         queryParams.append(key, String(value));
       }
@@ -645,8 +653,6 @@ class QlooAPIService {
 
       // Utiliser l'endpoint officiel Insights API v2 pour les tendances
       const response = await this.makeQlooRequest('/v2/insights/', {
-        'filter.type': 'urn:entity:place',
-        'limit': '20',
         'filter.location.query': 'Global'
       });
 
@@ -669,9 +675,7 @@ class QlooAPIService {
       const behaviorEntity = this.mapBehaviorToEntity(primatom.behaviorType);
       
       const response = await this.makeQlooRequest('/v2/insights/', {
-        'signal.interests.entities': behaviorEntity,
-        'filter.type': 'urn:entity:person',
-        'limit': '10'
+        'signal.interests.entities': behaviorEntity
       });
 
       console.log('👤 Processing cultural profile:', response);
@@ -693,9 +697,7 @@ class QlooAPIService {
       const behaviorEntity = this.mapBehaviorToEntity(dominantBehavior);
 
       const response = await this.makeQlooRequest('/v2/insights/', {
-        'signal.interests.entities': behaviorEntity,
-        'filter.type': 'urn:entity:brand',
-        'limit': '5'
+        'signal.interests.entities': behaviorEntity
       });
 
       console.log('🤝 Processing coalition recommendations:', response);
