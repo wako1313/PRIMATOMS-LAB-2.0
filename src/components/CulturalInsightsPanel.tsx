@@ -1,4 +1,5 @@
-[cite_start]import React, { useState, useEffect } from 'react'; [cite: 1]
+import React from 'react';
+import { useState, useEffect } from 'react';
 import { SimulationState } from '../types';
 import { 
   Globe, TrendingUp, Users, Zap, Brain, Eye, Wifi, RefreshCw, BarChart3,
@@ -6,7 +7,7 @@ import {
   AlertTriangle, CheckCircle, Clock, DollarSign, Gauge, LineChart,
   ArrowUpRight, ArrowDownRight, Minus, Star, Crown, Gem, Flame, Cpu, Info,
   Atom, Circle, Search, Telescope
-[cite_start]} from 'lucide-react'; [cite: 2]
+} from 'lucide-react';
 
 interface CulturalInsightsPanelProps {
   [cite_start]state: SimulationState; [cite: 3]
