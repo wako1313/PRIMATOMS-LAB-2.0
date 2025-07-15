@@ -579,7 +579,7 @@
                 </span>
                 <span className="text-green-400">
                   ⚡ {trendingEntities.length} tendances suivies
-                </span>
+                 </span>
             </div>
           </div>
         </div>
