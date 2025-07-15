@@ -1,4 +1,5 @@
 const SIM_MODE = import.meta.env.VITE_SIMULATION === 'true';
+import { LLMProvider, SimulationData } from '../types';
 
 export interface LLMConfig {
   provider: 'openai' | 'gemini';
