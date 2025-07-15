@@ -272,7 +272,6 @@ const runCompleteAnalysis = async () => {
   }
 };
 
-
   const getFallbackSessionReport = (): string => {
     return `# RAPPORT DE SESSION - PRIMATOMS CULTURE ENGINE
 
