@@ -87,7 +87,9 @@ export class LLMOrchestrator {
   }
 
   async generateSessionReport(data: SimulationData, sessionMetrics: any): Promise<string> {
-    const prompt = this.buildSessionReportPrompt(data, sessionMetrics);
+    if (SIM_MODE) {
+      return this.getFallbackSessionReport(data, sessionMetrics);
+    }
     
     try {
       const response = await this.callLLM(prompt, 'report');
