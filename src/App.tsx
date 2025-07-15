@@ -15,6 +15,7 @@ import QuantumSocialAnalyzer from './components/QuantumSocialAnalyzer';
 import EmergentIntelligenceTracker from './components/EmergentIntelligenceTracker';
 import CognitiveResonanceMapper from './components/CognitiveResonanceMapper';
 import CulturalInsightsPanel from './components/CulturalInsightsPanel';
+import CultureEnginePanel from './components/CultureEnginePanel';
 import { Activity, BarChart3, User, Target, Brain, Zap, AlertTriangle, Users, Settings, Play, Pause, RotateCcw, Search, FileText, Cpu, Atom, Network, Waves, Globe } from 'lucide-react';
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
   const [poliSynthCore] = useState(() => new PoliSynthCore());
   const [state, setState] = useState<SimulationState>(engine.getState());
   const [selectedPrimatom, setSelectedPrimatom] = useState<Primatom | null>(null);
-  const [activeTab, setActiveTab] = useState<'simulation' | 'metrics' | 'details' | 'scenarios' | 'disruption' | 'population' | 'analytics' | 'ai-disruption' | 'quantum' | 'emergence' | 'resonance' | 'cultural'>('simulation');
+  const [activeTab, setActiveTab] = useState<'simulation' | 'metrics' | 'details' | 'scenarios' | 'disruption' | 'population' | 'analytics' | 'ai-disruption' | 'quantum' | 'emergence' | 'resonance' | 'cultural' | 'culture-engine'>('simulation');
   const [isIntelligentZoom, setIsIntelligentZoom] = useState(false);
 
   useEffect(() => {
@@ -97,6 +98,7 @@ function App() {
     { id: 'emergence', label: 'Intelligence Émergente', icon: <Network className="w-4 h-4" /> },
     { id: 'resonance', label: 'Résonance Cognitive', icon: <Waves className="w-4 h-4" /> },
     { id: 'cultural', label: 'Insights Culturels', icon: <Globe className="w-4 h-4" /> },
+    { id: 'culture-engine', label: 'Culture Engine', icon: <Brain className="w-4 h-4" /> },
     { id: 'details', label: 'Zoom Intelligent', icon: <Search className="w-4 h-4" /> },
     { id: 'analytics', label: 'Analytics Pro', icon: <FileText className="w-4 h-4" /> },
     { id: 'scenarios', label: 'Scénarios', icon: <Target className="w-4 h-4" /> },
@@ -304,6 +306,13 @@ function App() {
               />
             )}
 
+            {activeTab === 'culture-engine' && (
+              <CultureEnginePanel
+                state={state}
+                poliSynthCore={poliSynthCore}
+                isRunning={state.isRunning}
+              />
+            )}
             {activeTab === 'details' && (
               <IntelligentZoom
                 primatoms={state.primatoms}
