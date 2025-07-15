@@ -15,22 +15,22 @@ const QlooConnectionTester: React.FC = () => {
 
   const testConnection = async () => {
     setIsTesting(true);
-    setTestResults(['🔍 Testing Qloo API connection...']);
+    setTestResults(['🔍 Testing Qloo API v2 connection...']);
     
     try {
       const connected = await qlooService.testConnection();
       setIsConnected(connected);
       
       if (connected) {
-        setTestResults(prev => [...prev, '✅ Qloo API connected successfully!']);
+        setTestResults(prev => [...prev, '✅ Qloo API v2 connected successfully!']);
         
-        // Test des endpoints principaux
+        // Test de l'endpoint Insights API v2
         try {
-          setTestResults(prev => [...prev, '📊 Testing global trends...']);
+          setTestResults(prev => [...prev, '📊 Testing Insights API v2...']);
           const trends = await qlooService.getGlobalTrends();
-          setTestResults(prev => [...prev, `✅ Global trends: ${trends.trending_entities.length} entities loaded`]);
+          setTestResults(prev => [...prev, `✅ Insights API v2: ${trends.trending_entities.length} entities loaded`]);
         } catch (error) {
-          setTestResults(prev => [...prev, '⚠️ Global trends using simulation mode']);
+          setTestResults(prev => [...prev, '⚠️ Insights API using simulation mode']);
         }
         
       } else {
@@ -94,10 +94,12 @@ const QlooConnectionTester: React.FC = () => {
         <div className="bg-slate-700/50 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <Info className="w-5 h-5 text-blue-400" />
-            <span className="font-medium text-white">API Key</span>
+            <span className="font-medium text-white">API Configuration</span>
           </div>
-          <div className="text-sm text-gray-300">
-            {apiKey ? `${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}` : 'Not configured'}
+          <div className="text-xs text-gray-300 space-y-1">
+            <div>Key: {apiKey ? `${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}` : 'Not configured'}</div>
+            <div>Endpoint: https://api.qloo.com/v2/insights/</div>
+            <div>Method: GET with X-Api-Key header</div>
           </div>
         </div>
       </div>
@@ -116,8 +118,8 @@ const QlooConnectionTester: React.FC = () => {
       {!isConnected && (
         <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <p className="text-xs text-yellow-400">
-            ⚠️ Qloo API not connected. The system is using advanced simulation mode with realistic data patterns.
-            All analyses and insights are generated using sophisticated behavioral models.
+            ⚠️ Qloo API v2 not connected. Using advanced simulation mode with realistic data patterns.
+            Configure your API key in .env file: VITE_QLOO_API_KEY=your_key_here
           </p>
         </div>
       )}
@@ -125,8 +127,8 @@ const QlooConnectionTester: React.FC = () => {
       {isConnected && (
         <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
           <p className="text-xs text-green-400">
-            ✅ Qloo API connected! Real-time cultural data and insights are now available.
-            The system will use live data from 500M+ consumer profiles for maximum accuracy.
+            ✅ Qloo API v2 connected! Real-time cultural insights from Insights API are now available.
+            Using official endpoints with proper authentication and data transformation.
           </p>
         </div>
       )}
