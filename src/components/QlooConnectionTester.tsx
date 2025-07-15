@@ -11,34 +11,45 @@ const QlooConnectionTester: React.FC = () => {
   useEffect(() => {
     setApiKey(import.meta.env.VITE_QLOO_API_KEY || '');
     testConnection();
-  }, [apiKey]);
+  }, []);
 
   const testConnection = async () => {
     setIsTesting(true);
     setTestResults([
       '🔍 Starting Qloo Hackathon API connection test...',
       `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`,
-      '🏆 Hackathon Server: https://hackathon.api.qloo.com/v2/insights/',
+      '🏆 Hackathon Server: https://hackathon.api.qloo.com',
       '📋 Mode simulation activé pour le hackathon',
       '💡 Open DevTools → Console for detailed logs'
     ]);
     
     try {
-      // Force simulation mode
-      setIsConnected(false);
-      setTestResults(prev => [...prev, 
-        '✅ Mode simulation activé avec succès',
-        '🎯 Données culturelles simulées disponibles',
-        '🔑 Simulation basée sur des patterns réels'
-      ]);
+      const connected = await qlooService.testConnection();
+      setIsConnected(connected);
       
-      // Test des fonctionnalités principales
-      try {
-        setTestResults(prev => [...prev, '📊 Génération de données culturelles simulées...']);
-        const trends = await qlooService.getGlobalTrends();
-        setTestResults(prev => [...prev, `✅ Tendances culturelles: ${trends.trending_entities.length} entités générées`]);
-      } catch (error) {
-        setTestResults(prev => [...prev, '⚠️ Erreur lors de la génération des données simulées']);
+      if (connected) {
+        setTestResults(prev => [...prev, 
+          '✅ Mode simulation activé avec succès',
+          '🎯 Données culturelles simulées disponibles',
+          '🔑 Simulation basée sur des patterns réels'
+        ]);
+        
+        // Test des fonctionnalités principales
+        try {
+          setTestResults(prev => [...prev, '📊 Génération de données culturelles simulées...']);
+          const trends = await qlooService.getGlobalTrends();
+          setTestResults(prev => [...prev, `✅ Tendances culturelles: ${trends.trending_entities.length} entités générées`]);
+        } catch (error) {
+          setTestResults(prev => [...prev, '⚠️ Erreur lors de la génération des données simulées']);
+        }
+        
+      } else {
+        setTestResults(prev => [...prev, 
+          '❌ Problème avec le mode simulation',
+          '🔧 Vérifiez la console pour plus de détails',
+          '📋 Tentative de récupération en cours',
+          '💡 Les données simulées seront utilisées si possible'
+        ]);
       }
     } catch (error) {
       setIsConnected(false);
@@ -65,7 +76,7 @@ const QlooConnectionTester: React.FC = () => {
   const runSystematicDebugging = async () => {
     setTestResults(prev => [...prev, '🔬 Lancement du debugging systématique...']);
     setTestResults(prev => [...prev, '📋 Ouvrez la Console (F12) pour voir l\'analyse complète']);
-    setTestResults(prev => [...prev, '✅ Mode simulation déjà activé pour assurer la continuité']);
+    setTestResults(prev => [...prev, '⚠️ Activation du mode simulation avancé pour assurer la continuité']);
     try {
       await qlooService.systematicDebugging();
       setTestResults(prev => [...prev, '✅ Debugging systématique terminé - Voir console pour détails']);
@@ -76,18 +87,20 @@ const QlooConnectionTester: React.FC = () => {
 
   const getStatusColor = () => {
     if (isConnected === null) return 'text-gray-400';
-    return 'text-yellow-400'; // Toujours en mode simulation
+    return isConnected ? 'text-green-400' : 'text-yellow-400';
   };
 
   const getStatusIcon = () => {
     if (isTesting) return <RefreshCw className="w-5 h-5 animate-spin" />;
     if (isConnected === null) return <Info className="w-5 h-5" />;
+    if (isConnected) return <CheckCircle className="w-5 h-5" />;
     return <AlertTriangle className="w-5 h-5" />;
   };
 
   const getStatusText = () => {
     if (isTesting) return 'Testing...';
     if (isConnected === null) return 'Not tested';
+    if (isConnected) return 'Connected';
     return 'Simulation Mode';
   };
 
