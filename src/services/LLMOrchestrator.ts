@@ -1,4 +1,4 @@
-const SIM_MODE = import.meta.env.VITE_SIMULATION === 'true'; // Ou process.env selon ton bundler
+const SIM_MODE = import.meta.env.VITE_QLOO_API_KEY === 'true'; // Ou process.env selon ton bundler
 
 export interface LLMConfig {
   provider: 'openai' | 'gemini';
