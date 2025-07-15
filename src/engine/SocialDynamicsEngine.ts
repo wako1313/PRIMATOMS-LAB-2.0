@@ -1,34 +1,63 @@
-import { Primatom, Coalition, SocialMetric, SimulationState, DisruptiveEvent } from '../types';
+import { Primatom, Coalition, SocialMetric, SimulationState, DisruptiveEvent, BehaviorDistribution } from '../types';
 import { DisruptionEngine } from './DisruptionEngine';
 import { qlooService } from '../services/QlooAPIService';
+import { LLMOrchestrator } from '../services/LLMOrchestrator';
+
+// Interfaces étendues pour les métriques avancées
+interface AdvancedMetrics extends SocialMetric {
+  // Métriques d'intelligence collective
+  collectiveIntelligence: number;
+  emergenceIndex: number;
+  culturalVelocity: number;
+  socialCoherence: number;
+  
+  // Métriques prédictives
+  stabilityTrend: 'rising' | 'stable' | 'declining' | 'volatile';
+  coalitionFormationRate: number;
+  innovationMomentum: number;
+  adaptabilityScore: number;
+  
+  // Métriques de réseau
+  networkDensity: number;
+  influenceDistribution: number;
+  communicationEfficiency: number;
+  trustPropagation: number;
+  
+  // Métriques émergentes
+  culturalSynchronization: number;
+  behavioralComplexity: number;
+  systemResilience: number;
+  evolutionaryPressure: number;
+}
 
 export class SocialDynamicsEngine {
   private state: SimulationState;
   private updateInterval: number | null = null;
   private disruptionEngine: DisruptionEngine;
+  private llmOrchestrator: LLMOrchestrator;
   private populationSize: number = 200;
   private movementSpeed: number = 0.3;
-  private territoryInfluence: Map<string, { x: number, y: number, radius: number }> = new Map();
-  private metricsHistory: SocialMetric[] = [];
+  private metricsHistory: AdvancedMetrics[] = [];
+  private behaviorDistribution: BehaviorDistribution;
 
   constructor() {
     this.disruptionEngine = new DisruptionEngine();
-    this.state = this.initializeState();
-  }
-
-  private initializeState(): SimulationState {
-    const primatoms: Primatom[] = [];
-    
-    const behaviorDistribution = {
+    this.llmOrchestrator = new LLMOrchestrator();
+    this.behaviorDistribution = {
       leader: 0.08,
       innovator: 0.15,
       mediator: 0.12,
       explorer: 0.20,
       follower: 0.45
     };
+    this.state = this.initializeState();
+  }
 
+  private initializeState(): SimulationState {
+    const primatoms: Primatom[] = [];
+    
     let currentId = 0;
-    Object.entries(behaviorDistribution).forEach(([behaviorType, ratio]) => {
+    Object.entries(this.behaviorDistribution).forEach(([behaviorType, ratio]) => {
       const count = Math.floor(this.populationSize * ratio);
       
       for (let i = 0; i < count; i++) {
@@ -195,7 +224,7 @@ export class SocialDynamicsEngine {
     this.updateBehaviors();
     
     if (Date.now() % 1000 < 100) {
-      this.updateMetrics();
+      this.updateAdvancedMetrics();
       this.processGovernance();
       this.detectEmergentPhenomena();
       this.updateSystemStability();
@@ -346,17 +375,20 @@ export class SocialDynamicsEngine {
     return colors[index % colors.length];
   }
 
-  setBehaviorDistribution(distribution: Record<string, number>) {
+  setBehaviorDistribution(distribution: BehaviorDistribution) {
     // Normaliser la distribution pour qu'elle totalise 1
     const total = Object.values(distribution).reduce((sum, val) => sum + val, 0);
-    let normalizedDistribution: Record<string, number> = {};
+    let normalizedDistribution: BehaviorDistribution;
     
     if (total > 0) {
-      Object.entries(distribution).forEach(([key, value]) => {
-        normalizedDistribution[key] = value / total;
-      });
+      normalizedDistribution = {
+        leader: distribution.leader / total,
+        innovator: distribution.innovator / total,
+        mediator: distribution.mediator / total,
+        explorer: distribution.explorer / total,
+        follower: distribution.follower / total
+      };
     } else {
-      // Distribution par défaut si total = 0
       normalizedDistribution = {
         leader: 0.08,
         innovator: 0.15,
@@ -366,16 +398,14 @@ export class SocialDynamicsEngine {
       };
     }
     
+    this.behaviorDistribution = normalizedDistribution;
     this.stop();
-    
-    // Recalculer la distribution
-    const behaviorDistribution = normalizedDistribution;
     
     // Régénérer les Primatoms avec la nouvelle distribution
     const primatoms: Primatom[] = [];
     let currentId = 0;
     
-    Object.entries(behaviorDistribution).forEach(([behaviorType, ratio]) => {
+    Object.entries(normalizedDistribution).forEach(([behaviorType, ratio]) => {
       const count = Math.floor(this.populationSize * ratio);
       
       for (let i = 0; i < count; i++) {
@@ -598,7 +628,7 @@ export class SocialDynamicsEngine {
     }
   }
 
-  private updateMetrics() {
+  private updateAdvancedMetrics() {
     const avgTrust = this.state.primatoms.reduce((sum, p) => sum + p.trust, 0) / this.state.primatoms.length;
     const avgCooperation = this.state.primatoms.reduce((sum, p) => sum + p.cooperation, 0) / this.state.primatoms.length;
     const avgInnovation = this.state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / this.state.primatoms.length;
@@ -610,7 +640,15 @@ export class SocialDynamicsEngine {
     const disruptionLevel = this.calculateDisruptionLevel();
     const emergentBehaviors = this.countEmergentBehaviors();
 
-    const newMetric: SocialMetric = {
+    // Calculs des métriques avancées
+    const collectiveIntelligence = this.calculateCollectiveIntelligence();
+    const emergenceIndex = this.calculateEmergenceIndex();
+    const culturalVelocity = this.calculateCulturalVelocity();
+    const socialCoherence = this.calculateSocialCoherence();
+    const stabilityTrend = this.calculateStabilityTrend();
+    const networkDensity = this.calculateNetworkDensity();
+
+    const newMetric: AdvancedMetrics = {
       timestamp: Date.now(),
       trustNetwork: avgTrust,
       cooperation: avgCooperation,
@@ -618,216 +656,4 @@ export class SocialDynamicsEngine {
       governance: coalitionStrength,
       resilience: resilience,
       culturalStability: culturalStability,
-      disruptionLevel: disruptionLevel,
-      emergentBehaviors: emergentBehaviors
-    };
-
-    this.state.metrics.push(newMetric);
-    this.metricsHistory.push(newMetric);
-    
-    if (this.state.metrics.length > 200) {
-      this.state.metrics.shift();
-    }
-  }
-
-  private processGovernance() {
-    const leaders = this.state.primatoms.filter(p => p.behaviorType === 'leader');
-    const strongCoalitions = this.state.coalitions.filter(c => c.cohesion > 75);
-    
-    const adaptiveNormProbability = this.state.activeDisruptions?.length > 0 ? 0.08 : 0.03;
-    
-    if (strongCoalitions.length > 0 && Math.random() < adaptiveNormProbability) {
-      const newKnowledge = `Norme-Adaptative-${Date.now()}-${Math.random()}`;
-      this.state.globalKnowledge.push(newKnowledge);
-      
-      strongCoalitions.forEach(coalition => {
-        const members = this.state.primatoms.filter(p => p.coalition === coalition.id);
-        members.forEach(member => {
-          if (Math.random() < 0.6) {
-            member.culturalNorms.push(newKnowledge);
-          }
-        });
-      });
-    }
-  }
-
-  private detectEmergentPhenomena() {
-    const phenomena: string[] = [];
-    
-    const avgInnovation = this.state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / this.state.primatoms.length;
-    if (avgInnovation > 85) {
-      phenomena.push('Renaissance Cognitive Collective');
-    }
-    
-    const avgCooperation = this.state.primatoms.reduce((sum, p) => sum + p.cooperation, 0) / this.state.primatoms.length;
-    if (avgCooperation > 90 && this.state.activeDisruptions?.length > 0) {
-      phenomena.push('Solidarité de Crise Transcendante');
-    }
-    
-    const megaCoalitions = this.state.coalitions.filter(c => c.members.length > 15);
-    if (megaCoalitions.length > 1) {
-      phenomena.push('Émergence de Super-Structures Sociales');
-    }
-    
-    const territorialOverlap = this.calculateTerritorialOverlap();
-    if (territorialOverlap > 0.3) {
-      phenomena.push('Fusion Territoriale Multi-Coalitions');
-    }
-    
-    this.state.emergentPhenomena = phenomena;
-  }
-
-  private calculateTerritorialOverlap(): number {
-    if (this.state.influenceZones.length < 2) return 0;
-    
-    let overlapCount = 0;
-    let totalPairs = 0;
-    
-    for (let i = 0; i < this.state.influenceZones.length; i++) {
-      for (let j = i + 1; j < this.state.influenceZones.length; j++) {
-        const zone1 = this.state.influenceZones[i];
-        const zone2 = this.state.influenceZones[j];
-        
-        const distance = Math.sqrt(Math.pow(zone1.x - zone2.x, 2) + Math.pow(zone1.y - zone2.y, 2));
-        const combinedRadius = zone1.radius + zone2.radius;
-        
-        if (distance < combinedRadius) {
-          overlapCount++;
-        }
-        totalPairs++;
-      }
-    }
-    
-    return totalPairs > 0 ? overlapCount / totalPairs : 0;
-  }
-
-  private updateSystemStability() {
-    const avgTrust = this.state.primatoms.reduce((sum, p) => sum + p.trust, 0) / this.state.primatoms.length;
-    const avgStress = this.state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / this.state.primatoms.length;
-    const coalitionStability = this.state.coalitions.reduce((sum, c) => sum + c.cohesion, 0) / Math.max(1, this.state.coalitions.length);
-    
-    const disruptionImpact = this.state.activeDisruptions?.reduce((sum, d) => sum + d.intensity, 0) || 0;
-    const territorialStability = 100 - (this.calculateTerritorialOverlap() * 100);
-    
-    this.state.systemStability = Math.max(0, Math.min(100, 
-      (avgTrust * 0.3 + coalitionStability * 0.3 + territorialStability * 0.2 + (100 - avgStress) * 0.2) - disruptionImpact * 0.2
-    ));
-  }
-
-  private processGenerationalEvolution() {
-    this.state.generation++;
-    
-    this.state.primatoms.forEach(primatom => {
-      if (primatom.memories.length > 8) {
-        primatom.adaptabilityScore = Math.min(100, (primatom.adaptabilityScore || 50) + 1.5);
-      }
-    });
-  }
-
-  private calculateDisruptionLevel(): number {
-    if (!this.state.activeDisruptions || this.state.activeDisruptions.length === 0) return 0;
-    
-    return this.state.activeDisruptions.reduce((sum, d) => sum + d.intensity, 0) / this.state.activeDisruptions.length;
-  }
-
-  private countEmergentBehaviors(): number {
-    return this.state.emergentPhenomena?.length || 0;
-  }
-
-  private generateAdaptationStrategies(): string[] {
-    const strategies = [
-      'Redistribution Équitable des Ressources',
-      'Formation de Sous-Groupes Spécialisés',
-      'Développement de Compétences Hybrides',
-      'Renforcement des Liens Inter-Coalitions',
-      'Innovation Collaborative Accélérée',
-      'Médiation Préventive Systémique',
-      'Exploration Territoriale Coordonnée',
-      'Partage de Connaissances Transgénérationnel'
-    ];
-    
-    return strategies.sort(() => Math.random() - 0.5).slice(0, 3 + Math.floor(Math.random() * 2));
-  }
-
-  private determineCrisisResponse(): 'cooperative' | 'competitive' | 'isolationist' {
-    const responses: ('cooperative' | 'competitive' | 'isolationist')[] = ['cooperative', 'competitive', 'isolationist'];
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
-
-  private calculateCulturalStability(): number {
-    const totalNorms = this.state.primatoms.reduce((sum, p) => sum + p.culturalNorms.length, 0);
-    const avgNormsPerPrimatom = totalNorms / this.state.primatoms.length;
-    return Math.min(100, avgNormsPerPrimatom * 8);
-  }
-
-  private calculateResilience(): number {
-    const avgEnergy = this.state.primatoms.reduce((sum, p) => sum + p.energy, 0) / this.state.primatoms.length;
-    const coalitionCoverage = this.state.primatoms.filter(p => p.coalition).length / this.state.primatoms.length;
-    const adaptabilityFactor = this.state.primatoms.reduce((sum, p) => sum + (p.adaptabilityScore || 50), 0) / this.state.primatoms.length;
-    
-    return (avgEnergy + coalitionCoverage * 100 + adaptabilityFactor) / 3;
-  }
-
-  private generateCoalitionGoals(): string[] {
-    const possibleGoals = [
-      "Optimisation Collective des Ressources",
-      "Innovation Technologique Disruptive",
-      "Stabilité Sociale Durable",
-      "Exploration Territoriale Stratégique",
-      "Renforcement des Liens Inter-Communautaires",
-      "Résolution Pacifique des Conflits",
-      "Préservation Culturelle Adaptative",
-      "Résilience Face aux Crises Systémiques",
-      "Collaboration Inter-Coalitions",
-      "Développement Durable Intégré"
-    ];
-    
-    return possibleGoals
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3 + Math.floor(Math.random() * 2));
-  }
-
-  getState(): SimulationState {
-    return { ...this.state };
-  }
-
-  resetSimulation() {
-    this.stop();
-    this.disruptionEngine = new DisruptionEngine();
-    this.state = this.initializeState();
-    this.metricsHistory = [];
-  }
-
-  injectDisruptiveEvent(eventConfig: Partial<DisruptiveEvent>): DisruptiveEvent {
-    return this.disruptionEngine.injectCustomEvent(eventConfig);
-  }
-
-  predictDisruptionImpact(eventConfig: Partial<DisruptiveEvent>) {
-    const event = this.disruptionEngine.injectCustomEvent(eventConfig);
-    return this.disruptionEngine.predictEventImpact(event, this.state);
-  }
-
-  getDisruptionEngine(): DisruptionEngine {
-    return this.disruptionEngine;
-  }
-
-  getPopulationSize(): number {
-    return this.populationSize;
-  }
-
-  getCurrentBehaviorDistribution(): Record<string, number> {
-    const distribution: Record<string, number> = {};
-    const total = this.state.primatoms.length;
-    
-    ['leader', 'innovator', 'mediator', 'explorer', 'follower'].forEach(type => {
-      const count = this.state.primatoms.filter(p => p.behaviorType === type).length;
-      distribution[type] = count / total;
-    });
-    
-    return distribution;
-  }
-
-  getMetricsHistory(): SocialMetric[] {
-    return [...this.metricsHistory];
-  }
-}
+      disruptionLevel
