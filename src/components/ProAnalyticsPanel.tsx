@@ -184,7 +184,7 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
 
   // Effet principal pour l'analyse en temps réel
   useEffect(() => {
-    if (autoRefresh && socialEngine) {
+    if (autoRefresh) {
       analysisInterval.current = setInterval(() => {
         performLiveAnalysis();
       }, refreshInterval);
@@ -193,11 +193,11 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
         if (analysisInterval.current) clearInterval(analysisInterval.current);
       };
     }
-  }, [autoRefresh, refreshInterval, socialEngine, analysisDepth]);
+  }, [autoRefresh, refreshInterval, analysisDepth]);
 
   // Effet pour les prédictions IA
   useEffect(() => {
-    if (aiAnalysisEnabled && socialEngine) {
+    if (aiAnalysisEnabled) {
       predictionInterval.current = setInterval(() => {
         generateLivePredictions();
       }, refreshInterval * 3); // Prédictions moins fréquentes
@@ -206,15 +206,29 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
         if (predictionInterval.current) clearInterval(predictionInterval.current);
       };
     }
-  }, [aiAnalysisEnabled, socialEngine, refreshInterval, predictiveMode]);
+  }, [aiAnalysisEnabled, refreshInterval, predictiveMode]);
 
-  // Analyse initiale
+  // Analyse initiale - DÉCLENCHEMENT FORCÉ
   useEffect(() => {
-    if (socialEngine && state.primatoms.length > 0) {
+    if (state.primatoms.length > 0) {
+      // Démarrer immédiatement l'analyse
+      setTimeout(() => {
+        performLiveAnalysis();
+      }, 500);
+      
+      setTimeout(() => {
+        generateLivePredictions();
+      }, 1000);
+    }
+  }, [state.primatoms.length]);
+
+  // DÉCLENCHEMENT FORCÉ quand l'état change
+  useEffect(() => {
+    if (state.primatoms.length > 0 && (state.coalitions.length > 0 || state.generation > 1)) {
       performLiveAnalysis();
       generateLivePredictions();
     }
-  }, [socialEngine, state.primatoms.length]);
+  }, [state.coalitions.length, state.generation, state.activeDisruptions?.length]);
 
   // Analyse en temps réel avec ou sans SocialDynamicsEngine
   const performLiveAnalysis = async () => {
@@ -300,103 +314,156 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
     const events: RealTimeEvent[] = [];
     const currentTime = Date.now();
     
-    // Événements de formation de coalitions
-    const recentCoalitions = state.coalitions.filter(c => 
-      currentTime - c.created < refreshInterval * 2
-    );
+    // FORCER la génération d'événements même s'il ne se passe "rien"
     
-    recentCoalitions.forEach(coalition => {
-      const members = state.primatoms.filter(p => p.coalition === coalition.id);
-      const event: RealTimeEvent = {
-        id: `coalition-${coalition.id}-${currentTime}`,
-        timestamp: currentTime,
-        type: 'coalition_formation',
-        severity: coalition.members.length > 10 ? 'high' : coalition.members.length > 5 ? 'medium' : 'low',
-        title: `Formation: ${coalition.name}`,
-        description: `Nouvelle coalition "${coalition.name}" formée avec ${coalition.members.length} membres (cohésion: ${coalition.cohesion.toFixed(1)}%)`,
-        affectedPrimatoms: coalition.members,
-        metrics: {
-          cohesion: coalition.cohesion,
-          memberCount: coalition.members.length,
-          avgTrust: members.reduce((sum, p) => sum + p.trust, 0) / members.length,
-          territorySize: calculateCoalitionTerritory(coalition)
-        },
-        predictedImpact: {
-          shortTerm: `Stabilisation locale dans un rayon de ${Math.round(Math.sqrt(coalition.members.length) * 20)}px`,
-          mediumTerm: `Influence sur ${Math.round(coalition.members.length * 1.5)} Primatoms voisins`,
-          longTerm: coalition.cohesion > 80 ? 'Formation possible de méga-structure' : 'Évolution vers spécialisation'
-        },
-        recommendations: generateCoalitionRecommendations(coalition),
-        aiConfidence: 85 + Math.random() * 12,
-        emergenceIndex: calculateEventEmergence('coalition_formation', coalition.members.length),
-        culturalImpact: coalition.cohesion * 0.8,
-        networkEffect: calculateNetworkEffect(coalition.members),
-        predictiveAccuracy: 78 + Math.random() * 15,
-        strategicImportance: coalition.members.length > 15 ? 'critical' : 
-                           coalition.members.length > 10 ? 'high' : 
-                           coalition.members.length > 5 ? 'medium' : 'low',
-        interconnections: findCoalitionInterconnections(coalition.id),
-        futureProjections: generateCoalitionProjections(coalition)
-      };
-      events.push(event);
-    });
-
-    // Événements d'innovation
-    const innovators = state.primatoms.filter(p => p.innovation > 85 && p.behaviorType === 'innovator');
-    if (innovators.length > 0 && Math.random() < 0.3) {
-      const innovator = innovators[Math.floor(Math.random() * innovators.length)];
-      const nearbyPrimatoms = state.primatoms.filter(p => 
-        distance(innovator, p) < 80 && p.id !== innovator.id
-      );
-      
-      const event: RealTimeEvent = {
-        id: `innovation-${innovator.id}-${currentTime}`,
-        timestamp: currentTime,
-        type: 'innovation_emergence',
-        severity: innovator.innovation > 95 ? 'critical' : 'high',
-        title: `Percée Innovation: ${innovator.name}`,
-        description: `${innovator.name} génère une innovation majeure (niveau ${innovator.innovation.toFixed(1)}) influençant ${nearbyPrimatoms.length} Primatoms`,
-        affectedPrimatoms: [innovator.id, ...nearbyPrimatoms.slice(0, 8).map(p => p.id)],
-        metrics: {
-          innovationLevel: innovator.innovation,
-          radiusInfluence: 80,
-          affectedCount: nearbyPrimatoms.length,
-          propagationSpeed: innovator.energy * 0.1
-        },
-        predictedImpact: {
-          shortTerm: `Boost d'innovation de +${Math.round(innovator.innovation * 0.1)} pour les Primatoms proches`,
-          mediumTerm: `Propagation vers ${Math.round(nearbyPrimatoms.length * 1.5)} autres Primatoms`,
-          longTerm: 'Catalyseur potentiel de Renaissance Cognitive'
-        },
-        recommendations: [
-          'Faciliter la diffusion de l\'innovation',
-          'Créer des canaux de communication optimisés',
-          'Surveiller l\'adoption par les coalitions voisines'
-        ],
-        aiConfidence: 92,
-        emergenceIndex: innovator.innovation,
-        culturalImpact: innovator.innovation * 0.7,
-        networkEffect: nearbyPrimatoms.length * 2,
-        predictiveAccuracy: 85,
-        strategicImportance: 'critical',
-        interconnections: nearbyPrimatoms.slice(0, 3).map(p => p.id),
-        futureProjections: [
-          { probability: 85, timeframe: '2-5 minutes', impact: 'Adoption par Primatoms voisins' },
-          { probability: 65, timeframe: '5-10 minutes', impact: 'Intégration dans coalitions' },
-          { probability: 40, timeframe: '10-20 minutes', impact: 'Émergence de nouveaux patterns' }
-        ]
-      };
-      events.push(event);
+    // Événements de formation de coalitions - TOUJOURS générer si coalitions existent
+    if (state.coalitions.length > 0) {
+      state.coalitions.forEach(coalition => {
+        // Probabilité élevée de générer un événement pour chaque coalition
+        if (Math.random() < 0.6) {
+          const members = state.primatoms.filter(p => p.coalition === coalition.id);
+          const event: RealTimeEvent = {
+            id: `coalition-${coalition.id}-${currentTime}-${Math.random()}`,
+            timestamp: currentTime,
+            type: 'coalition_formation',
+            severity: coalition.members.length > 10 ? 'high' : coalition.members.length > 5 ? 'medium' : 'low',
+            title: `Activité Coalition: ${coalition.name}`,
+            description: `Coalition "${coalition.name}" maintient sa cohésion avec ${coalition.members.length} membres actifs (${coalition.cohesion.toFixed(1)}% de cohésion)`,
+            affectedPrimatoms: coalition.members.slice(0, 8),
+            metrics: {
+              cohesion: coalition.cohesion,
+              memberCount: coalition.members.length,
+              avgTrust: members.reduce((sum, p) => sum + p.trust, 0) / members.length,
+              territorySize: calculateCoalitionTerritory(coalition)
+            },
+            predictedImpact: {
+              shortTerm: `Stabilisation locale de ${coalition.members.length} Primatoms`,
+              mediumTerm: `Influence sur ${Math.round(coalition.members.length * 1.5)} Primatoms voisins`,
+              longTerm: coalition.cohesion > 80 ? 'Formation possible de méga-structure' : 'Évolution vers spécialisation'
+            },
+            recommendations: generateCoalitionRecommendations(coalition),
+            aiConfidence: 85 + Math.random() * 12,
+            emergenceIndex: calculateEventEmergence('coalition_formation', coalition.members.length),
+            culturalImpact: coalition.cohesion * 0.8,
+            networkEffect: calculateNetworkEffect(coalition.members),
+            predictiveAccuracy: 78 + Math.random() * 15,
+            strategicImportance: coalition.members.length > 15 ? 'critical' : 
+                               coalition.members.length > 10 ? 'high' : 
+                               coalition.members.length > 5 ? 'medium' : 'low',
+            interconnections: findCoalitionInterconnections(coalition.id),
+            futureProjections: generateCoalitionProjections(coalition)
+          };
+          events.push(event);
+        }
+      });
     }
 
-    // Événements de disruption
+    // Événements d'innovation - FORCER pour les innovateurs actifs
+    const innovators = state.primatoms.filter(p => p.innovation > 70);
+    innovators.forEach(innovator => {
+      if (Math.random() < 0.4) { // 40% de chance par innovateur
+        const nearbyPrimatoms = state.primatoms.filter(p => 
+          distance(innovator, p) < 80 && p.id !== innovator.id
+        );
+        
+        const event: RealTimeEvent = {
+          id: `innovation-${innovator.id}-${currentTime}-${Math.random()}`,
+          timestamp: currentTime,
+          type: 'innovation_emergence',
+          severity: innovator.innovation > 95 ? 'critical' : innovator.innovation > 85 ? 'high' : 'medium',
+          title: `Innovation Active: ${innovator.name}`,
+          description: `${innovator.name} démontre une activité créative élevée (innovation ${innovator.innovation.toFixed(1)}%) avec ${nearbyPrimatoms.length} Primatoms dans la zone d'influence`,
+          affectedPrimatoms: [innovator.id, ...nearbyPrimatoms.slice(0, 8).map(p => p.id)],
+          metrics: {
+            innovationLevel: innovator.innovation,
+            radiusInfluence: 80,
+            affectedCount: nearbyPrimatoms.length,
+            propagationSpeed: innovator.energy * 0.1
+          },
+          predictedImpact: {
+            shortTerm: `Boost d'innovation de +${Math.round(innovator.innovation * 0.1)} pour les Primatoms proches`,
+            mediumTerm: `Propagation vers ${Math.round(nearbyPrimatoms.length * 1.5)} autres Primatoms`,
+            longTerm: innovator.innovation > 90 ? 'Catalyseur potentiel de Renaissance Cognitive' : 'Contribution à l\'innovation collective'
+          },
+          recommendations: [
+            'Faciliter la diffusion de l\'innovation',
+            'Créer des canaux de communication optimisés',
+            'Surveiller l\'adoption par les coalitions voisines'
+          ],
+          aiConfidence: 92,
+          emergenceIndex: innovator.innovation,
+          culturalImpact: innovator.innovation * 0.7,
+          networkEffect: nearbyPrimatoms.length * 2,
+          predictiveAccuracy: 85,
+          strategicImportance: innovator.innovation > 90 ? 'critical' : 'high',
+          interconnections: nearbyPrimatoms.slice(0, 3).map(p => p.id),
+          futureProjections: [
+            { probability: 85, timeframe: '2-5 minutes', impact: 'Adoption par Primatoms voisins' },
+            { probability: 65, timeframe: '5-10 minutes', impact: 'Intégration dans coalitions' },
+            { probability: 40, timeframe: '10-20 minutes', impact: 'Émergence de nouveaux patterns' }
+          ]
+        };
+        events.push(event);
+      }
+    });
+
+    // Événements comportementaux - FORCER selon les types de Primatoms
+    const leaders = state.primatoms.filter(p => p.behaviorType === 'leader');
+    const mediators = state.primatoms.filter(p => p.behaviorType === 'mediator');
+    
+    if (leaders.length > 0 && Math.random() < 0.3) {
+      const leader = leaders[Math.floor(Math.random() * leaders.length)];
+      const followers = state.primatoms.filter(p => 
+        p.behaviorType === 'follower' && distance(leader, p) < 100
+      );
+      
+      if (followers.length > 0) {
+        events.push({
+          id: `leadership-${leader.id}-${currentTime}`,
+          timestamp: currentTime,
+          type: 'behavior_shift',
+          severity: followers.length > 8 ? 'high' : 'medium',
+          title: `Leadership Actif: ${leader.name}`,
+          description: `${leader.name} exerce une influence de leadership sur ${followers.length} Followers dans un rayon de 100px`,
+          affectedPrimatoms: [leader.id, ...followers.slice(0, 6).map(p => p.id)],
+          metrics: {
+            leadershipStrength: leader.influence || 70,
+            followersCount: followers.length,
+            avgTrust: followers.reduce((sum, p) => sum + p.trust, 0) / followers.length
+          },
+          predictedImpact: {
+            shortTerm: `Coordination de ${followers.length} Followers`,
+            mediumTerm: 'Possible formation de nouvelle coalition',
+            longTerm: 'Structuration hiérarchique du groupe'
+          },
+          recommendations: [
+            'Surveiller la formation de nouvelles alliances',
+            'Faciliter la communication leader-followers',
+            'Équilibrer l\'influence entre leaders'
+          ],
+          aiConfidence: 88,
+          emergenceIndex: (leader.influence || 70) + followers.length * 5,
+          culturalImpact: 75,
+          networkEffect: followers.length * 3,
+          predictiveAccuracy: 80,
+          strategicImportance: followers.length > 10 ? 'high' : 'medium',
+          interconnections: [],
+          futureProjections: [
+            { probability: 75, timeframe: '3-8 minutes', impact: 'Formation de structure hiérarchique' },
+            { probability: 55, timeframe: '8-15 minutes', impact: 'Possible création de coalition' }
+          ]
+        });
+      }
+    }
+
+    // Événements de disruption - SI des disruptions sont actives
     if (state.activeDisruptions && state.activeDisruptions.length > 0) {
       state.activeDisruptions.forEach(disruption => {
         const affectedPrimatoms = state.primatoms.filter(p => 
-          p.stressLevel && p.stressLevel > 60
+          p.stressLevel && p.stressLevel > 40
         ).slice(0, 12);
         
-        if (affectedPrimatoms.length > 3) {
+        if (affectedPrimatoms.length > 0) {
           const event: RealTimeEvent = {
             id: `disruption-${disruption.id}-${currentTime}`,
             timestamp: currentTime,
@@ -404,8 +471,8 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
             severity: disruption.intensity > 80 ? 'critical' : 
                      disruption.intensity > 60 ? 'high' : 
                      disruption.intensity > 40 ? 'medium' : 'low',
-            title: `Disruption Active: ${disruption.type}`,
-            description: `Disruption "${disruption.type}" (intensité ${disruption.intensity.toFixed(1)}) affecte ${affectedPrimatoms.length} Primatoms`,
+            title: `Impact Disruption: ${disruption.type}`,
+            description: `Disruption "${disruption.type}" (intensité ${disruption.intensity.toFixed(1)}) continue d'affecter ${affectedPrimatoms.length} Primatoms avec stress élevé`,
             affectedPrimatoms: affectedPrimatoms.map(p => p.id),
             metrics: {
               intensity: disruption.intensity,
@@ -414,14 +481,14 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
               adaptationRate: affectedPrimatoms.reduce((sum, p) => sum + (p.adaptabilityScore || 50), 0) / affectedPrimatoms.length
             },
             predictedImpact: {
-              shortTerm: `Augmentation du stress de ${Math.round(disruption.intensity * 0.3)}% pour les Primatoms affectés`,
-              mediumTerm: `Possible formation de ${Math.ceil(affectedPrimatoms.length / 8)} coalitions défensives`,
-              longTerm: 'Renforcement de la résilience systémique ou fragmentation'
+              shortTerm: `Maintien du stress à ${Math.round(disruption.intensity * 0.3)}% pour les Primatoms affectés`,
+              mediumTerm: `Adaptation progressive ou formation de ${Math.ceil(affectedPrimatoms.length / 8)} coalitions défensives`,
+              longTerm: 'Renforcement de la résilience systémique ou risque de fragmentation'
             },
             recommendations: [
-              'Activer protocoles de résilience',
-              'Faciliter formation coalitions de soutien',
-              'Surveiller propagation du stress'
+              'Surveiller l\'évolution du stress',
+              'Faciliter les mécanismes d\'adaptation',
+              'Renforcer les structures de soutien'
             ],
             aiConfidence: 88,
             emergenceIndex: disruption.intensity * 0.6,
@@ -431,9 +498,9 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
             strategicImportance: disruption.intensity > 70 ? 'critical' : 'high',
             interconnections: affectedPrimatoms.slice(0, 4).map(p => p.id),
             futureProjections: [
-              { probability: 75, timeframe: '1-3 minutes', impact: 'Propagation du stress' },
-              { probability: 55, timeframe: '5-8 minutes', impact: 'Réponses adaptatives' },
-              { probability: 35, timeframe: '10-15 minutes', impact: 'Stabilisation ou escalade' }
+              { probability: 70, timeframe: '1-3 minutes', impact: 'Continuation des effets de stress' },
+              { probability: 50, timeframe: '5-8 minutes', impact: 'Émergence de réponses adaptatives' },
+              { probability: 30, timeframe: '10-15 minutes', impact: 'Stabilisation ou escalade' }
             ]
           };
           events.push(event);
@@ -441,45 +508,48 @@ const ProAnalyticsPanel: React.FC<ProAnalyticsPanelProps> = ({
       });
     }
 
-    // Événements culturels basés sur l'évolution
-    if (state.emergentPhenomena && state.emergentPhenomena.length > 0) {
-      state.emergentPhenomena.forEach(phenomenon => {
-        const event: RealTimeEvent = {
-          id: `culture-${phenomenon.replace(/\s+/g, '-')}-${currentTime}`,
-          timestamp: currentTime,
-          type: 'cultural_evolution',
-          severity: 'medium',
-          title: `Phénomène Émergent: ${phenomenon}`,
-          description: `Détection du phénomène émergent: "${phenomenon}"`,
-          affectedPrimatoms: state.primatoms.slice(0, Math.floor(state.primatoms.length * 0.3)).map(p => p.id),
-          metrics: {
-            emergenceLevel: 75 + Math.random() * 20,
-            culturalSynchronization: calculateCulturalSync(),
-            populationCoverage: 0.3
-          },
-          predictedImpact: {
-            shortTerm: 'Synchronisation culturelle accrue',
-            mediumTerm: 'Émergence de nouvelles normes collectives',
-            longTerm: 'Évolution paradigmatique possible'
-          },
-          recommendations: [
-            'Documenter l\'évolution culturelle',
-            'Faciliter l\'adoption progressive',
-            'Surveiller la résistance au changement'
-          ],
-          aiConfidence: 78,
-          emergenceIndex: 85,
-          culturalImpact: 90,
-          networkEffect: state.primatoms.length * 0.3,
-          predictiveAccuracy: 72,
-          strategicImportance: 'high',
-          interconnections: [],
-          futureProjections: [
-            { probability: 70, timeframe: '5-10 minutes', impact: 'Adoption par nouvelles coalitions' },
-            { probability: 50, timeframe: '15-30 minutes', impact: 'Intégration dans normes globales' }
-          ]
-        };
-        events.push(event);
+    // ÉVÉNEMENT FORCÉ si aucun événement généré - Observer la population
+    if (events.length === 0) {
+      const avgTrust = state.primatoms.reduce((sum, p) => sum + p.trust, 0) / state.primatoms.length;
+      const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
+      const avgCooperation = state.primatoms.reduce((sum, p) => sum + p.cooperation, 0) / state.primatoms.length;
+      
+      events.push({
+        id: `observation-${currentTime}`,
+        timestamp: currentTime,
+        type: 'cultural_evolution',
+        severity: 'medium',
+        title: `Observation Système: Population Stable`,
+        description: `Système en évolution continue avec ${state.primatoms.length} Primatoms - Trust: ${avgTrust.toFixed(1)}%, Innovation: ${avgInnovation.toFixed(1)}%, Coopération: ${avgCooperation.toFixed(1)}%`,
+        affectedPrimatoms: state.primatoms.slice(0, 10).map(p => p.id),
+        metrics: {
+          populationSize: state.primatoms.length,
+          avgTrust,
+          avgInnovation,
+          avgCooperation,
+          coalitionCount: state.coalitions.length
+        },
+        predictedImpact: {
+          shortTerm: `Maintien de la dynamique sociale actuelle`,
+          mediumTerm: `Évolution graduelle des métriques comportementales`,
+          longTerm: avgInnovation > 60 ? 'Potentiel d\'émergence créative' : 'Stabilisation progressive'
+        },
+        recommendations: [
+          'Surveiller l\'émergence de nouveaux patterns',
+          'Faciliter les interactions inter-groupes',
+          'Maintenir l\'équilibre du système'
+        ],
+        aiConfidence: 75,
+        emergenceIndex: 50,
+        culturalImpact: 60,
+        networkEffect: state.primatoms.length * 0.5,
+        predictiveAccuracy: 70,
+        strategicImportance: 'medium',
+        interconnections: [],
+        futureProjections: [
+          { probability: 80, timeframe: '5-10 minutes', impact: 'Continuation de l\'évolution' },
+          { probability: 40, timeframe: '10-20 minutes', impact: 'Émergence de nouveaux comportements' }
+        ]
       });
     }
 
