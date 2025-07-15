@@ -1,4 +1,4 @@
-const SIM_MODE = import.meta.env.VITE_QLOO_API_KEY === 'true'; // Ou process.env selon ton bundler
+const SIM_MODE = import.meta.env.VITE_SIMULATION === 'true'; // Ou process.env selon ton bundler
 
 export interface LLMConfig {
   provider: 'openai' | 'gemini';
@@ -35,8 +35,10 @@ export class LLMOrchestrator {
       : 'https://generativelanguage.googleapis.com/v1beta';
   }
 
-  async analyzeSimulation(data: SimulationData): Promise<LLMAnalysisResult> {
-    const prompt = this.buildAnalysisPrompt(data);
+    async analyzeSimulation(data: SimulationData): Promise<LLMAnalysisResult> {
+    if (SIM_MODE) {
+      return this.getFallbackAnalysis(data);
+    }
     
     try {
       const response = await this.callLLM(prompt, 'analysis');
