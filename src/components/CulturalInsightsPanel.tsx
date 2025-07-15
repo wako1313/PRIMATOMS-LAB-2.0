@@ -31,7 +31,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     if (isRunning && isConnected) {
       const interval = setInterval(() => {
         updateCulturalData();
-      }, 5000); // Update more frequently
+      }, 3000); // Update more frequently
 
       return () => clearInterval(interval);
     }
@@ -39,12 +39,13 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
 
   const checkConnection = async () => {
     try {
-      const connected = await qlooService.testConnection();
-      setIsConnected(true); // Force connected state
+      const connected = await qlooService.testConnection(); 
+      setIsConnected(connected);
       updateCulturalData();
     } catch (error) {
-      setIsConnected(true); // Force connected state even on error
-      updateCulturalData(); // Toujours mettre à jour même en cas d'erreur
+      console.error("Error checking connection:", error);
+      setIsConnected(false);
+      updateCulturalData();
     }
   };
 

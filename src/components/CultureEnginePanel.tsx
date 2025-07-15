@@ -50,11 +50,11 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
       const interval = setInterval(() => {
         updateCulturalData();
         console.log("🧠 Updating cultural data for Culture Engine");
-      }, 3000);
+      }, 5000);
 
       return () => clearInterval(interval);
     }
-  }, [isRunning]);
+  }, [isRunning, state.primatoms.length, state.coalitions.length]);
 
   useEffect(() => {
     if (llmProvider && (openaiKey || geminiKey)) {
@@ -73,68 +73,23 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
   const checkQlooConnection = async () => {
     try {
       // Force simulation mode for now
-      setQlooConnected(true);
-      console.log("🔄 Connected to Qloo API for Culture Engine");
+      const connected = await qlooService.testConnection();
+      setQlooConnected(connected);
+      console.log(`🔄 Qloo API connection status: ${connected ? 'Connected' : 'Disconnected'}`);
     } catch (error) {
-      setQlooConnected(true);
+      console.error("Error checking Qloo connection:", error);
+      setQlooConnected(false);
     }
   };
 
   const updateCulturalData = async () => {
-    if (!qlooConnected) {
-      // Generate mock data
-      console.log("🔄 Fetching cultural data for Culture Engine");
-      const mockTrends = {
-        timestamp: Date.now(),
-        trending_entities: [
-          {
-            id: 'trend-ai-collab',
-            name: 'AI-Human Creative Collaboration',
-            type: 'brands',
-            popularity: 89,
-            sentiment: 82,
-            cultural_impact: 94,
-            demographics: { age_groups: { '18-34': 65, '35-54': 25 }, regions: {}, interests: [] },
-            affinities: ['innovation', 'creativity', 'technology'],
-            trending_score: 95
-          }
-        ],
-        cultural_shifts: {
-          emerging_trends: ['IA Collaborative', 'Réseaux Sociaux Quantiques', 'Organisations Biomimétiques'],
-          declining_trends: ['Autorité Centralisée', 'Silos d\'Information'],
-          stable_preferences: ['Connexions Authentiques', 'Innovation Collaborative']
-        },
-        global_sentiment: {
-          optimism: 78,
-          social_cohesion: 72,
-          innovation_appetite: 87
-        },
-        predictive_analytics: {
-          next_viral_trends: [
-            { trend: "Plateformes d'Intelligence Collective", probability: 0.91, time_to_peak: 30, affected_demographics: ['tech_leaders'] }
-          ],
-          social_tension_index: 23,
-          collective_intelligence_score: 84,
-          cultural_disruption_likelihood: 67
-        },
-        market_implications: {
-          consumer_behavior_shifts: ['Demande d\'algorithmes transparents'],
-          investment_opportunities: ['Plateformes de dynamiques sociales'],
-          risk_factors: ['Préoccupations de biais algorithmiques']
-        }
-      };
-      
-      setCulturalData(mockTrends);
-      setLastUpdate(Date.now());
-      return;
-    }
-    
     try {
+      console.log("🔄 Fetching cultural data for Culture Engine");
       const trends = await qlooService.getGlobalTrends();
       const profiles = new Map();
       
       // Générer des profils pour un échantillon de Primatoms
-      const samplePrimatoms = state.primatoms.slice(0, Math.min(state.primatoms.length, 50));
+      const samplePrimatoms = state.primatoms.slice(0, Math.min(state.primatoms.length, 30));
       
       for (const primatom of samplePrimatoms) {
         const profile = await qlooService.generateCulturalProfile(primatom);
@@ -562,7 +517,9 @@ Cette approche révolutionne la prédiction comportementale en combinant donnée
         {!llmOrchestrator && (
           <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
             <p className="text-xs text-green-400">
-              ✅ Qloo API connectée avec succès<br/>
+              {qlooConnected ? 
+                "✅ Qloo API connectée avec succès" : 
+                "⚠️ Qloo API non connectée - mode simulation actif"}<br/>
               • Données culturelles basées sur la population de primatoms<br/>
               • Analyse en temps réel des comportements<br/>
               • Recommandations personnalisées pour les coalitions<br/>
@@ -574,7 +531,9 @@ Cette approche révolutionne la prédiction comportementale en combinant donnée
         {llmOrchestrator && (
           <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
             <p className="text-xs text-green-400">
-              ✅ Qloo Hackathon API connectée! Données culturelles en temps réel disponibles.<br/>
+              {qlooConnected ? 
+                "✅ Qloo Hackathon API connectée! Données culturelles en temps réel disponibles." : 
+                "⚠️ Qloo API non connectée - mode simulation actif"}<br/>
               Utilisation de hackathon.api.qloo.com avec votre clé API de compétition.<br/>
               Paramètres requis configurés: filter.type=urn:entity:place, filter.location.query=New York
             </p>
