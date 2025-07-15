@@ -111,6 +111,36 @@ class QlooAPIService {
     }
   }
 
+  // Test manuel direct - pour diagnostic
+  async testDirectEndpoint(): Promise<void> {
+    const testUrl = 'https://hackathon.api.qloo.com/v2/insights/?limit=1';
+    console.log('🧪 QLOO MANUAL TEST: Testing direct endpoint');
+    console.log('📡 URL:', testUrl);
+    console.log('🔑 API Key:', this.apiKey);
+    
+    try {
+      const response = await fetch(testUrl, {
+        method: 'GET',
+        headers: {
+          'X-Api-Key': this.apiKey,
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('📊 Response Status:', response.status, response.statusText);
+      console.log('📋 Response Headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ SUCCESS! Data received:', data);
+      } else {
+        const errorText = await response.text();
+        console.log('❌ ERROR Response:', errorText);
+      }
+    } catch (error) {
+      console.log('💥 FETCH ERROR:', error);
+    }
+  }
+
   // Test de connexion avec les vrais endpoints Qloo v2
   async testConnection(): Promise<boolean> {
     if (!this.apiKey) {

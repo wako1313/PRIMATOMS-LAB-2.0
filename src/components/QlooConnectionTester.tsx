@@ -62,6 +62,16 @@ const QlooConnectionTester: React.FC = () => {
     }
   };
 
+  const testDirectly = async () => {
+    setTestResults(prev => [...prev, '🧪 Testing direct endpoint manually...']);
+    try {
+      await qlooService.testDirectEndpoint();
+      setTestResults(prev => [...prev, '📊 Check console for direct test results']);
+    } catch (error) {
+      setTestResults(prev => [...prev, `❌ Direct test failed: ${error}`]);
+    }
+  };
+
   const getStatusColor = () => {
     if (isConnected === null) return 'text-gray-400';
     return isConnected ? 'text-green-400' : 'text-yellow-400';
@@ -95,6 +105,12 @@ const QlooConnectionTester: React.FC = () => {
         >
           <RefreshCw className={`w-4 h-4 ${isTesting ? 'animate-spin' : ''}`} />
           Test Connection
+        </button>
+        <button
+          onClick={testDirectly}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm transition-colors"
+        >
+          🧪 Direct Test
         </button>
       </div>
 
