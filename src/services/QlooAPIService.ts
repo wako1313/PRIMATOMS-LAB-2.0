@@ -96,7 +96,7 @@ export interface QlooRecommendation {
 
 class QlooAPIService {
   private apiKey: string;
-  private baseUrl: string = 'https://api.qloo.com';
+  private baseUrl: string = 'https://hackathon.api.qloo.com';
   private cache: Map<string, any> = new Map();
   private cacheTimeout: number = 300000; // 5 minutes
   private connectionTested: boolean = false;
@@ -124,7 +124,7 @@ class QlooAPIService {
     // Tests multiples avec différents endpoints et configurations
     const testConfigurations = [
       {
-        name: 'Official v2 Insights API',
+        name: 'Hackathon v2 Insights API',
         url: `${this.baseUrl}/v2/insights/?filter.type=urn:entity:place&limit=1`,
         headers: {
           'X-Api-Key': this.apiKey,
@@ -133,7 +133,7 @@ class QlooAPIService {
         }
       },
       {
-        name: 'Alternative v2 endpoint',
+        name: 'Hackathon v2 alternative',
         url: `${this.baseUrl}/v2/insights/`,
         headers: {
           'X-Api-Key': this.apiKey,
@@ -141,18 +141,18 @@ class QlooAPIService {
         }
       },
       {
-        name: 'Legacy v1 endpoint test',
-        url: `${this.baseUrl}/v1/cultural/insights`,
+        name: 'Hackathon v1 fallback',
+        url: `${this.baseUrl}/v1/insights`,
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'X-Api-Key': this.apiKey,
           'Content-Type': 'application/json'
         }
       },
       {
-        name: 'Hackathon endpoint test',
-        url: `https://hackathon.api.qloo.com/v2/insights/?limit=1`,
+        name: 'Hackathon Bearer auth test',
+        url: `${this.baseUrl}/v2/insights/?limit=1`,
         headers: {
-          'X-Api-Key': this.apiKey,
+          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         }
       }

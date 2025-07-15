@@ -108,7 +108,7 @@ const QlooConnectionTester: React.FC = () => {
           </div>
           <div className="text-xs text-gray-300 space-y-1">
             <div>Key: {apiKey ? `${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}` : 'Not configured'}</div>
-            <div>Endpoint: https://api.qloo.com/v2/insights/</div>
+            <div>Endpoint: https://hackathon.api.qloo.com/v2/insights/</div>
             <div>Method: GET with X-Api-Key header</div>
           </div>
         </div>
@@ -117,10 +117,10 @@ const QlooConnectionTester: React.FC = () => {
       <div className="bg-slate-700/50 rounded-lg p-4 mb-4">
         <h4 className="font-medium text-white mb-2">Diagnostic Information</h4>
         <div className="text-xs text-gray-300 space-y-1">
-          <div>🔍 Testing multiple endpoints and authentication methods</div>
+          <div>🔍 Testing Qloo Hackathon API endpoints</div>
           <div>⏱️ 10-second timeout per endpoint</div>
           <div>📋 Detailed logs available in browser console</div>
-          <div>🔧 Advanced simulation mode as fallback</div>
+          <div>🏆 Hackathon server: https://hackathon.api.qloo.com</div>
           <div>💡 Open browser DevTools → Console for full diagnostics</div>
         </div>
       </div>
@@ -152,8 +152,8 @@ const QlooConnectionTester: React.FC = () => {
       {isConnected && (
         <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
           <p className="text-xs text-green-400">
-            ✅ Qloo API v2 connected! Real-time cultural insights from Insights API are now available.
-            Using official endpoints with proper authentication and data transformation.
+            ✅ Qloo Hackathon API connected! Real-time cultural insights from Hackathon server are now available.
+            Using hackathon.api.qloo.com with your competition API key.
           </p>
         </div>
       )}
