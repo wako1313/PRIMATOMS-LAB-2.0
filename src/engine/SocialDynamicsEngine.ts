@@ -349,7 +349,7 @@ export class SocialDynamicsEngine {
   setBehaviorDistribution(distribution: Record<string, number>) {
     // Normaliser la distribution pour qu'elle totalise 1
     const total = Object.values(distribution).reduce((sum, val) => sum + val, 0);
-    const normalizedDistribution: Record<string, number> = {};
+    let normalizedDistribution: Record<string, number> = {};
     
     if (total > 0) {
       Object.entries(distribution).forEach(([key, value]) => {
