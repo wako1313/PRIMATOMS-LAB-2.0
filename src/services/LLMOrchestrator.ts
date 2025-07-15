@@ -1,7 +1,4 @@
 import { LLMProvider, SimulationData } from '../types';
-import { Logger } from '../utils/logger';
-import { RateLimiter } from '../utils/rateLimiter';
-import { MetricsCollector } from '../utils/metrics';
 
 const SIM_MODE = import.meta.env.VITE_SIMULATION === 'true';
 const API_TIMEOUT = 30000; // 30 secondes
@@ -46,6 +43,89 @@ export interface SessionMetrics {
   responseTime: number;
   apiCalls: number;
   errorRate: number;
+}
+
+// Utility classes integrated directly
+class Logger {
+  constructor(private context: string) {}
+  
+  info(message: string, data?: any) {
+    console.log(`[${this.context}] INFO: ${message}`, data || '');
+  }
+  
+  warn(message: string, data?: any) {
+    console.warn(`[${this.context}] WARN: ${message}`, data || '');
+  }
+  
+  error(message: string, error?: any) {
+    console.error(`[${this.context}] ERROR: ${message}`, error || '');
+  }
+}
+
+class RateLimiter {
+  private limits: Map<string, { count: number; resetTime: number }> = new Map();
+  private readonly RATE_LIMIT = 60; // requests per minute
+  private readonly WINDOW_MS = 60000; // 1 minute
+
+  async checkLimit(operation: string): Promise<void> {
+    const now = Date.now();
+    const key = operation;
+    const current = this.limits.get(key);
+
+    if (!current || now > current.resetTime) {
+      this.limits.set(key, { count: 1, resetTime: now + this.WINDOW_MS });
+      return;
+    }
+
+    if (current.count >= this.RATE_LIMIT) {
+      throw new Error(`Rate limit exceeded for ${operation}`);
+    }
+
+    current.count++;
+  }
+}
+
+class MetricsCollector {
+  private metrics: {
+    analyses: number;
+    whatIfs: number;
+    reports: number;
+    errors: number;
+    avgResponseTime: number;
+  } = {
+    analyses: 0,
+    whatIfs: 0,
+    reports: 0,
+    errors: 0,
+    avgResponseTime: 0
+  };
+
+  recordAnalysis(result: LLMAnalysisResult) {
+    this.metrics.analyses++;
+    this.updateAvgResponseTime(result.processingTime);
+  }
+
+  recordWhatIf(parameter: string, value: any) {
+    this.metrics.whatIfs++;
+  }
+
+  recordReport(sessionMetrics: SessionMetrics) {
+    this.metrics.reports++;
+  }
+
+  recordError(operation: string, error: any) {
+    this.metrics.errors++;
+  }
+
+  private updateAvgResponseTime(time: number) {
+    const total = this.metrics.analyses + this.metrics.whatIfs + this.metrics.reports;
+    this.metrics.avgResponseTime = 
+      (this.metrics.avgResponseTime * (total - 1) + time) / total;
+  }
+
+  getReport() {
+    return { ...this.metrics };
+  }
 }
 
 export class LLMOrchestrator {
