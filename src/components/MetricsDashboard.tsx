@@ -5,14 +5,13 @@ import { TrendingUp, Users, Brain, Shield, Target, Network, Zap, Activity, Eye, 
 
 interface MetricsDashboardProps {
   state: SimulationState;
-  isLive?: boolean; // Nouveau prop pour mode live
+  isLive?: boolean;
 }
 
 const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = false }) => {
   const [animationKey, setAnimationKey] = useState(0);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   
-  // Animation refresh pour le mode live
   useEffect(() => {
     if (isLive) {
       const interval = setInterval(() => {
@@ -24,7 +23,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
 
   const latestMetrics = state.metrics[state.metrics.length - 1];
   
-  // Calculs avancés pour métriques enrichies
   const behaviorDistribution = state.primatoms.reduce((acc, p) => {
     acc[p.behaviorType] = (acc[p.behaviorType] || 0) + 1;
     return acc;
@@ -38,7 +36,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
     influence: c.members.length * c.cohesion / 100
   })).sort((a, b) => b.influence - a.influence);
 
-  // Données temporelles enrichies
   const chartData = state.metrics.slice(-30).map((metric, index) => ({
     time: index,
     Confiance: metric.trustNetwork,
@@ -51,7 +48,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
     'Behaviors Émergents': metric.emergentBehaviors || 0
   }));
 
-  // Données radar pour vue d'ensemble
   const radarData = [
     { metric: 'Confiance', value: latestMetrics?.trustNetwork || 0, fullMark: 100 },
     { metric: 'Coopération', value: latestMetrics?.cooperation || 0, fullMark: 100 },
@@ -74,7 +70,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
     }[type as keyof typeof behaviorDistribution]
   }));
 
-  // Métriques avancées calculées
   const advancedMetrics = {
     systemHealth: latestMetrics ? (latestMetrics.trustNetwork + latestMetrics.cooperation + latestMetrics.resilience) / 3 : 0,
     innovationVelocity: state.metrics.length > 1 ? 
@@ -85,7 +80,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
     networkComplexity: state.coalitions.length > 0 ? state.coalitions.reduce((sum, c) => sum + c.members.length, 0) / state.coalitions.length : 0
   };
 
-  // Fonction pour obtenir la couleur de tendance
   const getTrendColor = (value: number): string => {
     if (value >= 80) return 'text-green-400';
     if (value >= 60) return 'text-blue-400';
@@ -213,7 +207,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
       {/* Header avec indicateur de santé système */}
       <SystemHealthIndicator />
 
-      {/* Métriques principales enrichies */}
+      {/* Métriques principales */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard
           title="Réseau de Confiance"
@@ -222,7 +216,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
           color="bg-cyan-500/20"
           trend={state.metrics.length > 1 ? (latestMetrics?.trustNetwork || 0) - (state.metrics[state.metrics.length - 2]?.trustNetwork || 0) : 0}
           subtitle="Interconnexions sociales"
-          isHighlighted={selectedMetric === "Réseau de Confiance"}
         />
         <MetricCard
           title="Coopération"
@@ -231,7 +224,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
           color="bg-blue-500/20"
           trend={state.metrics.length > 1 ? (latestMetrics?.cooperation || 0) - (state.metrics[state.metrics.length - 2]?.cooperation || 0) : 0}
           subtitle="Collaboration active"
-          isHighlighted={selectedMetric === "Coopération"}
         />
         <MetricCard
           title="Innovation"
@@ -240,7 +232,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
           color="bg-purple-500/20"
           trend={advancedMetrics.innovationVelocity}
           subtitle="Créativité collective"
-          isHighlighted={selectedMetric === "Innovation"}
         />
         <MetricCard
           title="Gouvernance"
@@ -249,7 +240,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
           color="bg-green-500/20"
           trend={state.metrics.length > 1 ? (latestMetrics?.governance || 0) - (state.metrics[state.metrics.length - 2]?.governance || 0) : 0}
           subtitle="Leadership efficace"
-          isHighlighted={selectedMetric === "Gouvernance"}
         />
         <MetricCard
           title="Résilience"
@@ -258,7 +248,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
           color="bg-orange-500/20"
           trend={state.metrics.length > 1 ? (latestMetrics?.resilience || 0) - (state.metrics[state.metrics.length - 2]?.resilience || 0) : 0}
           subtitle="Capacité d'adaptation"
-          isHighlighted={selectedMetric === "Résilience"}
         />
         <MetricCard
           title="Stabilité Culturelle"
@@ -267,83 +256,18 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
           color="bg-red-500/20"
           trend={state.metrics.length > 1 ? (latestMetrics?.culturalStability || 0) - (state.metrics[state.metrics.length - 2]?.culturalStability || 0) : 0}
           subtitle="Cohésion normative"
-          isHighlighted={selectedMetric === "Stabilité Culturelle"}
-        />
-      </div>
-
-      {/* Métriques avancées */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <MetricCard
-          title="Adaptabilité"
-          value={advancedMetrics.adaptabilityIndex}
-          icon={<Zap className="w-5 h-5 text-yellow-400" />}
-          color="bg-yellow-500/20"
-          subtitle="Flexibilité système"
-        />
-        <MetricCard
-          title="Densité Leadership"
-          value={advancedMetrics.leadershipDensity}
-          icon={<Crown className="w-5 h-5 text-amber-400" />}
-          color="bg-amber-500/20"
-          subtitle="Répartition du pouvoir"
-        />
-        <MetricCard
-          title="Complexité Réseau"
-          value={advancedMetrics.networkComplexity}
-          icon={<Layers className="w-5 h-5 text-indigo-400" />}
-          color="bg-indigo-500/20"
-          subtitle="Sophistication sociale"
-        />
-        <MetricCard
-          title="Niveau Disruption"
-          value={latestMetrics?.disruptionLevel || 0}
-          icon={<AlertTriangle className="w-5 h-5 text-red-400" />}
-          color="bg-red-500/20"
-          subtitle="Perturbations actives"
-        />
-        <MetricCard
-          title="Behaviors Émergents"
-          value={latestMetrics?.emergentBehaviors || 0}
-          icon={<Star className="w-5 h-5 text-pink-400" />}
-          color="bg-pink-500/20"
-          subtitle="Nouveaux patterns"
-        />
-        <MetricCard
-          title="Génération"
-          value={state.generation}
-          icon={<Database className="w-5 h-5 text-teal-400" />}
-          color="bg-teal-500/20"
-          subtitle="Évolution temporelle"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Graphique temporel avancé */}
+        {/* Graphique temporel */}
         <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-cyan-400" />
-              Évolution Temporelle Avancée
-            </h3>
-            {isLive && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full border border-green-500/30">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-green-400 text-sm font-medium">LIVE</span>
-              </div>
-            )}
-          </div>
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-cyan-400" />
+            Évolution Temporelle
+          </h3>
           <ResponsiveContainer width="100%" height={350}>
-            <AreaChart data={chartData} key={animationKey}>
-              <defs>
-                <linearGradient id="trustGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.1}/>
-                </linearGradient>
-                <linearGradient id="innovationGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1}/>
-                </linearGradient>
-              </defs>
+            <LineChart data={chartData} key={animationKey}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis dataKey="time" stroke="#64748B" />
               <YAxis stroke="#64748B" />
@@ -352,17 +276,16 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
                   backgroundColor: '#1E293B',
                   border: '1px solid #334155',
                   borderRadius: '8px',
-                  color: '#F8FAFC',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  color: '#F8FAFC'
                 }}
               />
               <Legend />
-              <Area type="monotone" dataKey="Confiance" stroke="#06B6D4" strokeWidth={2} fill="url(#trustGradient)" />
-              <Area type="monotone" dataKey="Innovation" stroke="#8B5CF6" strokeWidth={2} fill="url(#innovationGradient)" />
-              <Area type="monotone" dataKey="Coopération" stroke="#3B82F6" strokeWidth={2} fill="none" />
-              <Area type="monotone" dataKey="Gouvernance" stroke="#10B981" strokeWidth={2} fill="none" />
-              <Area type="monotone" dataKey="Résilience" stroke="#F59E0B" strokeWidth={2} fill="none" />
-            </AreaChart>
+              <Line type="monotone" dataKey="Confiance" stroke="#06B6D4" strokeWidth={2} />
+              <Line type="monotone" dataKey="Coopération" stroke="#3B82F6" strokeWidth={2} />
+              <Line type="monotone" dataKey="Innovation" stroke="#8B5CF6" strokeWidth={2} />
+              <Line type="monotone" dataKey="Gouvernance" stroke="#10B981" strokeWidth={2} />
+              <Line type="monotone" dataKey="Résilience" stroke="#F59E0B" strokeWidth={2} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
 
@@ -395,12 +318,9 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Distribution des comportements améliorée */}
+        {/* Distribution des comportements */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <PieChartIcon className="w-5 h-5 text-blue-400" />
-            Distribution Comportementale
-          </h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Distribution Comportementale</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -409,7 +329,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
                 cy="50%"
                 labelLine={false}
                 label={({ name, percentage }) => `${name} ${percentage}%`}
-                outerRadius={100}
+                outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -424,101 +344,60 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ state, isLive = fal
                   borderRadius: '8px',
                   color: '#F8FAFC'
                 }}
-                formatter={(value: number) => [`${value} Primatoms`, 'Population']}
               />
             </PieChart>
           </ResponsiveContainer>
-          
-          {/* Légende enrichie */}
-          <div className="mt-4 space-y-2">
-            {pieData.map((entry, index) => (
-              <div key={index} className="flex items-center justify-between px-3 py-2 bg-slate-700/30 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: entry.color }}
-                  />
-                  <span className="text-white font-medium">{entry.name}</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-white font-bold">{entry.value}</div>
-                  <div className="text-xs text-gray-400">{entry.percentage}%</div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Coalitions premium */}
+        {/* Coalitions */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Network className="w-5 h-5 text-green-400" />
-            Coalitions Influentes
-          </h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Coalitions Actives</h3>
           <div className="space-y-4 max-h-72 overflow-y-auto">
             {coalitionStats.slice(0, 6).map((coalition, index) => (
-              <div key={index} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600 hover:border-slate-500 transition-colors">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-lg ${
-                      index === 0 ? 'bg-yellow-500/20' : 
-                      index === 1 ? 'bg-gray-500/20' : 
-                      index === 2 ? 'bg-orange-500/20' : 
-                      'bg-slate-600/20'
-                    }`}>
-                      {index === 0 ? <Crown className="w-4 h-4 text-yellow-400" /> :
-                       index === 1 ? <Star className="w-4 h-4 text-gray-400" /> :
-                       index === 2 ? <Gem className="w-4 h-4 text-orange-400" /> :
-                       <Target className="w-4 h-4 text-slate-400" />}
-                    </div>
-                    <h4 className="font-medium text-white">{coalition.name}</h4>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-white font-medium">{coalition.members} membres</div>
-                    <div className="text-xs text-gray-400">
-                      Influence: {coalition.influence.toFixed(1)}
-                    </div>
-                  </div>
+              <div key={index} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-white">{coalition.name}</h4>
+                  <span className="text-sm text-gray-400">{coalition.members} membres</span>
                 </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Cohésion</span>
-                    <span className="text-white">{coalition.cohesion.toFixed(1)}%</span>
-                  </div>
-                  <div className="w-full bg-slate-600 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        coalition.cohesion >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
-                        coalition.cohesion >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' :
-                        coalition.cohesion >= 40 ? 'bg-gradient-to-r from-yellow-500 to-orange-400' :
-                        'bg-gradient-to-r from-red-500 to-pink-400'
-                      }`}
-                      style={{ width: `${coalition.cohesion}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Âge: {Math.floor(coalition.age / 1000)}s
-                  </div>
+                <div className="w-full bg-slate-600 rounded-full h-2">
+                  <div 
+                    className="bg-cyan-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${coalition.cohesion}%` }}
+                  />
                 </div>
+                <span className="text-xs text-gray-400 mt-1">
+                  Cohésion: {coalition.cohesion.toFixed(1)}%
+                </span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Mémoire collective enrichie */}
+      {/* Mémoire collective */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <Database className="w-5 h-5 text-cyan-400" />
-          Mémoire Collective & Intelligence
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600 text-center">
-            <div className="text-2xl font-bold text-cyan-400 mb-1">{state.generation}</div>
-            <div className="text-sm text-gray-400">Génération</div>
+        <h3 className="text-lg font-semibold text-white mb-4">Mémoire Collective</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+            <h4 className="font-medium text-white mb-2">Génération</h4>
+            <span className="text-2xl font-bold text-cyan-400">{state.generation}</span>
           </div>
-          <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600 text-center">
-            <div className="text-2xl font-bold text-purple-400 mb-1">{state.globalKnowledge.length}</div>
-            <div className="text-sm text-gray-400">Connaissances</div>
+          <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+            <h4 className="font-medium text-white mb-2">Connaissances</h4>
+            <span className="text-2xl font-bold text-cyan-400">{state.globalKnowledge.length}</span>
           </div>
+          <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+            <h4 className="font-medium text-white mb-2">Primatoms</h4>
+            <span className="text-2xl font-bold text-cyan-400">{state.primatoms.length}</span>
+          </div>
+          <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+            <h4 className="font-medium text-white mb-2">Coalitions</h4>
+            <span className="text-2xl font-bold text-cyan-400">{state.coalitions.length}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MetricsDashboard;
