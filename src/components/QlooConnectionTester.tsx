@@ -18,19 +18,30 @@ const QlooConnectionTester: React.FC = () => {
     setTestResults([
       '🔍 Starting Qloo Hackathon API connection test...',
       `🔑 API Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}`,
-      '🏆 Hackathon Server: https://hackathon.api.qloo.com/v2/insights/',
-      '📋 Connexion établie avec le serveur hackathon',
+      '🏆 Hackathon Server: https://hackathon.api.qloo.com',
+      '📋 Tentative de connexion au serveur hackathon',
+      '📋 Paramètres requis: filter.type=urn:entity:place, filter.location.query=New York',
       '💡 Open DevTools → Console for detailed logs'
     ]);
     
     try {
-      // Set connected mode
-      setIsConnected(true);
-      setTestResults(prev => [...prev, 
-        '✅ Connexion établie avec succès',
-        '🎯 Données culturelles disponibles',
-        '🔑 Analyse basée sur des patterns réels'
-      ]);
+      // Test real connection
+      const connected = await qlooService.testConnection();
+      setIsConnected(connected);
+      
+      if (connected) {
+        setTestResults(prev => [...prev, 
+          '✅ Connexion établie avec succès',
+          '🎯 Données culturelles disponibles',
+          '🔑 Analyse basée sur des patterns réels'
+        ]);
+      } else {
+        setTestResults(prev => [...prev, 
+          '❌ Erreur de connexion à l\'API Qloo',
+          '🔧 Vérifiez votre clé API et les paramètres',
+          '📋 Mode simulation activé pour assurer la continuité'
+        ]);
+      }
       
       // Test des fonctionnalités principales
       try {
@@ -76,19 +87,19 @@ const QlooConnectionTester: React.FC = () => {
 
   const getStatusColor = () => {
     if (isConnected === null) return 'text-gray-400';
-    return 'text-green-400'; // Connecté
+    return isConnected ? 'text-green-400' : 'text-red-400';
   };
 
   const getStatusIcon = () => {
     if (isTesting) return <RefreshCw className="w-5 h-5 animate-spin" />;
     if (isConnected === null) return <Info className="w-5 h-5" />;
-    return <Wifi className="w-5 h-5" />;
+    return isConnected ? <Wifi className="w-5 h-5" /> : <WifiOff className="w-5 h-5" />;
   };
 
   const getStatusText = () => {
     if (isTesting) return 'Testing...';
     if (isConnected === null) return 'Not tested';
-    return 'Connected';
+    return isConnected ? 'Connected' : 'Disconnected';
   };
 
   return (
@@ -169,7 +180,7 @@ const QlooConnectionTester: React.FC = () => {
       {!isConnected && (
         <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <p className="text-xs text-yellow-400">
-            ⚠️ Note: Utilisation du mode simulation avancé<br/>
+            ⚠️ Note: Connexion à l'API Qloo échouée<br/>
             • Données culturelles basées sur la population de primatoms<br/>
             • Analyse en temps réel des comportements<br/>
             • Recommandations personnalisées pour les coalitions<br/>
