@@ -49,7 +49,86 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   };
 
   const updateCulturalData = async () => {
-    if (!isConnected) return;
+    if (!isConnected) {
+      // Générer des données simulées de qualité
+      const mockTrends = {
+        timestamp: Date.now(),
+        trending_entities: [
+          {
+            id: 'trend-1',
+            name: 'Intelligence Collective Émergente',
+            type: 'brands' as const,
+            popularity: 89,
+            sentiment: 82,
+            cultural_impact: 94,
+            demographics: { age_groups: { '18-34': 65, '35-54': 25 }, regions: {}, interests: [] },
+            affinities: ['innovation', 'collaboration', 'autonomy'],
+            trending_score: 95
+          }
+        ],
+        cultural_shifts: {
+          emerging_trends: ['IA Collaborative', 'Réseaux Sociaux Quantiques', 'Organisations Biomimétiques'],
+          declining_trends: ['Autorité Centralisée', 'Silos d\'Information'],
+          stable_preferences: ['Connexions Authentiques', 'Innovation Collaborative']
+        },
+        global_sentiment: {
+          optimism: 78,
+          social_cohesion: 72,
+          innovation_appetite: 87
+        },
+        predictive_analytics: {
+          next_viral_trends: [
+            { trend: "Plateformes d'Intelligence Collective", probability: 0.91, time_to_peak: 30, affected_demographics: ['tech_leaders'] }
+          ],
+          social_tension_index: 23,
+          collective_intelligence_score: 84,
+          cultural_disruption_likelihood: 67
+        },
+        market_implications: {
+          consumer_behavior_shifts: ['Demande d\'algorithmes transparents'],
+          investment_opportunities: ['Plateformes de dynamiques sociales'],
+          risk_factors: ['Préoccupations de biais algorithmiques']
+        }
+      };
+      
+      setTrendingData(mockTrends);
+      
+      // Générer des profils simulés
+      const profiles = new Map();
+      state.primatoms.slice(0, 10).forEach(primatom => {
+        profiles.set(primatom.id, {
+          id: primatom.id,
+          affinities: [],
+          behavior_patterns: {
+            discovery_tendency: primatom.innovation,
+            social_influence: primatom.influence || 50,
+            brand_loyalty: primatom.trust,
+            cultural_openness: primatom.cooperation
+          },
+          sentiment_analysis: {
+            overall_mood: 100 - (primatom.stressLevel || 0),
+            cultural_engagement: primatom.energy,
+            social_connectivity: primatom.cooperation
+          },
+          ai_predictions: {
+            coalition_formation_probability: 75 + Math.random() * 20,
+            leadership_potential: 60 + Math.random() * 30,
+            disruption_resilience: 70 + Math.random() * 25,
+            viral_influence_score: 65 + Math.random() * 30
+          },
+          behavioral_insights: {
+            decision_making_style: ['analytical', 'intuitive', 'collaborative', 'impulsive'][Math.floor(Math.random() * 4)],
+            stress_response_pattern: ['fight', 'flight', 'freeze', 'adapt'][Math.floor(Math.random() * 4)],
+            innovation_catalyst_type: ['pioneer', 'early_adopter', 'follower', 'skeptic'][Math.floor(Math.random() * 4)],
+            social_clustering_tendency: 60 + Math.random() * 30
+          }
+        });
+      });
+      setCulturalProfiles(profiles);
+      
+      setLastUpdate(Date.now());
+      return;
+    }
     
     setIsLoading(true);
     try {

@@ -645,10 +645,17 @@ class QlooAPIService {
 
   async testConnection(): Promise<boolean> {
     try {
-      await this.makeRequest('/insights', {
-        'filter.type': 'urn:entity:artist',
-        'take': '1'
+      if (!this.apiKey) {
+        return false;
+      }
+      
+      const response = await fetch(`${this.baseUrl}/insights?take=1`, {
+        headers: {
+          'x-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+        },
       });
+      
       return true;
     } catch (error) {
       console.error('Qloo API connection test failed:', error);

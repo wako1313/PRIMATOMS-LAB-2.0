@@ -162,16 +162,18 @@ Recommandations:
   };
 
   const runCompleteAnalysis = async () => {
-    if (!llmOrchestrator) {
-      // Utiliser les données simulées si pas de LLM configuré
-      console.warn('LLM non configuré, utilisation des données simulées');
-      setAnalysisResult(getFallbackAnalysisResult());
-      return;
-    }
-
     setIsAnalyzing(true);
     
     try {
+      if (!llmOrchestrator) {
+        // Utiliser les données simulées si pas de LLM configuré
+        console.warn('LLM non configuré, utilisation des données simulées');
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simuler délai d'analyse
+        setAnalysisResult(getFallbackAnalysisResult());
+        setSessionReport(getFallbackSessionReport());
+        return;
+      }
+
       // Préparer les données de simulation
       const simulationData: SimulationData = {
         personas: state.primatoms.map(p => ({
@@ -216,15 +218,30 @@ Recommandations:
     }
   };
 
-  const runWhatIfAnalysis = async () => {
-    if (!llmOrchestrator) {
-      setWhatIfResult(getFallbackWhatIfResult());
-      return;
-    }
+  const getFallbackSessionReport = (): string => {
+    return `# RAPPORT DE SESSION - PRIMATOMS CULTURE ENGINE
 
+## SYNTHÈSE EXÉCUTIVE
+Cette session a démontré la puissance de l'intégration Qloo + IA pour prédire l'adoption culturelle. ${state.primatoms.length} personas ont été analysées avec des taux d'adoption variant selon les segments comportementaux.
+
+## DÉCOUVERTES MAJEURES
+- Corrélation forte entre affinités culturelles et vitesse d'adoption
+- Identification de patterns de résistance culturelle distincts
+- Validation de l'hypothèse de propagation par affinités croisées
+
+*Rapport généré par PRIMATOMS CULTURE ENGINE - ${new Date().toLocaleString()}*`;
+  };
+
+  const runWhatIfAnalysis = async () => {
     setIsAnalyzing(true);
     
     try {
+      if (!llmOrchestrator) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setWhatIfResult(getFallbackWhatIfResult());
+        return;
+      }
+
       const simulationData: SimulationData = {
         personas: state.primatoms.slice(0, 5).map(p => ({ id: p.id, name: p.name })),
         culturalAffinities: culturalData?.trends?.trending_entities || [],

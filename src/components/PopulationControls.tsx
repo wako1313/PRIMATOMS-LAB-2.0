@@ -104,11 +104,15 @@ const PopulationControls: React.FC<PopulationControlsProps> = ({
   };
 
   const resetToDefaults = () => {
-    setTempPopulation(200);
-    setTempDistribution(presetDistributions['Équilibrée']);
+    const defaultPopulation = 200;
+    const defaultDistribution = presetDistributions['Équilibrée'];
+    
+    setTempPopulation(defaultPopulation);
+    setTempDistribution(defaultDistribution);
+    
     if (!isRunning) {
-      onPopulationChange(200);
-      onDistributionChange(presetDistributions['Équilibrée']);
+      onPopulationChange(defaultPopulation);
+      onDistributionChange(defaultDistribution);
     }
   };
 

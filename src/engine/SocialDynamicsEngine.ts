@@ -353,7 +353,39 @@ export class SocialDynamicsEngine {
     }
     
     this.stop();
-    this.state = this.initializeState();
+    
+    // Recalculer la distribution
+    const behaviorDistribution = {
+      leader: distribution.leader || 0.08,
+      innovator: distribution.innovator || 0.15,
+      mediator: distribution.mediator || 0.12,
+      explorer: distribution.explorer || 0.20,
+      follower: distribution.follower || 0.45
+    };
+    
+    // Régénérer les Primatoms avec la nouvelle distribution
+    const primatoms: Primatom[] = [];
+    let currentId = 0;
+    
+    Object.entries(behaviorDistribution).forEach(([behaviorType, ratio]) => {
+      const count = Math.floor(this.populationSize * ratio);
+      
+      for (let i = 0; i < count; i++) {
+        const primatom = this.createPrimatom(currentId++, behaviorType as Primatom['behaviorType']);
+        primatoms.push(primatom);
+      }
+    });
+    
+    this.initializeClusterPositions(primatoms);
+    this.state.primatoms = primatoms;
+    this.state.coalitions = [];
+    this.state.metrics = [];
+    this.state.generation = 1;
+    this.state.globalKnowledge = [];
+    this.state.activeDisruptions = [];
+    this.state.emergentPhenomena = [];
+    this.state.systemStability = 75;
+    this.state.influenceZones = [];
   }
 
   setPopulationSize(size: number) {
