@@ -30,7 +30,6 @@ export interface QlooConsumerProfile {
     cultural_engagement: number;
     social_connectivity: number;
   };
-  // NOUVEAUX INSIGHTS SOPHISTIQUÉS
   ai_predictions: {
     coalition_formation_probability: number;
     leadership_potential: number;
@@ -58,12 +57,11 @@ export interface QlooTrendingData {
     social_cohesion: number;
     innovation_appetite: number;
   };
-  // NOUVEAUX INSIGHTS PRÉDICTIFS
   predictive_analytics: {
     next_viral_trends: Array<{
       trend: string;
       probability: number;
-      time_to_peak: number; // in days
+      time_to_peak: number;
       affected_demographics: string[];
     }>;
     social_tension_index: number;
@@ -83,7 +81,6 @@ export interface QlooRecommendation {
   reasoning: string;
   cultural_context: string;
   predicted_adoption: number;
-  // NOUVEAUX INSIGHTS STRATEGIQUES
   strategic_value: {
     coalition_strengthening_factor: number;
     network_effect_multiplier: number;
@@ -99,419 +96,323 @@ export interface QlooRecommendation {
 
 class QlooAPIService {
   private apiKey: string;
-  private baseUrl: string = 'https://hackathon.api.qloo.com';
+  private baseUrl: string = 'https://api.qloo.com';
+  private hackathonUrl: string = 'https://hackathon.api.qloo.com';
   private cache: Map<string, any> = new Map();
   private cacheTimeout: number = 300000; // 5 minutes
+  private connectionTested: boolean = false;
+  private isConnected: boolean = false;
   
-  // INTELLIGENCE ARTIFICIELLE INTERNE
-  private behavioralAnalysisEngine: BehavioralAnalysisEngine;
-
   constructor() {
     this.apiKey = import.meta.env.VITE_QLOO_API_KEY || '';
-    this.behavioralAnalysisEngine = new BehavioralAnalysisEngine();
     
     if (!this.apiKey) {
-      console.warn('Qloo API key not found. Using advanced simulation with behavioral modeling.');
+      console.warn('⚠️ Qloo API key not found. Using advanced simulation mode.');
+      this.isConnected = false;
     }
   }
 
-  private async makeRequest(endpoint: string, params: Record<string, any> = {}): Promise<any> {
+  // Test de connexion avec les vrais endpoints Qloo
+  async testConnection(): Promise<boolean> {
     if (!this.apiKey) {
-      throw new Error('Qloo API key not configured');
+      console.log('🔧 No API key - Using simulation mode');
+      this.isConnected = false;
+      return false;
+    }
+
+    const endpoints = [
+      `${this.hackathonUrl}/v1/cultural/insights`,
+      `${this.hackathonUrl}/cultural/insights`,
+      `${this.baseUrl}/v1/cultural/insights`,
+      `${this.baseUrl}/cultural/insights`,
+      `${this.hackathonUrl}/insights`,
+      `${this.baseUrl}/insights`
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`🔍 Testing endpoint: ${endpoint}`);
+        
+        const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'X-API-Key': this.apiKey,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          timeout: 5000
+        });
+
+        console.log(`📡 Response status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Qloo API connected successfully!', { endpoint, data: data });
+          this.isConnected = true;
+          this.connectionTested = true;
+          return true;
+        } else {
+          const errorText = await response.text();
+          console.log(`❌ Endpoint failed: ${endpoint} - ${response.status} - ${errorText}`);
+        }
+      } catch (error) {
+        console.log(`❌ Connection error for ${endpoint}:`, error);
+      }
+    }
+
+    console.log('🔧 All endpoints failed - Using simulation mode');
+    this.isConnected = false;
+    this.connectionTested = true;
+    return false;
+  }
+
+  private async makeRequest(endpoint: string, params: Record<string, any> = {}): Promise<any> {
+    if (!this.isConnected) {
+      throw new Error('Qloo API not connected - using simulation mode');
     }
 
     const cacheKey = `${endpoint}-${JSON.stringify(params)}`;
     const cached = this.cache.get(cacheKey);
     
     if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      console.log('📦 Using cached data for:', endpoint);
       return cached.data;
     }
 
-    try {
-      const queryParams = new URLSearchParams(params).toString();
-      const url = `${this.baseUrl}${endpoint}${queryParams ? `?${queryParams}` : ''}`;
-      
-      const response = await fetch(url, {
-        headers: {
-          'x-api-key': this.apiKey,
-          'Content-Type': 'application/json',
-        },
-      });
+    const urls = [
+      `${this.hackathonUrl}${endpoint}`,
+      `${this.baseUrl}${endpoint}`
+    ];
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Qloo API Error Response:', errorText);
-        throw new Error(`Qloo API error: ${response.status} ${response.statusText}`);
+    for (const url of urls) {
+      try {
+        const queryParams = new URLSearchParams(params).toString();
+        const fullUrl = `${url}${queryParams ? `?${queryParams}` : ''}`;
+        
+        console.log(`🚀 Making request to: ${fullUrl}`);
+        
+        const response = await fetch(fullUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'X-API-Key': this.apiKey,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          timeout: 10000
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Request successful:', { url, data });
+          
+          // Cache the response
+          this.cache.set(cacheKey, {
+            data,
+            timestamp: Date.now()
+          });
+
+          return data;
+        } else {
+          const errorText = await response.text();
+          console.log(`❌ Request failed: ${url} - ${response.status} - ${errorText}`);
+        }
+      } catch (error) {
+        console.log(`❌ Request error for ${url}:`, error);
       }
-
-      const data = await response.json();
-      
-      // Cache the response
-      this.cache.set(cacheKey, {
-        data,
-        timestamp: Date.now()
-      });
-
-      return data;
-    } catch (error) {
-      console.error('Qloo API request failed:', error);
-      throw error;
     }
+
+    throw new Error('All Qloo API endpoints failed');
   }
 
-  // TRANSFORMATION INTELLIGENTE DES TENDANCES GLOBALES
   async getGlobalTrends(): Promise<QlooTrendingData> {
     try {
-      const response = await this.makeRequest('/insights', {
-        'filter.type': 'urn:entity:artist',
-        'take': '50'
-      });
+      // Test connection first
+      if (!this.connectionTested) {
+        await this.testConnection();
+      }
 
-      // TRANSFORMATION MAGIQUE : Données réelles → Insights comportementaux
-      const realArtists = response.results || [];
-      const transformedTrends = this.transformCulturalDataToBehavioralInsights(realArtists);
+      if (!this.isConnected) {
+        console.log('🔧 Using advanced simulation for global trends');
+        return this.getAdvancedMockTrendingData();
+      }
 
-      return {
-        timestamp: Date.now(),
-        trending_entities: transformedTrends.entities,
-        cultural_shifts: transformedTrends.shifts,
-        global_sentiment: this.calculateAdvancedSentiment(realArtists),
-        predictive_analytics: {
-          next_viral_trends: [
-            {
-              trend: "AI-Human Collaborative Creativity",
-              probability: 0.87,
-              time_to_peak: 45,
-              affected_demographics: ['digital_natives', 'creative_professionals', 'early_adopters']
-            },
-            {
-              trend: "Distributed Social Governance",
-              probability: 0.72,
-              time_to_peak: 90,
-              affected_demographics: ['millennials', 'gen_z', 'tech_leaders']
-            },
-            {
-              trend: "Quantum Social Networks",
-              probability: 0.58,
-              time_to_peak: 180,
-              affected_demographics: ['researchers', 'tech_enthusiasts', 'futurists']
-            }
-          ],
-          social_tension_index: this.calculateSocialTensionFromCulturalData(realArtists),
-          collective_intelligence_score: this.calculateCollectiveIntelligence(realArtists),
-          cultural_disruption_likelihood: this.predictCulturalDisruption(realArtists)
-        },
-        market_implications: {
-          consumer_behavior_shifts: [
-            "Shift towards collaborative consumption models",
-            "Increased demand for authentic cultural experiences", 
-            "Rise of AI-assisted decision making"
-          ],
-          investment_opportunities: [
-            "Social dynamics prediction platforms",
-            "Collaborative intelligence tools",
-            "Cultural trend monetization systems"
-          ],
-          risk_factors: [
-            "Cultural fragmentation risks",
-            "Social manipulation vulnerabilities",
-            "Privacy vs personalization tensions"
-          ]
+      // Try different endpoints for cultural insights
+      const endpoints = [
+        '/v1/cultural/insights',
+        '/cultural/insights',
+        '/insights',
+        '/v1/insights'
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await this.makeRequest(endpoint, {
+            'limit': '50',
+            'type': 'trending',
+            'category': 'all'
+          });
+
+          console.log('📊 Processing Qloo trends data:', response);
+          return this.transformQlooToTrendingData(response);
+        } catch (error) {
+          console.log(`❌ Endpoint ${endpoint} failed:`, error);
+          continue;
         }
-      };
+      }
+
+      throw new Error('All trending endpoints failed');
     } catch (error) {
-      console.error('Failed to fetch global trends:', error);
+      console.error('❌ Failed to fetch global trends:', error);
+      console.log('🔧 Falling back to advanced simulation');
       return this.getAdvancedMockTrendingData();
     }
   }
 
-  // PROFIL CULTUREL AVEC IA PRÉDICTIVE
   async generateCulturalProfile(primatom: Primatom): Promise<QlooConsumerProfile> {
     try {
-      const response = await this.makeRequest('/insights', {
-        'filter.type': 'urn:entity:artist',
-        'take': '10'
-      });
+      if (!this.isConnected) {
+        return this.getAdvancedMockCulturalProfile(primatom);
+      }
 
-      // ANALYSE COMPORTEMENTALE AVANCÉE
-      const behavioralProfile = this.behavioralAnalysisEngine.analyzePrimatom(primatom);
-      const culturalAffinities = this.transformArtistDataToAffinities(response.results || []);
+      // Try to get personalized recommendations
+      const endpoints = [
+        '/v1/recommendations',
+        '/recommendations',
+        '/v1/cultural/profile',
+        '/cultural/profile'
+      ];
 
-      return {
-        id: primatom.id,
-        affinities: culturalAffinities,
-        behavior_patterns: {
-          discovery_tendency: primatom.innovation,
-          social_influence: primatom.influence || 50,
-          brand_loyalty: primatom.trust,
-          cultural_openness: primatom.cooperation
-        },
-        sentiment_analysis: {
-          overall_mood: 100 - (primatom.stressLevel || 0),
-          cultural_engagement: primatom.energy,
-          social_connectivity: primatom.cooperation
-        },
-        ai_predictions: {
-          coalition_formation_probability: behavioralProfile.coalitionProbability,
-          leadership_potential: behavioralProfile.leadershipScore,
-          disruption_resilience: behavioralProfile.resilienceIndex,
-          viral_influence_score: behavioralProfile.viralPotential
-        },
-        behavioral_insights: {
-          decision_making_style: behavioralProfile.decisionStyle,
-          stress_response_pattern: behavioralProfile.stressResponse,
-          innovation_catalyst_type: behavioralProfile.innovationType,
-          social_clustering_tendency: behavioralProfile.clusteringTendency
+      for (const endpoint of endpoints) {
+        try {
+          const response = await this.makeRequest(endpoint, {
+            'user_id': primatom.id,
+            'behavior_type': primatom.behaviorType,
+            'innovation_score': Math.round(primatom.innovation),
+            'cooperation_score': Math.round(primatom.cooperation),
+            'trust_score': Math.round(primatom.trust),
+            'limit': '10'
+          });
+
+          console.log('👤 Processing cultural profile:', response);
+          return this.transformQlooToCulturalProfile(response, primatom);
+        } catch (error) {
+          console.log(`❌ Profile endpoint ${endpoint} failed:`, error);
+          continue;
         }
-      };
+      }
+
+      throw new Error('All profile endpoints failed');
     } catch (error) {
-      console.error('Failed to generate cultural profile:', error);
+      console.error('❌ Failed to generate cultural profile:', error);
       return this.getAdvancedMockCulturalProfile(primatom);
     }
   }
 
-  // RECOMMANDATIONS STRATÉGIQUES POUR COALITIONS
   async getCoalitionRecommendations(coalition: Coalition, primatoms: Primatom[]): Promise<QlooRecommendation[]> {
     try {
-      const coalitionMembers = primatoms.filter(p => coalition.members.includes(p.id));
-      const coalitionDynamics = this.analyzeCoalitionDynamics(coalitionMembers);
-      
-      const response = await this.makeRequest('/insights', {
-        'filter.type': 'urn:entity:artist',
-        'take': '10'
-      });
+      if (!this.isConnected) {
+        return this.getAdvancedMockRecommendations(coalition);
+      }
 
-      return this.transformToStrategicRecommendations(response.results || [], coalitionDynamics, coalition);
+      const coalitionMembers = primatoms.filter(p => coalition.members.includes(p.id));
+      const avgInnovation = coalitionMembers.reduce((sum, p) => sum + p.innovation, 0) / coalitionMembers.length;
+      const avgCooperation = coalitionMembers.reduce((sum, p) => sum + p.cooperation, 0) / coalitionMembers.length;
+
+      const endpoints = [
+        '/v1/group/recommendations',
+        '/group/recommendations',
+        '/v1/recommendations',
+        '/recommendations'
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await this.makeRequest(endpoint, {
+            'group_id': coalition.id,
+            'group_size': coalition.members.length,
+            'cohesion_score': Math.round(coalition.cohesion),
+            'innovation_avg': Math.round(avgInnovation),
+            'cooperation_avg': Math.round(avgCooperation),
+            'limit': '5'
+          });
+
+          console.log('🤝 Processing coalition recommendations:', response);
+          return this.transformQlooToRecommendations(response, coalition);
+        } catch (error) {
+          console.log(`❌ Coalition endpoint ${endpoint} failed:`, error);
+          continue;
+        }
+      }
+
+      throw new Error('All coalition endpoints failed');
     } catch (error) {
-      console.error('Failed to get coalition recommendations:', error);
+      console.error('❌ Failed to get coalition recommendations:', error);
       return this.getAdvancedMockRecommendations(coalition);
     }
   }
 
-  // MÉTHODES D'ANALYSE COMPORTEMENTALE AVANCÉE
-  private transformCulturalDataToBehavioralInsights(artists: any[]) {
-    const affinitySum = artists.reduce((sum, artist) => sum + (artist.affinity || 50), 0);
-    const avgAffinity = affinitySum / Math.max(artists.length, 1);
+  // Transformation des données Qloo réelles
+  private transformQlooToTrendingData(qlooData: any): QlooTrendingData {
+    console.log('🔄 Transforming Qloo data to trending format');
     
-    return {
-      entities: artists.slice(0, 5).map(artist => ({
-        id: artist.id || 'unknown',
-        name: this.translateToSocialConcept(artist.properties?.name || 'Unknown'),
-        type: 'brands' as const,
-        popularity: artist.affinity || 50,
-        sentiment: 75 + (artist.affinity - 50) * 0.5,
-        cultural_impact: artist.affinity || 50,
-        demographics: { age_groups: {}, regions: {}, interests: [] },
-        affinities: [],
-        trending_score: artist.affinity || 50
-      })),
-      shifts: {
-        emerging_trends: this.generateEmergingTrends(artists),
-        declining_trends: ['Information Silos', 'Rigid Hierarchies', 'Single-Point Leadership'],
-        stable_preferences: ['Authentic Connections', 'Collaborative Innovation', 'Cultural Diversity']
-      }
-    };
-  }
+    // Adapter selon la structure réelle des données Qloo
+    const entities = (qlooData.results || qlooData.data || qlooData.trends || []).slice(0, 10).map((item: any) => ({
+      id: item.id || `entity-${Math.random()}`,
+      name: item.name || item.title || item.label || 'Cultural Trend',
+      type: this.mapQlooTypeToEntityType(item.type || item.category),
+      popularity: item.popularity || item.score || item.affinity || Math.random() * 100,
+      sentiment: item.sentiment || item.mood || 75 + Math.random() * 25,
+      cultural_impact: item.cultural_impact || item.influence || item.popularity || Math.random() * 100,
+      demographics: item.demographics || { age_groups: {}, regions: {}, interests: [] },
+      affinities: item.affinities || item.related || [],
+      trending_score: item.trending_score || item.velocity || Math.random() * 100
+    }));
 
-  private translateToSocialConcept(artistName: string): string {
-    const translations: Record<string, string> = {
-      'Taylor Swift': 'Collective Emotional Intelligence',
-      'Drake': 'Cross-Cultural Bridge Building',
-      'Billie Eilish': 'Authentic Self-Expression',
-      'The Weeknd': 'Emotional Vulnerability Leadership',
-      'Ariana Grande': 'Resilient Community Support',
-      'Post Malone': 'Genre-Transcendent Collaboration',
-      'Dua Lipa': 'Global Cultural Synthesis',
-      'Ed Sheeran': 'Grassroots Viral Influence',
-      'Olivia Rodrigo': 'Generational Voice Amplification',
-      'Bad Bunny': 'Cultural Pride Innovation'
-    };
-    
-    return translations[artistName] || 'Emergent Social Dynamics';
-  }
-
-  private generateEmergingTrends(artists: any[]): string[] {
-    const basePatterns = [
-      'AI-Augmented Collective Decision Making',
-      'Hybrid Digital-Physical Social Spaces',
-      'Quantum Entanglement Communication Patterns',
-      'Biomimetic Organizational Structures',
-      'Neuro-Feedback Enhanced Collaboration'
-    ];
-    
-    // Utilise les données réelles pour influencer la sélection
-    const avgAffinity = artists.reduce((sum, a) => sum + (a.affinity || 50), 0) / Math.max(artists.length, 1);
-    
-    if (avgAffinity > 70) {
-      return basePatterns.slice(0, 3);
-    } else if (avgAffinity > 50) {
-      return basePatterns.slice(1, 4);
-    } else {
-      return basePatterns.slice(2, 5);
-    }
-  }
-
-  private calculateAdvancedSentiment(artists: any[]) {
-    const avgAffinity = artists.reduce((sum, a) => sum + (a.affinity || 50), 0) / Math.max(artists.length, 1);
-    
-    return {
-      optimism: Math.min(95, 60 + (avgAffinity - 50) * 0.7),
-      social_cohesion: Math.min(90, 55 + (avgAffinity - 45) * 0.6),
-      innovation_appetite: Math.min(98, 65 + (avgAffinity - 50) * 0.8)
-    };
-  }
-
-  private calculateSocialTensionFromCulturalData(artists: any[]): number {
-    const variability = this.calculateAffinityVariability(artists);
-    return Math.max(0, Math.min(100, 40 - variability * 2));
-  }
-
-  private calculateCollectiveIntelligence(artists: any[]): number {
-    const diversity = Math.min(artists.length / 50 * 100, 100);
-    const avgAffinity = artists.reduce((sum, a) => sum + (a.affinity || 50), 0) / Math.max(artists.length, 1);
-    return (diversity * 0.6 + avgAffinity * 0.4);
-  }
-
-  private predictCulturalDisruption(artists: any[]): number {
-    const variability = this.calculateAffinityVariability(artists);
-    const momentum = artists.filter(a => (a.affinity || 0) > 80).length / Math.max(artists.length, 1);
-    return (variability * 0.4 + momentum * 60);
-  }
-
-  private calculateAffinityVariability(artists: any[]): number {
-    const affinities = artists.map(a => a.affinity || 50);
-    const mean = affinities.reduce((sum, a) => sum + a, 0) / Math.max(affinities.length, 1);
-    const variance = affinities.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) / Math.max(affinities.length, 1);
-    return Math.sqrt(variance);
-  }
-
-  private analyzeCoalitionDynamics(members: Primatom[]) {
-    return {
-      avgInnovation: members.reduce((sum, p) => sum + p.innovation, 0) / Math.max(members.length, 1),
-      avgCooperation: members.reduce((sum, p) => sum + p.cooperation, 0) / Math.max(members.length, 1),
-      diversity: this.calculateBehaviorDiversity(members),
-      stability: this.calculateCoalitionStability(members),
-      emergentPotential: this.calculateEmergentPotential(members)
-    };
-  }
-
-  private calculateBehaviorDiversity(members: Primatom[]): number {
-    const behaviors = members.map(m => m.behaviorType);
-    const uniqueBehaviors = new Set(behaviors);
-    return (uniqueBehaviors.size / Math.max(behaviors.length, 1)) * 100;
-  }
-
-  private calculateCoalitionStability(members: Primatom[]): number {
-    const trustLevels = members.map(m => m.trust);
-    const avgTrust = trustLevels.reduce((sum, t) => sum + t, 0) / Math.max(trustLevels.length, 1);
-    const cooperationLevels = members.map(m => m.cooperation);
-    const avgCooperation = cooperationLevels.reduce((sum, c) => sum + c, 0) / Math.max(cooperationLevels.length, 1);
-    return (avgTrust * 0.6 + avgCooperation * 0.4);
-  }
-
-  private calculateEmergentPotential(members: Primatom[]): number {
-    const innovationSum = members.reduce((sum, m) => sum + m.innovation, 0);
-    const energySum = members.reduce((sum, m) => sum + m.energy, 0);
-    return (innovationSum + energySum) / (Math.max(members.length, 1) * 2);
-  }
-
-  // DONNÉES FALLBACK SOPHISTIQUÉES
-  private getAdvancedMockTrendingData(): QlooTrendingData {
     return {
       timestamp: Date.now(),
-      trending_entities: [
-        {
-          id: 'trend-1',
-          name: 'Distributed Autonomous Organizations',
-          type: 'brands',
-          popularity: 89,
-          sentiment: 82,
-          cultural_impact: 94,
-          demographics: { age_groups: { '18-34': 65, '35-54': 25 }, regions: {}, interests: [] },
-          affinities: ['innovation', 'collaboration', 'autonomy'],
-          trending_score: 95
-        }
-      ],
+      trending_entities: entities,
       cultural_shifts: {
-        emerging_trends: ['AI-Augmented Collective Decision Making', 'Quantum Social Networks', 'Biomimetic Organizations'],
-        declining_trends: ['Centralized Authority', 'Information Silos', 'Rigid Hierarchies'],
-        stable_preferences: ['Authentic Connections', 'Collaborative Innovation', 'Cultural Diversity']
+        emerging_trends: this.extractEmergingTrends(qlooData),
+        declining_trends: ['Traditional Media Consumption', 'Rigid Brand Loyalty'],
+        stable_preferences: ['Authentic Experiences', 'Social Connection', 'Personal Growth']
       },
       global_sentiment: {
-        optimism: 78,
-        social_cohesion: 72,
-        innovation_appetite: 87
+        optimism: this.calculateSentimentScore(qlooData, 'optimism'),
+        social_cohesion: this.calculateSentimentScore(qlooData, 'cohesion'),
+        innovation_appetite: this.calculateSentimentScore(qlooData, 'innovation')
       },
       predictive_analytics: {
-        next_viral_trends: [
-          { trend: "Collective Intelligence Platforms", probability: 0.91, time_to_peak: 30, affected_demographics: ['tech_leaders', 'innovators'] },
-          { trend: "Empathetic AI Companions", probability: 0.84, time_to_peak: 60, affected_demographics: ['digital_natives', 'elderly'] },
-          { trend: "Decentralized Identity Systems", probability: 0.76, time_to_peak: 120, affected_demographics: ['privacy_advocates', 'millennials'] }
-        ],
-        social_tension_index: 23,
-        collective_intelligence_score: 84,
-        cultural_disruption_likelihood: 67
+        next_viral_trends: this.generateViralTrendPredictions(entities),
+        social_tension_index: Math.random() * 40 + 10,
+        collective_intelligence_score: Math.random() * 30 + 70,
+        cultural_disruption_likelihood: Math.random() * 40 + 30
       },
       market_implications: {
-        consumer_behavior_shifts: ['Demand for transparent algorithms', 'Preference for peer-to-peer services', 'Increased privacy consciousness'],
-        investment_opportunities: ['Social dynamics platforms', 'Behavioral prediction tools', 'Collaborative intelligence systems'],
-        risk_factors: ['Algorithmic bias concerns', 'Social fragmentation risks', 'Cultural homogenization threats']
+        consumer_behavior_shifts: this.extractBehaviorShifts(qlooData),
+        investment_opportunities: this.extractInvestmentOpportunities(entities),
+        risk_factors: ['Cultural Fragmentation', 'Trend Volatility', 'Generational Gaps']
       }
     };
   }
 
-  // AUTRES MÉTHODES EXISTANTES (simplifiées pour la place)
-  private transformArtistDataToAffinities(artists: any[]): QlooEntity[] {
-    return artists.slice(0, 3).map(artist => ({
-      id: artist.id || 'unknown',
-      name: this.translateToSocialConcept(artist.properties?.name || 'Unknown'),
-      type: 'brands' as const,
-      popularity: artist.affinity || 50,
-      sentiment: 75,
-      cultural_impact: artist.affinity || 50,
-      demographics: { age_groups: {}, regions: {}, interests: [] },
-      affinities: [],
-      trending_score: artist.affinity || 50
-    }));
-  }
-
-  private transformToStrategicRecommendations(places: any[], dynamics: any, coalition: Coalition): QlooRecommendation[] {
-    return [{
-      entity: {
-        id: 'strategic-1',
-        name: 'Adaptive Collaboration Framework',
-        type: 'brands',
-        popularity: 85 + dynamics.emergentPotential * 0.1,
-        sentiment: 80,
-        cultural_impact: 90,
-        demographics: { age_groups: {}, regions: {}, interests: [] },
-        affinities: [],
-        trending_score: 88
-      },
-      confidence: 0.92,
-      reasoning: `Optimized for coalition's ${dynamics.diversity.toFixed(0)}% behavioral diversity and ${dynamics.stability.toFixed(0)}% stability index`,
-      cultural_context: 'Next-generation collaborative intelligence systems',
-      predicted_adoption: 0.87,
-      strategic_value: {
-        coalition_strengthening_factor: 94,
-        network_effect_multiplier: 2.3,
-        competitive_advantage_score: 89,
-        market_timing_index: 91
-      },
-      behavioral_triggers: {
-        primary_motivator: 'Collective achievement amplification',
-        resistance_factors: ['Change management complexity', 'Individual autonomy concerns'],
-        optimal_introduction_strategy: 'Gradual integration with success celebration milestones'
-      }
-    }];
-  }
-
-  private getAdvancedMockCulturalProfile(primatom: Primatom): QlooConsumerProfile {
-    const profile = this.behavioralAnalysisEngine.analyzePrimatom(primatom);
+  private transformQlooToCulturalProfile(qlooData: any, primatom: Primatom): QlooConsumerProfile {
+    const recommendations = qlooData.recommendations || qlooData.results || qlooData.data || [];
     
     return {
       id: primatom.id,
-      affinities: [],
+      affinities: recommendations.slice(0, 5).map((item: any) => ({
+        id: item.id || `affinity-${Math.random()}`,
+        name: item.name || item.title || 'Cultural Affinity',
+        type: this.mapQlooTypeToEntityType(item.type),
+        popularity: item.popularity || item.score || Math.random() * 100,
+        sentiment: item.sentiment || 75,
+        cultural_impact: item.cultural_impact || Math.random() * 100,
+        demographics: { age_groups: {}, regions: {}, interests: [] },
+        affinities: [],
+        trending_score: item.trending_score || Math.random() * 100
+      })),
       behavior_patterns: {
         discovery_tendency: primatom.innovation,
         social_influence: primatom.influence || 50,
@@ -524,166 +425,131 @@ class QlooAPIService {
         social_connectivity: primatom.cooperation
       },
       ai_predictions: {
-        coalition_formation_probability: profile.coalitionProbability,
-        leadership_potential: profile.leadershipScore,
-        disruption_resilience: profile.resilienceIndex,
-        viral_influence_score: profile.viralPotential
+        coalition_formation_probability: this.calculateCoalitionProbability(primatom),
+        leadership_potential: this.calculateLeadershipPotential(primatom),
+        disruption_resilience: this.calculateResilienceIndex(primatom),
+        viral_influence_score: this.calculateViralPotential(primatom)
       },
       behavioral_insights: {
-        decision_making_style: profile.decisionStyle,
-        stress_response_pattern: profile.stressResponse,
-        innovation_catalyst_type: profile.innovationType,
-        social_clustering_tendency: profile.clusteringTendency
+        decision_making_style: this.determineDecisionStyle(primatom),
+        stress_response_pattern: this.determineStressResponse(primatom),
+        innovation_catalyst_type: this.determineInnovationType(primatom),
+        social_clustering_tendency: this.calculateClusteringTendency(primatom)
       }
     };
   }
 
-  private getAdvancedMockRecommendations(coalition: Coalition): QlooRecommendation[] {
-    return [{
+  private transformQlooToRecommendations(qlooData: any, coalition: Coalition): QlooRecommendation[] {
+    const recommendations = qlooData.recommendations || qlooData.results || qlooData.data || [];
+    
+    return recommendations.slice(0, 3).map((item: any) => ({
       entity: {
-        id: 'advanced-rec-1',
-        name: 'Synergistic Innovation Accelerator',
-        type: 'brands',
-        popularity: 91,
-        sentiment: 88,
-        cultural_impact: 95,
+        id: item.id || `rec-${Math.random()}`,
+        name: item.name || item.title || 'Strategic Recommendation',
+        type: this.mapQlooTypeToEntityType(item.type),
+        popularity: item.popularity || Math.random() * 100,
+        sentiment: item.sentiment || 80,
+        cultural_impact: item.cultural_impact || Math.random() * 100,
         demographics: { age_groups: {}, regions: {}, interests: [] },
         affinities: [],
-        trending_score: 93
+        trending_score: item.trending_score || Math.random() * 100
       },
-      confidence: 0.94,
-      reasoning: `AI-optimized for coalition size ${coalition.members.length} with emergent potential analysis`,
-      cultural_context: 'Breakthrough collaborative intelligence paradigm',
-      predicted_adoption: 0.89,
+      confidence: item.confidence || Math.random() * 0.3 + 0.7,
+      reasoning: item.reasoning || `Optimized for coalition's behavioral dynamics and cultural preferences`,
+      cultural_context: item.cultural_context || 'Next-generation collaborative framework',
+      predicted_adoption: item.predicted_adoption || Math.random() * 0.3 + 0.6,
       strategic_value: {
-        coalition_strengthening_factor: 96,
-        network_effect_multiplier: 2.7,
-        competitive_advantage_score: 92,
-        market_timing_index: 94
+        coalition_strengthening_factor: Math.random() * 20 + 80,
+        network_effect_multiplier: Math.random() * 1.5 + 1.5,
+        competitive_advantage_score: Math.random() * 20 + 70,
+        market_timing_index: Math.random() * 20 + 75
       },
       behavioral_triggers: {
-        primary_motivator: 'Exponential collective growth',
-        resistance_factors: ['Integration complexity', 'Performance measurement challenges'],
-        optimal_introduction_strategy: 'Pilot program with measurable impact demonstrations'
+        primary_motivator: 'Collective achievement amplification',
+        resistance_factors: ['Change adaptation complexity', 'Individual autonomy concerns'],
+        optimal_introduction_strategy: 'Gradual integration with success milestones'
       }
-    }];
+    }));
   }
 
-  // MÉTHODES EXISTANTES CONSERVÉES
-  async analyzeCulturalImpact(disruptionType: string, intensity: number): Promise<{
-    cultural_shift_prediction: number;
-    affected_demographics: string[];
-    sentiment_impact: number;
-    trend_acceleration: string[];
-  }> {
-    try {
-      const response = await this.makeRequest('/v2/insights', {
-        'filter.type': 'urn:entity:artist',
-        'signal.location.query': 'New York City',
-        'bias.trends': 'high',
-        'take': '5'
-      });
-
-      return {
-        cultural_shift_prediction: intensity * 12 + Math.random() * 15,
-        affected_demographics: ['digital_natives', 'early_adopters', 'cultural_leaders'],
-        sentiment_impact: -intensity * 3 + Math.random() * 10,
-        trend_acceleration: response.results?.map((item: any) => 
-          this.translateToSocialConcept(item.properties?.name || 'Unknown')
-        ).slice(0, 3) || ['Adaptive Leadership', 'Resilient Communities', 'Innovation Networks']
-      };
-    } catch (error) {
-      return {
-        cultural_shift_prediction: intensity * 12,
-        affected_demographics: ['general_population'],
-        sentiment_impact: -intensity * 4,
-        trend_acceleration: ['Adaptive Leadership', 'Resilient Communities']
-      };
-    }
-  }
-
-  async detectCulturalAffinities(primatom1: Primatom, primatom2: Primatom): Promise<{
-    affinity_score: number;
-    shared_interests: string[];
-    cultural_compatibility: number;
-    recommendation_overlap: number;
-  }> {
-    const affinity = this.calculateBasicAffinity(primatom1, primatom2);
-    const insights1 = this.behavioralAnalysisEngine.analyzePrimatom(primatom1);
-    const insights2 = this.behavioralAnalysisEngine.analyzePrimatom(primatom2);
+  // Méthodes utilitaires pour transformation des données
+  private mapQlooTypeToEntityType(qlooType: string): QlooEntity['type'] {
+    const typeMap: Record<string, QlooEntity['type']> = {
+      'music': 'music',
+      'artist': 'music',
+      'song': 'music',
+      'tv': 'tv',
+      'show': 'tv',
+      'movie': 'film',
+      'film': 'film',
+      'fashion': 'fashion',
+      'style': 'fashion',
+      'food': 'dining',
+      'restaurant': 'dining',
+      'dining': 'dining',
+      'travel': 'travel',
+      'destination': 'travel',
+      'brand': 'brands',
+      'product': 'brands',
+      'book': 'books',
+      'podcast': 'podcasts'
+    };
     
-    const sharedPatterns = [];
-    if (insights1.decisionStyle === insights2.decisionStyle) sharedPatterns.push('Decision Making Alignment');
-    if (insights1.innovationType === insights2.innovationType) sharedPatterns.push('Innovation Synchrony');
-    if (Math.abs(insights1.clusteringTendency - insights2.clusteringTendency) < 20) sharedPatterns.push('Social Clustering Harmony');
-    
-    return {
-      affinity_score: affinity + (sharedPatterns.length * 5),
-      shared_interests: sharedPatterns,
-      cultural_compatibility: affinity + (sharedPatterns.length * 8),
-      recommendation_overlap: (sharedPatterns.length / 3) * 100
-    };
+    return typeMap[qlooType?.toLowerCase()] || 'brands';
   }
 
-  private calculateBasicAffinity(primatom1: Primatom, primatom2: Primatom): number {
-    const behaviorCompatibility = this.getBehaviorCompatibility(primatom1.behaviorType, primatom2.behaviorType);
-    const innovationSimilarity = 100 - Math.abs(primatom1.innovation - primatom2.innovation);
-    const cooperationSimilarity = 100 - Math.abs(primatom1.cooperation - primatom2.cooperation);
-    return (behaviorCompatibility + innovationSimilarity + cooperationSimilarity) / 3;
-  }
-
-  private getBehaviorCompatibility(type1: string, type2: string): number {
-    const compatibilityMatrix: Record<string, Record<string, number>> = {
-      leader: { leader: 25, follower: 85, innovator: 65, mediator: 75, explorer: 55 },
-      follower: { leader: 85, follower: 70, innovator: 50, mediator: 80, explorer: 60 },
-      innovator: { leader: 65, follower: 50, innovator: 80, mediator: 70, explorer: 90 },
-      mediator: { leader: 75, follower: 80, innovator: 70, mediator: 85, explorer: 65 },
-      explorer: { leader: 55, follower: 60, innovator: 90, mediator: 65, explorer: 75 }
-    };
-    return compatibilityMatrix[type1]?.[type2] || 50;
-  }
-
-  async testConnection(): Promise<boolean> {
-    try {
-      if (!this.apiKey) {
-        return false;
-      }
-      
-      const response = await fetch(`${this.baseUrl}/insights?take=1`, {
-        headers: {
-          'x-api-key': this.apiKey,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Qloo API connection test failed:', error);
-      return false;
+  private extractEmergingTrends(qlooData: any): string[] {
+    const trends = qlooData.emerging_trends || qlooData.trends || [];
+    if (trends.length > 0) {
+      return trends.slice(0, 5).map((trend: any) => trend.name || trend.title || trend);
     }
-  }
-}
-
-// MOTEUR D'ANALYSE COMPORTEMENTALE IA
-class BehavioralAnalysisEngine {
-  analyzePrimatom(primatom: Primatom) {
-    return {
-      coalitionProbability: this.calculateCoalitionProbability(primatom),
-      leadershipScore: this.calculateLeadershipPotential(primatom),
-      resilienceIndex: this.calculateResilienceIndex(primatom),
-      viralPotential: this.calculateViralPotential(primatom),
-      decisionStyle: this.determineDecisionStyle(primatom),
-      stressResponse: this.determineStressResponse(primatom),
-      innovationType: this.determineInnovationType(primatom),
-      clusteringTendency: this.calculateClusteringTendency(primatom)
-    };
+    
+    return [
+      'AI-Augmented Creative Collaboration',
+      'Sustainable Cultural Consumption',
+      'Cross-Cultural Digital Communities',
+      'Personalized Cultural Curation',
+      'Immersive Social Experiences'
+    ];
   }
 
+  private calculateSentimentScore(qlooData: any, type: string): number {
+    const sentiment = qlooData.sentiment || qlooData.global_sentiment || {};
+    return sentiment[type] || (Math.random() * 30 + 60);
+  }
+
+  private generateViralTrendPredictions(entities: QlooEntity[]): Array<{trend: string, probability: number, time_to_peak: number, affected_demographics: string[]}> {
+    return entities.slice(0, 3).map(entity => ({
+      trend: `${entity.name} Cultural Movement`,
+      probability: Math.random() * 0.4 + 0.6,
+      time_to_peak: Math.floor(Math.random() * 90 + 30),
+      affected_demographics: ['digital_natives', 'early_adopters', 'cultural_leaders']
+    }));
+  }
+
+  private extractBehaviorShifts(qlooData: any): string[] {
+    return [
+      'Increased demand for authentic cultural experiences',
+      'Shift towards collaborative consumption models',
+      'Growing preference for personalized content curation',
+      'Rise of cross-cultural appreciation and fusion'
+    ];
+  }
+
+  private extractInvestmentOpportunities(entities: QlooEntity[]): string[] {
+    return [
+      'Cultural prediction and analytics platforms',
+      'Cross-cultural collaboration tools',
+      'Personalized cultural experience services',
+      'Social dynamics optimization systems'
+    ];
+  }
+
+  // Méthodes de calcul pour profils comportementaux
   private calculateCoalitionProbability(primatom: Primatom): number {
     const baseScore = (primatom.cooperation * 0.4 + primatom.trust * 0.3 + (100 - (primatom.stressLevel || 0)) * 0.3);
     const behaviorModifier = primatom.behaviorType === 'leader' ? 1.2 : 
-                           primatom.behaviorType === 'mediator' ? 1.15 : 
-                           primatom.behaviorType === 'follower' ? 1.1 : 1.0;
+                           primatom.behaviorType === 'mediator' ? 1.15 : 1.0;
     return Math.min(98, baseScore * behaviorModifier);
   }
 
@@ -691,17 +557,7 @@ class BehavioralAnalysisEngine {
     const charisma = primatom.influence || 50;
     const innovation = primatom.innovation;
     const stability = 100 - (primatom.stressLevel || 0);
-    const baseScore = (charisma * 0.4 + innovation * 0.35 + stability * 0.25);
-    
-    const typeMultiplier = {
-      'leader': 1.3,
-      'innovator': 1.2,
-      'mediator': 1.15,
-      'explorer': 1.1,
-      'follower': 0.8
-    }[primatom.behaviorType] || 1.0;
-    
-    return Math.min(97, baseScore * typeMultiplier);
+    return (charisma * 0.4 + innovation * 0.35 + stability * 0.25);
   }
 
   private calculateResilienceIndex(primatom: Primatom): number {
@@ -709,7 +565,6 @@ class BehavioralAnalysisEngine {
     const stability = 100 - (primatom.stressLevel || 0);
     const innovation = primatom.innovation;
     const trust = primatom.trust;
-    
     return (adaptability * 0.3 + stability * 0.25 + innovation * 0.25 + trust * 0.2);
   }
 
@@ -718,14 +573,7 @@ class BehavioralAnalysisEngine {
     const energy = primatom.energy;
     const innovation = primatom.innovation;
     const cooperation = primatom.cooperation;
-    
-    const baseScore = (influence * 0.35 + energy * 0.25 + innovation * 0.25 + cooperation * 0.15);
-    
-    const networkEffect = primatom.behaviorType === 'innovator' ? 1.25 : 
-                         primatom.behaviorType === 'leader' ? 1.2 : 
-                         primatom.behaviorType === 'explorer' ? 1.15 : 1.0;
-    
-    return Math.min(96, baseScore * networkEffect);
+    return (influence * 0.35 + energy * 0.25 + innovation * 0.25 + cooperation * 0.15);
   }
 
   private determineDecisionStyle(primatom: Primatom): 'analytical' | 'intuitive' | 'collaborative' | 'impulsive' {
@@ -753,11 +601,10 @@ class BehavioralAnalysisEngine {
   private determineInnovationType(primatom: Primatom): 'pioneer' | 'early_adopter' | 'follower' | 'skeptic' {
     const innovation = primatom.innovation;
     const trust = primatom.trust;
-    const cooperation = primatom.cooperation;
     
     if (innovation > 80 && primatom.behaviorType === 'innovator') return 'pioneer';
     if (innovation > 65 && trust > 60) return 'early_adopter';
-    if (cooperation > 70 && trust > 50) return 'follower';
+    if (primatom.cooperation > 70 && trust > 50) return 'follower';
     return 'skeptic';
   }
 
@@ -767,17 +614,270 @@ class BehavioralAnalysisEngine {
     const influence = primatom.influence || 50;
     const stress = primatom.stressLevel || 0;
     
-    const baseScore = (cooperation * 0.4 + trust * 0.3 + influence * 0.2 + (100 - stress) * 0.1);
+    return (cooperation * 0.4 + trust * 0.3 + influence * 0.2 + (100 - stress) * 0.1);
+  }
+
+  // Données de simulation avancées (fallback)
+  private getAdvancedMockTrendingData(): QlooTrendingData {
+    return {
+      timestamp: Date.now(),
+      trending_entities: [
+        {
+          id: 'trend-ai-collab',
+          name: 'AI-Human Creative Collaboration',
+          type: 'brands',
+          popularity: 89,
+          sentiment: 82,
+          cultural_impact: 94,
+          demographics: { age_groups: { '18-34': 65, '35-54': 25 }, regions: {}, interests: [] },
+          affinities: ['innovation', 'creativity', 'technology'],
+          trending_score: 95
+        },
+        {
+          id: 'trend-sustainable',
+          name: 'Sustainable Cultural Experiences',
+          type: 'travel',
+          popularity: 76,
+          sentiment: 88,
+          cultural_impact: 81,
+          demographics: { age_groups: { '25-44': 55, '18-34': 35 }, regions: {}, interests: [] },
+          affinities: ['sustainability', 'authenticity', 'community'],
+          trending_score: 87
+        }
+      ],
+      cultural_shifts: {
+        emerging_trends: [
+          'AI-Augmented Collective Decision Making',
+          'Hybrid Digital-Physical Social Spaces',
+          'Cross-Cultural Collaboration Platforms',
+          'Personalized Cultural Curation',
+          'Sustainable Experience Economy'
+        ],
+        declining_trends: ['Passive Content Consumption', 'Rigid Cultural Boundaries', 'One-Size-Fits-All Experiences'],
+        stable_preferences: ['Authentic Connections', 'Personal Growth', 'Community Belonging', 'Creative Expression']
+      },
+      global_sentiment: {
+        optimism: 78,
+        social_cohesion: 72,
+        innovation_appetite: 87
+      },
+      predictive_analytics: {
+        next_viral_trends: [
+          { trend: "Collective Intelligence Platforms", probability: 0.91, time_to_peak: 30, affected_demographics: ['tech_leaders', 'innovators'] },
+          { trend: "Cultural Fusion Experiences", probability: 0.84, time_to_peak: 60, affected_demographics: ['millennials', 'gen_z'] },
+          { trend: "AI-Curated Personal Growth", probability: 0.76, time_to_peak: 90, affected_demographics: ['professionals', 'lifelong_learners'] }
+        ],
+        social_tension_index: 23,
+        collective_intelligence_score: 84,
+        cultural_disruption_likelihood: 67
+      },
+      market_implications: {
+        consumer_behavior_shifts: [
+          'Demand for transparent and ethical AI systems',
+          'Preference for collaborative over competitive experiences',
+          'Increased value placed on cultural authenticity',
+          'Growing expectation for personalized cultural journeys'
+        ],
+        investment_opportunities: [
+          'Cultural prediction and analytics platforms',
+          'AI-powered collaborative creativity tools',
+          'Cross-cultural experience platforms',
+          'Sustainable cultural tourism technologies'
+        ],
+        risk_factors: [
+          'Cultural homogenization through AI algorithms',
+          'Privacy concerns in cultural profiling',
+          'Digital divide in cultural access',
+          'Authenticity vs. commercialization tensions'
+        ]
+      }
+    };
+  }
+
+  private getAdvancedMockCulturalProfile(primatom: Primatom): QlooConsumerProfile {
+    return {
+      id: primatom.id,
+      affinities: [
+        {
+          id: 'affinity-creative',
+          name: 'Creative Collaboration Tools',
+          type: 'brands',
+          popularity: 85,
+          sentiment: 80,
+          cultural_impact: 90,
+          demographics: { age_groups: {}, regions: {}, interests: [] },
+          affinities: [],
+          trending_score: 88
+        }
+      ],
+      behavior_patterns: {
+        discovery_tendency: primatom.innovation,
+        social_influence: primatom.influence || 50,
+        brand_loyalty: primatom.trust,
+        cultural_openness: primatom.cooperation
+      },
+      sentiment_analysis: {
+        overall_mood: 100 - (primatom.stressLevel || 0),
+        cultural_engagement: primatom.energy,
+        social_connectivity: primatom.cooperation
+      },
+      ai_predictions: {
+        coalition_formation_probability: this.calculateCoalitionProbability(primatom),
+        leadership_potential: this.calculateLeadershipPotential(primatom),
+        disruption_resilience: this.calculateResilienceIndex(primatom),
+        viral_influence_score: this.calculateViralPotential(primatom)
+      },
+      behavioral_insights: {
+        decision_making_style: this.determineDecisionStyle(primatom),
+        stress_response_pattern: this.determineStressResponse(primatom),
+        innovation_catalyst_type: this.determineInnovationType(primatom),
+        social_clustering_tendency: this.calculateClusteringTendency(primatom)
+      }
+    };
+  }
+
+  private getAdvancedMockRecommendations(coalition: Coalition): QlooRecommendation[] {
+    return [{
+      entity: {
+        id: 'rec-adaptive-framework',
+        name: 'Adaptive Collaboration Framework',
+        type: 'brands',
+        popularity: 91,
+        sentiment: 88,
+        cultural_impact: 95,
+        demographics: { age_groups: {}, regions: {}, interests: [] },
+        affinities: [],
+        trending_score: 93
+      },
+      confidence: 0.94,
+      reasoning: `AI-optimized for coalition size ${coalition.members.length} with cultural dynamics analysis`,
+      cultural_context: 'Next-generation collaborative intelligence paradigm',
+      predicted_adoption: 0.89,
+      strategic_value: {
+        coalition_strengthening_factor: 96,
+        network_effect_multiplier: 2.7,
+        competitive_advantage_score: 92,
+        market_timing_index: 94
+      },
+      behavioral_triggers: {
+        primary_motivator: 'Exponential collective growth through cultural alignment',
+        resistance_factors: ['Integration complexity', 'Cultural adaptation challenges'],
+        optimal_introduction_strategy: 'Pilot program with cultural validation and measurable impact demonstrations'
+      }
+    }];
+  }
+
+  // Méthodes d'analyse culturelle existantes (conservées)
+  async analyzeCulturalImpact(disruptionType: string, intensity: number): Promise<{
+    cultural_shift_prediction: number;
+    affected_demographics: string[];
+    sentiment_impact: number;
+    trend_acceleration: string[];
+  }> {
+    try {
+      if (this.isConnected) {
+        const response = await this.makeRequest('/v1/cultural/impact', {
+          'disruption_type': disruptionType,
+          'intensity': intensity,
+          'analysis_depth': 'comprehensive'
+        });
+        
+        return {
+          cultural_shift_prediction: response.shift_prediction || intensity * 12,
+          affected_demographics: response.demographics || ['digital_natives', 'early_adopters'],
+          sentiment_impact: response.sentiment_impact || -intensity * 3,
+          trend_acceleration: response.accelerated_trends || ['Adaptive Leadership', 'Resilient Communities']
+        };
+      }
+    } catch (error) {
+      console.log('❌ Cultural impact analysis failed, using simulation');
+    }
     
-    const typeModifier = {
-      'mediator': 1.2,
-      'follower': 1.15,
-      'leader': 1.1,
-      'explorer': 0.9,
-      'innovator': 0.85
-    }[primatom.behaviorType] || 1.0;
+    return {
+      cultural_shift_prediction: intensity * 12 + Math.random() * 15,
+      affected_demographics: ['digital_natives', 'early_adopters', 'cultural_leaders'],
+      sentiment_impact: -intensity * 3 + Math.random() * 10,
+      trend_acceleration: ['Adaptive Leadership', 'Resilient Communities', 'Innovation Networks']
+    };
+  }
+
+  async detectCulturalAffinities(primatom1: Primatom, primatom2: Primatom): Promise<{
+    affinity_score: number;
+    shared_interests: string[];
+    cultural_compatibility: number;
+    recommendation_overlap: number;
+  }> {
+    try {
+      if (this.isConnected) {
+        const response = await this.makeRequest('/v1/cultural/affinities', {
+          'user1_profile': {
+            'behavior_type': primatom1.behaviorType,
+            'innovation': primatom1.innovation,
+            'cooperation': primatom1.cooperation,
+            'trust': primatom1.trust
+          },
+          'user2_profile': {
+            'behavior_type': primatom2.behaviorType,
+            'innovation': primatom2.innovation,
+            'cooperation': primatom2.cooperation,
+            'trust': primatom2.trust
+          }
+        });
+        
+        return {
+          affinity_score: response.affinity_score || this.calculateBasicAffinity(primatom1, primatom2),
+          shared_interests: response.shared_interests || ['Collaborative Innovation'],
+          cultural_compatibility: response.compatibility || this.calculateBasicAffinity(primatom1, primatom2),
+          recommendation_overlap: response.overlap || 0.75
+        };
+      }
+    } catch (error) {
+      console.log('❌ Cultural affinities detection failed, using simulation');
+    }
     
-    return Math.min(95, baseScore * typeModifier);
+    const affinity = this.calculateBasicAffinity(primatom1, primatom2);
+    const sharedPatterns = this.identifySharedPatterns(primatom1, primatom2);
+    
+    return {
+      affinity_score: affinity + (sharedPatterns.length * 5),
+      shared_interests: sharedPatterns,
+      cultural_compatibility: affinity + (sharedPatterns.length * 8),
+      recommendation_overlap: (sharedPatterns.length / 3) * 100
+    };
+  }
+
+  private calculateBasicAffinity(primatom1: Primatom, primatom2: Primatom): number {
+    const behaviorCompatibility = this.getBehaviorCompatibility(primatom1.behaviorType, primatom2.behaviorType);
+    const innovationSimilarity = 100 - Math.abs(primatom1.innovation - primatom2.innovation);
+    const cooperationSimilarity = 100 - Math.abs(primatom1.cooperation - primatom2.cooperation);
+    return (behaviorCompatibility + innovationSimilarity + cooperationSimilarity) / 3;
+  }
+
+  private identifySharedPatterns(primatom1: Primatom, primatom2: Primatom): string[] {
+    const patterns: string[] = [];
+    
+    if (Math.abs(primatom1.innovation - primatom2.innovation) < 20) {
+      patterns.push('Innovation Synchrony');
+    }
+    if (Math.abs(primatom1.cooperation - primatom2.cooperation) < 15) {
+      patterns.push('Collaboration Alignment');
+    }
+    if (primatom1.behaviorType === primatom2.behaviorType) {
+      patterns.push('Behavioral Resonance');
+    }
+    
+    return patterns;
+  }
+
+  private getBehaviorCompatibility(type1: string, type2: string): number {
+    const compatibilityMatrix: Record<string, Record<string, number>> = {
+      leader: { leader: 25, follower: 85, innovator: 65, mediator: 75, explorer: 55 },
+      follower: { leader: 85, follower: 70, innovator: 50, mediator: 80, explorer: 60 },
+      innovator: { leader: 65, follower: 50, innovator: 80, mediator: 70, explorer: 90 },
+      mediator: { leader: 75, follower: 80, innovator: 70, mediator: 85, explorer: 65 },
+      explorer: { leader: 55, follower: 60, innovator: 90, mediator: 65, explorer: 75 }
+    };
+    return compatibilityMatrix[type1]?.[type2] || 50;
   }
 }
 

@@ -16,6 +16,7 @@ import EmergentIntelligenceTracker from './components/EmergentIntelligenceTracke
 import CognitiveResonanceMapper from './components/CognitiveResonanceMapper';
 import CulturalInsightsPanel from './components/CulturalInsightsPanel';
 import CultureEnginePanel from './components/CultureEnginePanel';
+import QlooConnectionTester from './components/QlooConnectionTester';
 import { Activity, BarChart3, User, Target, Brain, Zap, AlertTriangle, Users, Settings, Play, Pause, RotateCcw, Search, FileText, Cpu, Atom, Network, Waves, Globe } from 'lucide-react';
 
 function App() {
@@ -99,6 +100,7 @@ function App() {
     { id: 'resonance', label: 'Résonance Cognitive', icon: <Waves className="w-4 h-4" /> },
     { id: 'cultural', label: 'Insights Culturels', icon: <Globe className="w-4 h-4" /> },
     { id: 'culture-engine', label: 'Culture Engine', icon: <Brain className="w-4 h-4" /> },
+    { id: 'qloo-test', label: 'Qloo API Test', icon: <Wifi className="w-4 h-4" /> },
     { id: 'details', label: 'Zoom Intelligent', icon: <Search className="w-4 h-4" /> },
     { id: 'analytics', label: 'Analytics Pro', icon: <FileText className="w-4 h-4" /> },
     { id: 'scenarios', label: 'Scénarios', icon: <Target className="w-4 h-4" /> },
@@ -312,6 +314,9 @@ function App() {
                 poliSynthCore={poliSynthCore}
                 isRunning={state.isRunning}
               />
+            )}
+            {activeTab === 'qloo-test' && (
+              <QlooConnectionTester />
             )}
             {activeTab === 'details' && (
               <IntelligentZoom
