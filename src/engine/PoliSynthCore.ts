@@ -271,18 +271,24 @@ export class PoliSynthCore {
     const systemStability = state.systemStability || 75;
     const coalitionCount = state.coalitions.length;
     const avgStress = state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / state.primatoms.length;
+    const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
     
     // Logique adaptative de génération de disruptions
-    if (systemStability > 85 && coalitionCount > 3 && Math.random() < 0.03) {
+    if (systemStability > 85 && coalitionCount > 3 && Math.random() < 0.15) {
       return this.createStabilityChallenge(state);
     }
     
-    if (avgStress < 20 && Math.random() < 0.02) {
+    if (avgStress < 20 && avgInnovation > 70 && Math.random() < 0.12) {
       return this.createGrowthOpportunity(state);
     }
     
-    if (coalitionCount > 5 && Math.random() < 0.025) {
+    if (coalitionCount > 5 && systemStability < 60 && Math.random() < 0.18) {
       return this.createGovernanceChallenge(state);
+    }
+    
+    // Nouveau: Catalyseur d'innovation si potentiel détecté
+    if (avgInnovation > 80 && coalitionCount > 2 && Math.random() < 0.10) {
+      return this.createInnovationCatalyst(state);
     }
     
     return null;
@@ -337,18 +343,47 @@ export class PoliSynthCore {
   }
 
   private createGovernanceChallenge(state: SimulationState): DisruptiveEvent {
+    const intensity = Math.min(10, 6 + Math.floor(state.coalitions.length / 3));
+    
     return {
       id: `governance-challenge-${Date.now()}`,
       type: 'governance_crisis',
-      name: 'Évolution Gouvernementale Nécessaire',
-      description: 'Besoin d\'adaptation des structures de pouvoir existantes',
-      intensity: 8,
-      duration: 60,
+      name: 'Restructuration Gouvernementale Intelligente',
+      description: `Adaptation des structures de pouvoir pour ${state.coalitions.length} coalitions actives`,
+      intensity: intensity,
+      duration: 45 + (intensity * 3),
       effects: {
-        trustModifier: -0.3,
+        trustModifier: -0.2 - (intensity * 0.02),
         energyModifier: -0.1,
-        cooperationModifier: -0.2,
-        innovationModifier: 0.7
+        cooperationModifier: 0.1 + (intensity * 0.05),
+        innovationModifier: 0.5 + (intensity * 0.05)
+      },
+      emergenceConditions: {
+        minGeneration: 0,
+        requiredCoalitions: 0,
+        stabilityThreshold: 0
+      },
+      isActive: true,
+      startTime: Date.now()
+    };
+  }
+  
+  private createInnovationCatalyst(state: SimulationState): DisruptiveEvent {
+    const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
+    const intensity = Math.min(10, Math.floor(avgInnovation / 10));
+    
+    return {
+      id: `innovation-catalyst-${Date.now()}`,
+      type: 'innovation_catalyst',
+      name: 'Catalyseur d\'Innovation Collective',
+      description: `Amplification du potentiel créatif détecté (${avgInnovation.toFixed(0)}% innovation moyenne)`,
+      intensity: intensity,
+      duration: 35 + (intensity * 2),
+      effects: {
+        trustModifier: 0.2 + (intensity * 0.03),
+        energyModifier: 0.3 + (intensity * 0.04),
+        cooperationModifier: 0.4 + (intensity * 0.05),
+        innovationModifier: 0.6 + (intensity * 0.06)
       },
       emergenceConditions: {
         minGeneration: 0,
@@ -382,8 +417,8 @@ export class PoliSynthCore {
       coalitionEvolution,
       behavioralInsights,
       recommendations: this.generateFinalRecommendations(state),
-      dataQuality: this.assessDataQuality(),
-      confidenceLevel: this.calculateConfidenceLevel()
+      dataQuality: this.assessDataQuality(state),
+      confidenceLevel: this.calculateConfidenceLevel(state)
     };
   }
 
