@@ -1,4 +1,4 @@
-{/* TABLEAU DE BORD EXÉCUTIF */}
+      {/* TABLEAU DE BORD EXÉCUTIF */}
       {globalSentiment && (
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-xl">
           <div className="flex items-center justify-between mb-6">
@@ -1107,5 +1107,3 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
           </div>
         )}
       </div>
-
-      {/* TABLEAU DE BORD EXÉCUT
