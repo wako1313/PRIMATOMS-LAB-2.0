@@ -212,62 +212,66 @@ Recommandations:
 - Prévoir stratégie de diffusion progressive inter-segments`;
   };
 
-  const runCompleteAnalysis = async () => {
-    setIsAnalyzing(true);
-    
-    try {
-      if (!llmOrchestrator) {
-        // Utiliser les données simulées si pas de LLM configuré
-        console.warn('LLM non configuré, utilisation des données simulées');
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simuler délai d'analyse
-        setAnalysisResult(getFallbackAnalysisResult());
-        setSessionReport(getFallbackSessionReport());
-        return;
-      }
+const runCompleteAnalysis = async () => {
+  setIsAnalyzing(true);
 
-      // Préparer les données de simulation
-      const simulationData: SimulationData = {
-        personas: state.primatoms.map(p => ({
-          id: p.id,
-          name: p.name,
-          behaviorType: p.behaviorType,
-          culturalProfile: culturalData?.profiles.get(p.id),
-          metrics: {
-            trust: p.trust,
-            cooperation: p.cooperation,
-            innovation: p.innovation,
-            energy: p.energy,
-            stress: p.stressLevel || 0
-          }
-        })),
-        culturalAffinities: culturalData?.trends?.trending_entities || [],
-        adoptionRates: calculateAdoptionRates(),
-        frictionZones: identifyFrictionZones(),
-        propagationPath: analyzePropagationPath(),
-        timelineEvents: state.metrics.slice(-20),
-        culturalDrivers: calculateCulturalDrivers()
-      };
-
-      // Lancer l'analyse LLM
-      const result = await llmOrchestrator.analyzeSimulation(simulationData);
-      setAnalysisResult(result);
-      
-      // Générer le rapport de session
-      const report = await llmOrchestrator.generateSessionReport(simulationData, {
-        duration: Date.now() - (state.metrics[0]?.timestamp || Date.now()),
-        totalEvents: state.metrics.length,
-        coalitions: state.coalitions.length,
-        stability: state.systemStability
-      });
-      setSessionReport(report);
-      
-    } catch (error) {
-      console.error('Analysis failed:', error);
-      alert('Erreur lors de l\'analyse. Vérifiez votre configuration LLM.');
-    } finally {
-      setIsAnalyzing(false);
+  try {
+    if (!llmOrchestrator) {
+      // Utiliser les données simulées si pas de LLM configuré
+      console.warn('LLM non configuré, utilisation des données simulées');
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simuler délai d'analyse
+      setAnalysisResult(getFallbackAnalysisResult());
+      setSessionReport(getFallbackSessionReport());
+      return;
     }
-  };
+
+    // Préparer les données de simulation
+    const simulationData: SimulationData = {
+      personas: state.primatoms.map(p => ({
+        id: p.id,
+        name: p.name,
+        behaviorType: p.behaviorType,
+        // Correction : sécurise l'accès au .get
+        culturalProfile: (culturalData && culturalData.profiles && typeof culturalData.profiles.get === 'function')
+          ? culturalData.profiles.get(p.id)
+          : null,
+        metrics: {
+          trust: p.trust,
+          cooperation: p.cooperation,
+          innovation: p.innovation,
+          energy: p.energy,
+          stress: p.stressLevel || 0
+        }
+      })),
+      culturalAffinities: culturalData?.trends?.trending_entities || [],
+      adoptionRates: calculateAdoptionRates(),
+      frictionZones: identifyFrictionZones(),
+      propagationPath: analyzePropagationPath(),
+      timelineEvents: state.metrics.slice(-20),
+      culturalDrivers: calculateCulturalDrivers()
+    };
+
+    // Lancer l'analyse LLM
+    const result = await llmOrchestrator.analyzeSimulation(simulationData);
+    setAnalysisResult(result);
+
+    // Générer le rapport de session
+    const report = await llmOrchestrator.generateSessionReport(simulationData, {
+      duration: Date.now() - (state.metrics[0]?.timestamp || Date.now()),
+      totalEvents: state.metrics.length,
+      coalitions: state.coalitions.length,
+      stability: state.systemStability
+    });
+    setSessionReport(report);
+
+  } catch (error) {
+    console.error('Analysis failed:', error);
+    alert('Erreur lors de l\'analyse. Vérifiez votre configuration LLM.');
+  } finally {
+    setIsAnalyzing(false);
+  }
+};
+
 
   const getFallbackSessionReport = (): string => {
     return `# RAPPORT DE SESSION - PRIMATOMS CULTURE ENGINE
