@@ -8,7 +8,7 @@ import {
   Cpu, Eye, Target, Users, Activity, AlertTriangle, CheckCircle,
   Download, RefreshCw, Sparkles, Crown, Gem, Star, Flame, Rocket,
   BarChart3, PieChart, LineChart, Network, Waves, Radio, Lightbulb,
-  Atom, Wifi, Zap as Lightning, Pulse, Radar, Telescope
+  Atom, Wifi, Zap as Lightning, Circle, Search, Telescope
 } from 'lucide-react';
 
 interface CultureEnginePanelProps {
@@ -911,7 +911,7 @@ ${personality === 'creative' ?
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
         <div className="flex border-b border-slate-700">
           {[
-            { id: 'dashboard', label: 'Dashboard Live', icon: <Radar className="w-4 h-4" /> },
+            { id: 'dashboard', label: 'Dashboard Live', icon: <Search className="w-4 h-4" /> },
             { id: 'analysis', label: 'Analyse IA', icon: <Brain className="w-4 h-4" /> },
             { id: 'whatif', label: 'Prédictions', icon: <Telescope className="w-4 h-4" /> },
             { id: 'report', label: 'Rapport', icon: <Download className="w-4 h-4" /> }
@@ -938,7 +938,7 @@ ${personality === 'creative' ?
               <div className="flex items-center justify-between">
                 <h4 className="text-lg font-semibold text-white">Intelligence Collective Temps Réel</h4>
                 <div className="flex items-center gap-2 text-cyan-400 text-sm">
-                  <Pulse className="w-4 h-4 animate-pulse" />
+                  <Circle className="w-4 h-4 animate-pulse" />
                   Dernière mise à jour: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : 'En cours...'}
                 </div>
               </div>
