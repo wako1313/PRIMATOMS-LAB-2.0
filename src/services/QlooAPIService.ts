@@ -107,7 +107,7 @@ class QlooAPIService {
   private behavioralAnalysisEngine: BehavioralAnalysisEngine;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_QLOO_API_KEY || '';
+    this.apiKey = import.meta.env.VITE_QLOO_API_L8q5OjsxUNnY7_NFTuQmKXKYHtKshbhf8-P1zOurvY8 || '';
     this.behavioralAnalysisEngine = new BehavioralAnalysisEngine();
     
     if (!this.apiKey) {
