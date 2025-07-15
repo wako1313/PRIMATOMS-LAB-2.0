@@ -585,7 +585,6 @@
         </div>
       </div>
     </div>
-  );
 };
 
 export default PopulationControls;
