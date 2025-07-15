@@ -347,21 +347,29 @@ export class SocialDynamicsEngine {
   }
 
   setBehaviorDistribution(distribution: Record<string, number>) {
+    // Normaliser la distribution pour qu'elle totalise 1
     const total = Object.values(distribution).reduce((sum, val) => sum + val, 0);
-    if (Math.abs(total - 1) > 0.01) {
-      throw new Error('La distribution comportementale doit totaliser 100%');
+    const normalizedDistribution: Record<string, number> = {};
+    
+    if (total > 0) {
+      Object.entries(distribution).forEach(([key, value]) => {
+        normalizedDistribution[key] = value / total;
+      });
+    } else {
+      // Distribution par défaut si total = 0
+      normalizedDistribution = {
+        leader: 0.08,
+        innovator: 0.15,
+        mediator: 0.12,
+        explorer: 0.20,
+        follower: 0.45
+      };
     }
     
     this.stop();
     
     // Recalculer la distribution
-    const behaviorDistribution = {
-      leader: distribution.leader || 0.08,
-      innovator: distribution.innovator || 0.15,
-      mediator: distribution.mediator || 0.12,
-      explorer: distribution.explorer || 0.20,
-      follower: distribution.follower || 0.45
-    };
+    const behaviorDistribution = normalizedDistribution;
     
     // Régénérer les Primatoms avec la nouvelle distribution
     const primatoms: Primatom[] = [];

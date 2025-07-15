@@ -122,3 +122,20 @@ export interface CognitiveDisruptionAnalysis {
   vulnerabilityPoints: string[];
   innovationCatalysts: string[];
 }
+
+// Fix pour les imports manquants
+export interface LLMProvider {
+  provider: 'openai' | 'gemini';
+  apiKey: string;
+  model?: string;
+}
+
+export interface SimulationData {
+  personas: any[];
+  culturalAffinities: any[];
+  adoptionRates: Record<string, number>;
+  frictionZones: string[];
+  propagationPath: any[];
+  timelineEvents: any[];
+  culturalDrivers: Record<string, number>;
+}

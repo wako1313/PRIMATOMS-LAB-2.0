@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { SimulationState } from '../types';
 import { PoliSynthCore } from '../engine/PoliSynthCore';
 import { qlooService } from '../services/QlooAPIService';
-import { LLMOrchestrator, LLMProvider, SimulationData, LLMAnalysisResult } from '../services/LLMOrchestrator';
+import { LLMOrchestrator, LLMAnalysisResult } from '../services/LLMOrchestrator';
+import { LLMProvider, SimulationData } from '../types';
 import { 
   Globe, Brain, Zap, TrendingUp, Settings, Play, Pause, RotateCcw, 
   Cpu, Eye, Target, Users, Activity, AlertTriangle, CheckCircle,

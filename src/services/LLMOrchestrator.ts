@@ -1,19 +1,9 @@
-export type LLMProvider = 'openai' | 'gemini';
+import { LLMProvider, SimulationData } from '../types';
 
 export interface LLMConfig {
-  provider: LLMProvider;
+  provider: 'openai' | 'gemini';
   apiKey: string;
   model?: string;
-}
-
-export interface SimulationData {
-  personas: any[];
-  culturalAffinities: any[];
-  adoptionRates: Record<string, number>;
-  frictionZones: string[];
-  propagationPath: any[];
-  timelineEvents: any[];
-  culturalDrivers: Record<string, number>;
 }
 
 export interface LLMAnalysisResult {

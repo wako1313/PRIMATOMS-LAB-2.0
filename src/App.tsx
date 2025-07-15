@@ -17,7 +17,7 @@ import CognitiveResonanceMapper from './components/CognitiveResonanceMapper';
 import CulturalInsightsPanel from './components/CulturalInsightsPanel';
 import CultureEnginePanel from './components/CultureEnginePanel';
 import QlooConnectionTester from './components/QlooConnectionTester';
-import { Activity, BarChart3, User, Target, Brain, Zap, AlertTriangle, Users, Settings, Play, Pause, RotateCcw, Search, FileText, Cpu, Atom, Network, Waves, Globe } from 'lucide-react';
+import { Activity, BarChart3, User, Target, Brain, Zap, AlertTriangle, Users, Settings, Play, Pause, RotateCcw, Search, FileText, Cpu, Atom, Network, Waves, Globe, Wifi } from 'lucide-react';
 
 function App() {
   const [engine] = useState(() => new SocialDynamicsEngine());

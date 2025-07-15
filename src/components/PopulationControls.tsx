@@ -80,14 +80,6 @@ const PopulationControls: React.FC<PopulationControlsProps> = ({
   const handleDistributionChange = (type: keyof BehaviorDistribution, value: number) => {
     const newDistribution = { ...tempDistribution, [type]: value / 100 };
     
-    // Normalisation automatique pour maintenir 100%
-    const total = Object.values(newDistribution).reduce((sum, val) => sum + val, 0);
-    if (total > 0) {
-      Object.keys(newDistribution).forEach(key => {
-        newDistribution[key as keyof BehaviorDistribution] /= total;
-      });
-    }
-    
     setTempDistribution(newDistribution);
   };
 
