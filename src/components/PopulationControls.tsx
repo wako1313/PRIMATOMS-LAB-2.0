@@ -579,11 +579,16 @@
                 </span>
                 <span className="text-green-400">
                   ⚡ {trendingEntities.length} tendances suivies
-                <div>
+                <>
           </div>
         </div>
       </div>
     </div>
+        </>
+  );
+};
+
+export default PopulationControls;
         </div>
   );
 };
