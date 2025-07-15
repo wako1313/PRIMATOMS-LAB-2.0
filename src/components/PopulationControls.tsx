@@ -579,8 +579,7 @@
                 </span>
                 <span className="text-green-400">
                   ⚡ {trendingEntities.length} tendances suivies
-                </span>
-              </div>
+</span>
             </div>
           </div>
         </div>
@@ -588,6 +587,8 @@
     </div>
   );
 };
+
+export default PopulationControls;
 
 export default CulturalInsightsPanel;import React, { useState, useEffect } from 'react';
 import { SimulationState } from '../types';
