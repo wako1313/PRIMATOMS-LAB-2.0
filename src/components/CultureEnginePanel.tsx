@@ -1,3 +1,22 @@
+import React, { useState, useEffect } from 'react';
+import { SimulationState } from '../types';
+import { PoliSynthCore } from '../engine/PoliSynthCore';
+import { LLMOrchestrator, LLMAnalysisResult } from '../services/LLMOrchestrator';
+import { LLMProvider, SimulationData } from '../types';
+import { 
+  Globe, Brain, Zap, TrendingUp, Settings, Play, Pause, RotateCcw, 
+  Cpu, Eye, Target, Users, Activity, AlertTriangle, CheckCircle,
+  Download, RefreshCw, Sparkles, Crown, Gem, Star, Flame, Rocket,
+  BarChart3, PieChart, LineChart, Network, Waves, Radio, Lightbulb,
+  Atom, Wifi, Zap as Lightning, Circle, Search, Telescope
+} from 'lucide-react';
+
+interface CultureEnginePanelProps {
+  state: SimulationState;
+  poliSynthCore: PoliSynthCore;
+  isRunning: boolean;
+}
+
 *Rapport généré par ${llmProvider === 'openai' ? 'GPT-4o Advanced' : 'Gemini 2.5 Flash'} - ${new Date().toLocaleString()}*
 *Système PRIMATOMS CULTURE ENGINE - Intelligence Collective Émergente*`;
   };
