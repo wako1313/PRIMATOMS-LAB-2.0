@@ -72,8 +72,10 @@ export class LLMOrchestrator {
     }
   }
 
-  async explainCulturalDriver(data: SimulationData, driver: string): Promise<string> {
-    const prompt = this.buildDriverExplanationPrompt(data, driver);
+    async explainCulturalDriver(data: SimulationData, driver: string): Promise<string> {
+    if (SIM_MODE) {
+      return `Facteur simulé : "${driver}" joue un rôle déterminant selon Qloo, principalement sur les segments jeunes urbains.`;
+    }
     
     try {
       const response = await this.callLLM(prompt, 'explanation');
