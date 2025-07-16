@@ -29,7 +29,9 @@ export class DisruptionEngine {
   private eventHistory: DisruptiveEvent[] = [];
 
   constructor() {
+    this.loadStateFromSession();
     this.initializePredefinedEvents();
+    this.saveStateToSession();
   }
 
   private initializePredefinedEvents(): void {
@@ -142,6 +144,23 @@ export class DisruptionEngine {
     ];
   }
 
+  private loadStateFromSession(): void {
+    const savedState = sessionStorage.getItem('disruptionEngineState');
+    if (savedState) {
+      const { activeEvents, eventHistory } = JSON.parse(savedState);
+      this.activeEvents = activeEvents.map((e: any) => ({ ...e, effects: { ...e.effects }, emergenceConditions: { ...e.emergenceConditions } }));
+      this.eventHistory = eventHistory.map((e: any) => ({ ...e, effects: { ...e.effects }, emergenceConditions: { ...e.emergenceConditions } }));
+    }
+  }
+
+  private saveStateToSession(): void {
+    const state = {
+      activeEvents: this.activeEvents,
+      eventHistory: this.eventHistory
+    };
+    sessionStorage.setItem('disruptionEngineState', JSON.stringify(state));
+  }
+
   evaluateDisruptionTriggers(state: SimulationState): DisruptiveEvent[] {
     const triggeredEvents: DisruptiveEvent[] = [];
     
@@ -150,101 +169,91 @@ export class DisruptionEngine {
         const activatedEvent = { ...event, isActive: true, startTime: Date.now() };
         triggeredEvents.push(activatedEvent);
         this.activeEvents.push(activatedEvent);
-        
-        // Retirer de la liste des événements disponibles
         this.events = this.events.filter(e => e.id !== event.id);
       }
     });
 
+    this.saveStateToSession();
     return triggeredEvents;
   }
 
   private shouldTriggerEvent(event: DisruptiveEvent, state: SimulationState): boolean {
-    // Vérification des conditions d'émergence
     if (state.generation < event.emergenceConditions.minGeneration) return false;
     if (state.coalitions.length < event.emergenceConditions.requiredCoalitions) return false;
     
-    // Calcul de la stabilité actuelle
     const avgStability = this.calculateSystemStability(state);
     if (avgStability < event.emergenceConditions.stabilityThreshold) return false;
 
-    // Probabilité d'activation basée sur l'intensité et le contexte
     const activationProbability = this.calculateActivationProbability(event, state);
     return Math.random() < activationProbability;
   }
 
   private calculateSystemStability(state: SimulationState): number {
-    const avgTrust = state.primatoms.reduce((sum, p) => sum + p.trust, 0) / state.primatoms.length;
-    const avgCooperation = state.primatoms.reduce((sum, p) => sum + p.cooperation, 0) / state.primatoms.length;
+    const avgTrust = state.primatoms.reduce((sum, p) => sum + p.trust, 0) / Math.max(1, state.primatoms.length);
+    const avgCooperation = state.primatoms.reduce((sum, p) => sum + p.cooperation, 0) / Math.max(1, state.primatoms.length);
     const coalitionStability = state.coalitions.reduce((sum, c) => sum + c.cohesion, 0) / Math.max(1, state.coalitions.length);
     
     return (avgTrust + avgCooperation + coalitionStability) / 3;
   }
 
   private calculateActivationProbability(event: DisruptiveEvent, state: SimulationState): number {
-    // Base probability inversely related to intensity
     let probability = 0.02 / event.intensity;
     
-    // Contextual modifiers
     if (state.generation > event.emergenceConditions.minGeneration + 5) {
-      probability *= 1.5; // Plus probable avec le temps
+      probability *= 1.5;
     }
     
     if (state.coalitions.length > event.emergenceConditions.requiredCoalitions + 2) {
-      probability *= 1.3; // Plus de coalitions = plus de complexité
+      probability *= 1.3;
     }
 
-    return Math.min(0.1, probability); // Cap à 10% par cycle
+    return Math.min(0.1, probability);
   }
 
   applyDisruptiveEffects(primatoms: Primatom[], coalitions: Coalition[]): void {
     this.activeEvents.forEach(event => {
-      this.applyEventEffects(event, primatoms, coalitions);
+      const updatedEvent = { ...event };
+      this.applyEventEffects(updatedEvent, primatoms, coalitions);
       
-      // Décrémenter la durée
-      event.duration--;
-      
-      // Désactiver si terminé
-      if (event.duration <= 0) {
-        event.isActive = false;
-        this.eventHistory.push(event);
-        this.activeEvents = this.activeEvents.filter(e => e.id !== event.id);
+      updatedEvent.duration--;
+      if (updatedEvent.duration <= 0) {
+        updatedEvent.isActive = false;
+        this.eventHistory.push({ ...updatedEvent });
+        this.activeEvents = this.activeEvents.filter(e => e.id !== updatedEvent.id);
+      } else {
+        this.activeEvents = this.activeEvents.map(e => e.id === updatedEvent.id ? updatedEvent : e);
       }
     });
+
+    this.saveStateToSession();
   }
 
   private applyEventEffects(event: DisruptiveEvent, primatoms: Primatom[], coalitions: Coalition[]): void {
     const intensityFactor = event.intensity / 10;
     
     primatoms.forEach(primatom => {
-      // Application des modificateurs avec variation stochastique
-      const variance = 0.2; // 20% de variation
-      
+      const variance = 0.2;
       primatom.trust += (event.effects.trustModifier * intensityFactor) * (1 + (Math.random() - 0.5) * variance);
       primatom.energy += (event.effects.energyModifier * intensityFactor) * (1 + (Math.random() - 0.5) * variance);
       primatom.cooperation += (event.effects.cooperationModifier * intensityFactor) * (1 + (Math.random() - 0.5) * variance);
       primatom.innovation += (event.effects.innovationModifier * intensityFactor) * (1 + (Math.random() - 0.5) * variance);
       
-      // Contraintes réalistes
       primatom.trust = Math.max(0, Math.min(100, primatom.trust));
       primatom.energy = Math.max(0, Math.min(100, primatom.energy));
       primatom.cooperation = Math.max(0, Math.min(100, primatom.cooperation));
       primatom.innovation = Math.max(0, Math.min(100, primatom.innovation));
       
-      // Ajout de mémoires liées à l'événement
       if (Math.random() < 0.3) {
         primatom.memories.push(`Événement-${event.name}-${Date.now()}`);
       }
     });
 
-    // Effets sur les coalitions
     coalitions.forEach(coalition => {
       if (event.type === 'governance_crisis') {
-        coalition.cohesion *= 0.8; // Crise de gouvernance affaiblit la cohésion
+        coalition.cohesion *= 0.8;
       } else if (event.type === 'innovation_catalyst') {
-        coalition.cohesion *= 1.1; // Innovation renforce la collaboration
+        coalition.cohesion *= 1.1;
       }
-      
       coalition.cohesion = Math.max(0, Math.min(100, coalition.cohesion));
     });
   }
@@ -257,7 +266,6 @@ export class DisruptionEngine {
     return [...this.eventHistory];
   }
 
-  // Méthode pour injection manuelle d'événements (mode recherche)
   injectCustomEvent(eventConfig: Partial<DisruptiveEvent>): DisruptiveEvent {
     const customEvent: DisruptiveEvent = {
       id: `custom-${Date.now()}`,
@@ -282,10 +290,10 @@ export class DisruptionEngine {
     };
 
     this.activeEvents.push(customEvent);
+    this.saveStateToSession();
     return customEvent;
   }
 
-  // Analyse prédictive des impacts
   predictEventImpact(event: DisruptiveEvent, currentState: SimulationState): {
     trustImpact: number;
     cooperationImpact: number;
@@ -328,10 +336,17 @@ export class DisruptionEngine {
   private calculateEmergenceProbability(event: DisruptiveEvent, state: SimulationState): number {
     let probability = event.intensity * 0.1;
     
-    // Facteurs contextuels
     if (state.coalitions.length > 3) probability += 0.2;
     if (state.generation > 10) probability += 0.15;
     
     return Math.min(1, probability);
+  }
+
+  reset(): void {
+    this.activeEvents = [];
+    this.eventHistory = [];
+    this.events = [];
+    this.initializePredefinedEvents();
+    sessionStorage.removeItem('disruptionEngineState');
   }
 }
