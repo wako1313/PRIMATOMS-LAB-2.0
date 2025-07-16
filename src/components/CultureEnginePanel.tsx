@@ -706,16 +706,16 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
             </div>
             <div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                PRIMATOMS CULTURE ENGINE v3.0
+                PRIMATOMS CULTURE ENGINE
               </h2>
               <p className="text-slate-400 text-sm">
-                {llmProvider === 'openai' ? 'GPT-4o Advanced Quantum' : 'Gemini 2.5 Flash Thinking'} • Intelligence Collective Transcendante • Population: {state.primatoms.length}
+                {llmProvider === 'openai' ? 'GPT-4o Advanced Analytics' : 'Gemini 2.5 Deep Analysis'} • Intelligence Collective • Population: {state.primatoms.length}
               </p>
             </div>
             {isAnalyzing && (
               <div className="flex items-center gap-2 px-3 py-1 bg-purple-500/20 rounded-full">
                 <Orbit className="w-4 h-4 text-purple-400 animate-spin" />
-                <span className="text-purple-400 text-xs font-medium">IA Quantum Thinking...</span>
+                <span className="text-purple-400 text-xs font-medium">IA Processing...</span>
               </div>
             )}
           </div>
@@ -726,7 +726,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg"
           >
             <Rocket className="w-4 h-4" />
-            Analyse Hyperdimensionnelle
+            Analyse Avancée
           </button>
         </div>
 
@@ -735,7 +735,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
           <div className="mb-6 bg-gradient-to-r from-slate-700/30 via-purple-900/20 to-slate-700/30 rounded-lg p-4 border border-cyan-500/30">
             <h3 className="text-cyan-400 font-medium mb-2 flex items-center gap-2">
               <Atom className="w-4 h-4 animate-pulse" />
-              Intelligence Quantique Temps Réel
+              Intelligence Collective Temps Réel
             </h3>
             <div className="space-y-1">
               {realTimeInsights.map((insight, i) => (
@@ -767,7 +767,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
               <Wifi className="w-4 h-4 text-green-400" />
               <span className="text-sm font-medium text-gray-300">Quantum Live</span>
             </div>
-            <div className="text-xl font-bold text-green-400">TRANSCENDENT</div>
+            <div className="text-xl font-bold text-green-400">ACTIVE</div>
             <div className="text-xs text-green-300">Émergence {advancedMetrics ? calculateEmergenceLevel(advancedMetrics).toFixed(0) : 0}%</div>
           </div>
 
@@ -808,7 +808,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Settings className="w-5 h-5 text-purple-400" />
-          Configuration Intelligence Artificielle Quantique
+          Configuration Intelligence Artificielle
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -824,7 +824,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                 }`}
               >
                 <Brain className="w-4 h-4" />
-                GPT-4o Quantum
+                GPT-4o Advanced
               </button>
               <button
                 onClick={() => setLlmProvider('gemini')}
@@ -835,7 +835,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                 }`}
               >
                 <Sparkles className="w-4 h-4" />
-                Gemini 2.5 Thinking
+                Gemini 2.5 Pro
               </button>
             </div>
           </div>
@@ -847,11 +847,11 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
               onChange={(e) => setAiPersonality(e.target.value as any)}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-purple-500 focus:outline-none"
             >
-              <option value="analytical">🔬 Analytique - Précision Quantique</option>
-              <option value="creative">🎨 Créative - Vision Transcendante</option>
-              <option value="strategic">📈 Stratégique - Focus Émergence</option>
-              <option value="visionary">🌌 Visionnaire - Perspective Cosmique</option>
-              <option value="revolutionary">🚀 Révolutionnaire - Disruption Totale</option>
+              <option value="analytical">🔬 Analytique - Précision Scientifique</option>
+              <option value="creative">🎨 Créative - Vision Stratégique</option>
+              <option value="strategic">📈 Stratégique - Focus Business</option>
+              <option value="visionary">🌌 Visionnaire - Perspective Systémique</option>
+              <option value="revolutionary">🚀 Révolutionnaire - Innovation Disruptive</option>
             </select>
           </div>
 
@@ -864,8 +864,8 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
             >
               <option value="surface">🌊 Surface - Rapide</option>
               <option value="deep">🔍 Profonde - Détaillée</option>
-              <option value="quantum">⚛️ Quantique - Transcendante</option>
-              <option value="multidimensional">🌌 Multi-dimensionnelle - Ultime</option>
+              <option value="quantum">⚛️ Avancée - Complète</option>
+              <option value="multidimensional">🌌 Multi-factorielle - Exhaustive</option>
             </select>
           </div>
         </div>
@@ -873,13 +873,13 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
         <div className="mt-4 p-4 bg-gradient-to-r from-green-500/10 via-blue-500/10 to-purple-500/10 border border-green-500/30 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="w-5 h-5 text-green-400" />
-            <span className="text-green-400 font-medium">Système Transcendant - Intelligence Collective Quantique Active</span>
+            <span className="text-green-400 font-medium">Système Actif - Intelligence Collective Active</span>
           </div>
           <p className="text-xs text-green-300">
-            ✅ Qloo Quantum Intelligence: Données temps réel sur {state.primatoms.length} primatoms évolués<br/>
-            ✅ {llmProvider === 'openai' ? 'GPT-4o Advanced Quantum' : 'Gemini 2.5 Flash Thinking'}: Analyse comportementale hyperdimensionnelle<br/>
-            ✅ Prédictions quantiques: Émergence collective transcendante détectée et optimisée<br/>
-            ✅ Métriques avancées: Coefficient viral, gravité culturelle, cohésion quantique actifs
+            ✅ Cultural Intelligence: Données temps réel sur {state.primatoms.length} primatoms<br/>
+            ✅ {llmProvider === 'openai' ? 'GPT-4o Advanced Analytics' : 'Gemini 2.5 Pro Analysis'}: Analyse comportementale avancée<br/>
+            ✅ Prédictions intelligentes: Émergence collective détectée et optimisée<br/>
+            ✅ Métriques avancées: Coefficient viral, gravité culturelle, cohésion sociale actifs
           </p>
         </div>
       </div>
@@ -888,12 +888,12 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
         <div className="flex flex-wrap border-b border-slate-700">
           {[
-            { id: 'dashboard', label: 'Dashboard Quantique', icon: <Atom className="w-4 h-4" /> },
+            { id: 'dashboard', label: 'Dashboard Live', icon: <Atom className="w-4 h-4" /> },
             { id: 'analysis', label: 'Analyse IA', icon: <Brain className="w-4 h-4" /> },
             { id: 'predictions', label: 'Prédictions', icon: <Telescope className="w-4 h-4" /> },
             { id: 'dna', label: 'ADN Culturel', icon: <Dna className="w-4 h-4" /> },
-            { id: 'quantum', label: 'Quantum Lab', icon: <Atom className="w-4 h-4" /> },
-            { id: 'whatif', label: 'What-If', icon: <Wand2 className="w-4 h-4" /> },
+            { id: 'quantum', label: 'Lab Avancé', icon: <Atom className="w-4 h-4" /> },
+            { id: 'whatif', label: 'Simulation', icon: <Wand2 className="w-4 h-4" /> },
             { id: 'report', label: 'Rapport', icon: <Download className="w-4 h-4" /> }
           ].map((tab) => (
             <button
@@ -917,7 +917,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
             <div className="space-y-6">
               <h4 className="text-lg font-semibold text-white flex items-center gap-2">
                 <Atom className="w-5 h-5 text-purple-400" />
-                Intelligence Collective Quantique Temps Réel
+                Intelligence Collective Temps Réel
               </h4>
               
               {advancedMetrics && culturalData ? (
@@ -1026,7 +1026,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
               ) : (
                 <div className="text-center py-8 text-gray-400">
                   <Atom className="w-12 h-12 mx-auto mb-3 opacity-50 animate-pulse" />
-                  <p>Initialisation intelligence collective quantique...</p>
+                  <p>Initialisation intelligence collective...</p>
                 </div>
               )}
             </div>
@@ -1038,7 +1038,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
               <div className="flex items-center justify-between">
                 <h4 className="text-lg font-semibold text-white flex items-center gap-2">
                   <Brain className="w-5 h-5 text-purple-400" />
-                  Analyse Comportementale IA Hyperdimensionnelle
+                  Analyse Comportementale IA Avancée
                 </h4>
                 <button
                   onClick={runHyperAnalysis}
@@ -1046,7 +1046,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 text-white rounded-lg text-sm"
                 >
                   <Rocket className="w-4 h-4" />
-                  {isAnalyzing ? 'IA Quantique...' : 'Hyper-Analyse'}
+                  {isAnalyzing ? 'IA en cours...' : 'Analyse Approfondie'}
                 </button>
               </div>
 
@@ -1055,7 +1055,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-6 border border-purple-500/30">
                     <h5 className="font-medium text-white mb-3 flex items-center gap-2">
                       <Atom className="w-4 h-4" />
-                      Résumé Exécutif Quantique
+                      Résumé Exécutif
                     </h5>
                     <p className="text-gray-300 text-sm">{analysisResult.executiveSummary}</p>
                   </div>
@@ -1064,7 +1064,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                     <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
                       <h5 className="font-medium text-white mb-2 flex items-center gap-2">
                         <Lightbulb className="w-4 h-4 text-yellow-400" />
-                        Insights Culturels Transcendants
+                        Insights Culturels Avancés
                       </h5>
                       <ul className="space-y-1 max-h-40 overflow-y-auto">
                         {analysisResult.culturalInsights.map((insight, i) => (
@@ -1089,7 +1089,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
               ) : (
                 <div className="text-center py-12 text-gray-400">
                   <Brain className="w-16 h-16 mx-auto mb-4 opacity-50 animate-pulse" />
-                  <p className="text-lg mb-2">IA Quantique Prête pour Hyper-Analyse</p>
+                  <p className="text-lg mb-2">IA Prête pour Analyse Approfondie</p>
                   <p className="text-sm">Population: {state.primatoms.length} • Coalitions: {state.coalitions.length} • Mode: {deepAnalysisMode}</p>
                 </div>
               )}
