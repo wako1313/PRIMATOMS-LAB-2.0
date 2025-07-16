@@ -526,7 +526,10 @@ class QlooAPIService {
         await this.testConnection();
       }
       
-      console.log('📊 Generating simulated trending data');
+      if (!this.lastCall || Date.now() - this.lastCall > 5000) {
+  this.lastCall = Date.now();
+  console.log('📊 Generating simulated trending data');
+}
       return this.getAdvancedMockTrendingData();
     } catch (error) {
       console.error('❌ Failed to fetch global trends:', error);
