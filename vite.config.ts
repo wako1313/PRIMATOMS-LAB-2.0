@@ -9,15 +9,3 @@ export default defineConfig({
   },
 });
 
-// vite.config.ts
-export default {
-  server: {
-    proxy: {
-      '/collect': {
-        target: 'https://appsignal-endpoint.net',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/collect/, ''),
-      },
-    },
-  },
-};
