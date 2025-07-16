@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { DisruptiveEvent, SimulationState } from '../types';
 import { Zap, AlertTriangle, TrendingUp, Shield, Users, Brain, Target, Clock, Activity } from 'lucide-react';
 
@@ -15,51 +15,36 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
   const [customName, setCustomName] = useState('');
   const [customDescription, setCustomDescription] = useState('');
   const [predictionResult, setPredictionResult] = useState<any>(null);
+  const [disruptionHistory, setDisruptionHistory] = useState<Partial<DisruptiveEvent>[]>([]);
 
   const eventTypes = [
-    { 
-      type: 'resource_scarcity' as const, 
-      name: 'Rareté des Ressources', 
-      icon: <AlertTriangle className="w-4 h-4" />,
-      color: 'text-red-400',
-      description: 'Réduction des ressources disponibles'
-    },
-    { 
-      type: 'environmental_change' as const, 
-      name: 'Changement Environnemental', 
-      icon: <TrendingUp className="w-4 h-4" />,
-      color: 'text-orange-400',
-      description: 'Modification des conditions environnementales'
-    },
-    { 
-      type: 'newcomer_arrival' as const, 
-      name: 'Arrivée de Nouveaux Membres', 
-      icon: <Users className="w-4 h-4" />,
-      color: 'text-blue-400',
-      description: 'Intégration de nouveaux Primatoms'
-    },
-    { 
-      type: 'innovation_catalyst' as const, 
-      name: 'Catalyseur d\'Innovation', 
-      icon: <Brain className="w-4 h-4" />,
-      color: 'text-purple-400',
-      description: 'Stimulation de l\'innovation collective'
-    },
-    { 
-      type: 'governance_crisis' as const, 
-      name: 'Crise de Gouvernance', 
-      icon: <Target className="w-4 h-4" />,
-      color: 'text-yellow-400',
-      description: 'Remise en question des structures de pouvoir'
-    },
-    { 
-      type: 'conflict_trigger' as const, 
-      name: 'Déclencheur de Conflit', 
-      icon: <Shield className="w-4 h-4" />,
-      color: 'text-red-500',
-      description: 'Génération de tensions sociales'
-    }
+    { type: 'resource_scarcity', name: 'Rareté des Ressources', icon: <AlertTriangle className="w-4 h-4" />, color: 'text-red-400', description: 'Réduction des ressources disponibles' },
+    { type: 'environmental_change', name: 'Changement Environnemental', icon: <TrendingUp className="w-4 h-4" />, color: 'text-orange-400', description: 'Modification des conditions environnementales' },
+    { type: 'newcomer_arrival', name: 'Arrivée de Nouveaux Membres', icon: <Users className="w-4 h-4" />, color: 'text-blue-400', description: 'Intégration de nouveaux Primatoms' },
+    { type: 'innovation_catalyst', name: 'Catalyseur d\'Innovation', icon: <Brain className="w-4 h-4" />, color: 'text-purple-400', description: 'Stimulation de l\'innovation collective' },
+    { type: 'governance_crisis', name: 'Crise de Gouvernance', icon: <Target className="w-4 h-4" />, color: 'text-yellow-400', description: 'Remise en question des structures de pouvoir' },
+    { type: 'conflict_trigger', name: 'Déclencheur de Conflit', icon: <Shield className="w-4 h-4" />, color: 'text-red-500', description: 'Génération de tensions sociales' },
   ];
+
+  const generateEffects = useCallback((type: DisruptiveEvent['type'], intensity: number) => {
+    const factor = intensity / 10;
+    switch (type) {
+      case 'resource_scarcity':
+        return { trustModifier: -0.3 * factor, energyModifier: -0.5 * factor, cooperationModifier: 0.2 * factor, innovationModifier: 0.4 * factor };
+      case 'innovation_catalyst':
+        return { trustModifier: 0.2 * factor, energyModifier: 0.3 * factor, cooperationModifier: 0.4 * factor, innovationModifier: 0.6 * factor };
+      case 'governance_crisis':
+        return { trustModifier: -0.4 * factor, energyModifier: -0.2 * factor, cooperationModifier: -0.3 * factor, innovationModifier: 0.5 * factor };
+      case 'newcomer_arrival':
+        return { trustModifier: -0.1 * factor, energyModifier: 0.1 * factor, cooperationModifier: -0.2 * factor, innovationModifier: 0.3 * factor };
+      case 'environmental_change':
+        return { trustModifier: 0.1 * factor, energyModifier: -0.6 * factor, cooperationModifier: 0.5 * factor, innovationModifier: 0.7 * factor };
+      case 'conflict_trigger':
+        return { trustModifier: -0.5 * factor, energyModifier: -0.3 * factor, cooperationModifier: -0.4 * factor, innovationModifier: 0.2 * factor };
+      default:
+        return { trustModifier: 0, energyModifier: 0, cooperationModifier: 0, innovationModifier: 0 };
+    }
+  }, []);
 
   const handleInjectEvent = () => {
     const eventConfig: Partial<DisruptiveEvent> = {
@@ -68,10 +53,11 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
       description: customDescription || eventTypes.find(t => t.type === selectedEventType)?.description,
       intensity: eventIntensity,
       duration: eventDuration,
-      effects: generateEffects(selectedEventType, eventIntensity)
+      effects: generateEffects(selectedEventType, eventIntensity),
+      timestamp: new Date().toISOString(),
     };
-
     onInjectEvent(eventConfig);
+    setDisruptionHistory(prev => [...prev, eventConfig].slice(-10)); // Limit history to last 10 events
   };
 
   const handlePredictImpact = () => {
@@ -79,78 +65,30 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
       type: selectedEventType,
       intensity: eventIntensity,
       duration: eventDuration,
-      effects: generateEffects(selectedEventType, eventIntensity)
+      effects: generateEffects(selectedEventType, eventIntensity),
     };
-
     const result = onPredictImpact(eventConfig);
     setPredictionResult(result);
   };
 
-  const generateEffects = (type: DisruptiveEvent['type'], intensity: number) => {
-    const factor = intensity / 10;
-    
-    switch (type) {
-      case 'resource_scarcity':
-        return {
-          trustModifier: -0.3 * factor,
-          energyModifier: -0.5 * factor,
-          cooperationModifier: 0.2 * factor,
-          innovationModifier: 0.4 * factor
-        };
-      case 'innovation_catalyst':
-        return {
-          trustModifier: 0.2 * factor,
-          energyModifier: 0.3 * factor,
-          cooperationModifier: 0.4 * factor,
-          innovationModifier: 0.6 * factor
-        };
-      case 'governance_crisis':
-        return {
-          trustModifier: -0.4 * factor,
-          energyModifier: -0.2 * factor,
-          cooperationModifier: -0.3 * factor,
-          innovationModifier: 0.5 * factor
-        };
-      case 'newcomer_arrival':
-        return {
-          trustModifier: -0.1 * factor,
-          energyModifier: 0.1 * factor,
-          cooperationModifier: -0.2 * factor,
-          innovationModifier: 0.3 * factor
-        };
-      case 'environmental_change':
-        return {
-          trustModifier: 0.1 * factor,
-          energyModifier: -0.6 * factor,
-          cooperationModifier: 0.5 * factor,
-          innovationModifier: 0.7 * factor
-        };
-      case 'conflict_trigger':
-        return {
-          trustModifier: -0.5 * factor,
-          energyModifier: -0.3 * factor,
-          cooperationModifier: -0.4 * factor,
-          innovationModifier: 0.2 * factor
-        };
-      default:
-        return {
-          trustModifier: 0,
-          energyModifier: 0,
-          cooperationModifier: 0,
-          innovationModifier: 0
-        };
+  useEffect(() => {
+    // Sync active disruptions with history if not already present
+    const activeEvents = state.activeDisruptions || [];
+    const newHistory = activeEvents.filter(event => 
+      !disruptionHistory.some(h => h.timestamp === event.timestamp)
+    ).map(event => ({ ...event, timestamp: event.timestamp }));
+    if (newHistory.length > 0) {
+      setDisruptionHistory(prev => [...prev, ...newHistory].slice(-10));
     }
-  };
+  }, [state.activeDisruptions, disruptionHistory]);
 
   return (
     <div className="space-y-6">
-      {/* Événements actifs */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Activity className="w-5 h-5 text-cyan-400" />
           Disruptions Actives
         </h3>
-        
         {state.activeDisruptions && state.activeDisruptions.length > 0 ? (
           <div className="space-y-3">
             {state.activeDisruptions.map((event, index) => (
@@ -193,7 +131,6 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
         )}
       </div>
 
-      {/* Injection manuelle d'événements */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Brain className="w-5 h-5 text-purple-400" />
@@ -201,7 +138,6 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
         </h3>
 
         <div className="space-y-4">
-          {/* Sélection du type d'événement */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Type d'Événement</label>
             <div className="grid grid-cols-2 gap-2">
@@ -225,7 +161,6 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
             </div>
           </div>
 
-          {/* Paramètres de l'événement */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -255,7 +190,6 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
             </div>
           </div>
 
-          {/* Personnalisation */}
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Nom Personnalisé</label>
@@ -279,7 +213,6 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <button
               onClick={handlePredictImpact}
@@ -299,14 +232,12 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
         </div>
       </div>
 
-      {/* Résultats de prédiction */}
       {predictionResult && (
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-400" />
             Analyse Prédictive d'Impact
           </h3>
-          
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
               <h4 className="text-sm font-medium text-gray-300 mb-1">Impact Confiance</h4>
@@ -342,14 +273,12 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
         </div>
       )}
 
-      {/* Phénomènes émergents détectés */}
       {state.emergentPhenomena && state.emergentPhenomena.length > 0 && (
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Brain className="w-5 h-5 text-purple-400" />
             Phénomènes Émergents Détectés
           </h3>
-          
           <div className="space-y-2">
             {state.emergentPhenomena.map((phenomenon, index) => (
               <div key={index} className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
@@ -359,8 +288,36 @@ const DisruptionPanel: React.FC<DisruptionPanelProps> = ({ state, onInjectEvent,
           </div>
         </div>
       )}
+
+      {disruptionHistory.length > 0 && (
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-gray-400" />
+            Historique des Disruptions (Derniers 10 Événements)
+          </h3>
+          <div className="space-y-3">
+            {disruptionHistory.map((event, index) => (
+              <div key={index} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-white flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-yellow-400" />
+                    {event.name}
+                  </h4>
+                  <span className="text-sm text-gray-400">
+                    {new Date(event.timestamp || '').toLocaleTimeString()}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-300 mb-2">{event.description}</p>
+                <div className="text-xs text-gray-400">
+                  Intensité: {event.intensity}/10 | Durée: {event.duration} cycles
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default DisruptionPanel;
+export default React.memo(DisruptionPanel);
