@@ -47,6 +47,21 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
     }
   }, [selectedPrimatom]);
 
+  // Gestion du zoom avec la molette
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    setZoom(prev => Math.max(0.3, Math.min(5, prev * zoomFactor)));
+  }, []);
+
+  useEffect(() => {
+    const svgElement = svgRef.current;
+    if (svgElement) {
+      svgElement.addEventListener('wheel', handleWheel, { passive: false });
+      return () => svgElement.removeEventListener('wheel', handleWheel);
+    }
+  }, [handleWheel, svgRef]);
+
   const performVisualZoomOnPrimatom = (primatom: Primatom) => {
     setIsVisualZooming(true);
     setVisualZoomTarget(primatom);
@@ -268,13 +283,6 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
     setIsPanning(false);
   }, []);
 
-  // Gestion du zoom avec la molette
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prev => Math.max(0.3, Math.min(5, prev * zoomFactor)));
-  }, []);
-
   // Gestion du clic sur un Primatom avec zoom visuel focalisé
   const handlePrimatomClick = (primatom: Primatom, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -443,7 +451,6 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          onWheel={(e) => { handleWheel(e); }} // Correction ici
         >
           {/* Grille de fond subtile */}
           <defs>
