@@ -818,7 +818,10 @@ class QlooAPIService {
 
   // Données de simulation avancées (fallback)
   private getAdvancedMockTrendingData(): QlooTrendingData {
-    console.log('📊 Generating advanced mock trending data');
+    if (!this.lastAdvancedCall || Date.now() - this.lastAdvancedCall > 5000) {
+  this.lastAdvancedCall = Date.now();
+  console.log('📊 Generating advanced mock trending data');
+}
     return {
       timestamp: Date.now(),
       trending_entities: [
