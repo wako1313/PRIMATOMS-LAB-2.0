@@ -1,3 +1,4 @@
+// App.tsx
 import React, { useState, useEffect } from 'react';
 import { SocialDynamicsEngine } from './engine/SocialDynamicsEngine';
 import { PoliSynthCore } from './engine/PoliSynthCore';
@@ -24,9 +25,10 @@ function App() {
   const [poliSynthCore] = useState(() => new PoliSynthCore());
   const [state, setState] = useState<SimulationState>(engine.getState());
   const [selectedPrimatom, setSelectedPrimatom] = useState<Primatom | null>(null);
-  const [activeTab, setActiveTab] = useState<'simulation' | 'metrics' | 'details' | 'scenarios' | 'disruption' | 'population' | 'analytics' | 'ai-disruption' | 'quantum' | 'emergence' | 'resonance' | 'cultural' | 'culture-engine'>('simulation');
+  const [activeTab, setActiveTab] = useState<'simulation' | 'metrics' | 'details' | 'scenarios' | 'disruption' | 'population' | 'analytics' | 'ai-disruption' | 'quantum' | 'emergence' | 'resonance' | 'cultural' | 'culture-engine' | 'qloo-test'>('simulation');
   const [isIntelligentZoom, setIsIntelligentZoom] = useState(false);
 
+  // Mise à jour de l'état de la simulation toutes les 100ms
   useEffect(() => {
     const interval = setInterval(() => {
       setState(engine.getState());
@@ -35,14 +37,9 @@ function App() {
     return () => clearInterval(interval);
   }, [engine]);
 
-  const handleStart = () => {
-    engine.start();
-  };
-
-  const handleStop = () => {
-    engine.stop();
-  };
-
+  // Gestion des actions principales
+  const handleStart = () => engine.start();
+  const handleStop = () => engine.stop();
   const handleReset = () => {
     engine.resetSimulation();
     poliSynthCore.resetSession();
@@ -52,7 +49,7 @@ function App() {
   };
 
   const handleSelectScenario = (scenario: Scenario) => {
-    console.log('Scénario sélectionné:', scenario);
+    console.log('Scénario sélectionné :', scenario);
   };
 
   const handleInjectDisruption = (eventConfig: Partial<DisruptiveEvent>) => {
@@ -89,6 +86,7 @@ function App() {
     setActiveTab('simulation');
   };
 
+  // Configuration des onglets
   const tabs = [
     { id: 'simulation', label: 'Écosystème', icon: <Activity className="w-4 h-4" /> },
     { id: 'population', label: 'Population', icon: <Users className="w-4 h-4" /> },
@@ -106,32 +104,29 @@ function App() {
     { id: 'scenarios', label: 'Scénarios', icon: <Target className="w-4 h-4" /> },
   ];
 
+  // Calcul des couleurs et textes de statut
   const getSystemStatusColor = () => {
     const stability = state.systemStability || 75;
-    if (stability > 70) return 'text-green-400';
-    if (stability > 40) return 'text-yellow-400';
-    return 'text-red-400';
+    return stability > 70 ? 'text-green-400' : stability > 40 ? 'text-yellow-400' : 'text-red-400';
   };
 
   const getSystemStatusText = () => {
     const stability = state.systemStability || 75;
-    if (stability > 70) return 'Stable';
-    if (stability > 40) return 'Instable';
-    return 'Critique';
+    return stability > 70 ? 'Stable' : stability > 40 ? 'Instable' : 'Critique';
   };
 
   const getPopulationComplexity = () => {
     const size = state.primatoms.length;
-    if (size > 300) return { text: 'Société Complexe', color: 'text-purple-400' };
-    if (size > 150) return { text: 'Communauté Étendue', color: 'text-blue-400' };
-    return { text: 'Groupe Social', color: 'text-green-400' };
+    return size > 300 ? { text: 'Société Complexe', color: 'text-purple-400' }
+      : size > 150 ? { text: 'Communauté Étendue', color: 'text-blue-400' }
+      : { text: 'Groupe Social', color: 'text-green-400' };
   };
 
   const complexity = getPopulationComplexity();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
-      {/* Header */}
+      {/* En-tête avec informations système */}
       <header className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700">
         <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
@@ -140,20 +135,18 @@ function App() {
                 <Brain className="w-8 h-8 text-cyan-400" />
                 <div>
                   <h1 className="text-2xl font-bold text-white">PRIMATOMS SOCIETY</h1>
-                  <p className="text-sm text-gray-400">Laboratoire de Disruption Cognitive Avancée - Recherche Scientifique</p>
+                  <p className="text-sm text-gray-400">Laboratoire de Disruption Cognitive - Hackathon Qloo 2025</p>
                 </div>
               </div>
             </div>
             
             <div className="flex items-center gap-6">
-              {/* Contrôles généraux principaux */}
+              {/* Contrôles principaux */}
               <div className="flex items-center gap-2 bg-slate-800/50 rounded-lg p-2">
                 <button
                   onClick={state.isRunning ? handleStop : handleStart}
                   className={`flex items-center gap-2 px-3 py-1 rounded-md font-medium transition-colors ${
-                    state.isRunning 
-                      ? 'bg-red-500 hover:bg-red-600 text-white' 
-                      : 'bg-green-500 hover:bg-green-600 text-white'
+                    state.isRunning ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'
                   }`}
                 >
                   {state.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -164,7 +157,7 @@ function App() {
                   className="flex items-center gap-2 px-3 py-1 rounded-md font-medium bg-slate-600 hover:bg-slate-500 text-white transition-colors"
                 >
                   <RotateCcw className="w-4 h-4" />
-                  Reset
+                  Réinitialiser
                 </button>
               </div>
 
@@ -174,14 +167,14 @@ function App() {
               </div>
 
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-400">Population:</span>
+                <span className="text-gray-400">Population :</span>
                 <span className={`font-semibold ${complexity.color}`}>
                   {state.primatoms.length} ({complexity.text})
                 </span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-400">Stabilité:</span>
+                <span className="text-gray-400">Stabilité :</span>
                 <span className={`font-semibold ${getSystemStatusColor()}`}>
                   {(state.systemStability || 75).toFixed(0)}% ({getSystemStatusText()})
                 </span>
@@ -207,9 +200,9 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Contenu principal */}
       <main className="w-full px-6 py-6">
-        {/* Tabs Navigation */}
+        {/* Navigation par onglets */}
         <div className="mb-6">
           <div className="flex flex-wrap gap-1 bg-slate-800/50 p-1 rounded-lg backdrop-blur-sm border border-slate-700">
             {tabs.map((tab) => (
@@ -229,9 +222,9 @@ function App() {
           </div>
         </div>
 
-        {/* Content Sections - Layout maximisé */}
+        {/* Disposition des sections */}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-          {/* Main Content Area - Largeur maximisée */}
+          {/* Zone principale */}
           <div className="xl:col-span-4 min-h-[900px]">
             {activeTab === 'simulation' && (
               <div className="h-full">
@@ -315,9 +308,11 @@ function App() {
                 isRunning={state.isRunning}
               />
             )}
+
             {activeTab === 'qloo-test' && (
               <QlooConnectionTester />
             )}
+
             {activeTab === 'details' && (
               <IntelligentZoom
                 primatoms={state.primatoms}
@@ -348,10 +343,10 @@ function App() {
             )}
           </div>
 
-          {/* Sidebar - Optimisée pour la nouvelle largeur */}
+          {/* Barre latérale */}
           <div className="xl:col-span-1">
             <div className="space-y-4">
-              {/* Quick Stats */}
+              {/* Statistiques rapides */}
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-4">Statistiques Écosystème</h3>
                 <div className="space-y-3">
@@ -384,7 +379,7 @@ function App() {
                 </div>
               </div>
 
-              {/* System Status */}
+              {/* État du système */}
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-4">État du Système</h3>
                 <div className="space-y-3">
@@ -396,10 +391,10 @@ function App() {
                       </span>
                     </div>
                     <div className="w-full bg-slate-700 rounded-full h-2">
-                      <div 
+                      <div
                         className={`h-2 rounded-full transition-all duration-300 ${
-                          (state.systemStability || 75) > 70 ? 'bg-green-500' :
-                          (state.systemStability || 75) > 40 ? 'bg-yellow-500' : 'bg-red-500'
+                          (state.systemStability || 75) > 70 ? 'bg-green-500'
+                          : (state.systemStability || 75) > 40 ? 'bg-yellow-500' : 'bg-red-500'
                         }`}
                         style={{ width: `${state.systemStability || 75}%` }}
                       />
@@ -414,7 +409,7 @@ function App() {
                       </span>
                     </div>
                     <div className="w-full bg-slate-700 rounded-full h-2">
-                      <div 
+                      <div
                         className="h-2 rounded-full transition-all duration-300 bg-orange-500"
                         style={{ width: `${(state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / state.primatoms.length)}%` }}
                       />
@@ -436,34 +431,34 @@ function App() {
                 </div>
               </div>
 
-              {/* Recent Events */}
+              {/* Événements récents */}
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-4">Événements Récents</h3>
                 <div className="space-y-2">
                   {state.emergentPhenomena && state.emergentPhenomena.slice(-3).map((phenomenon, index) => (
                     <div key={index} className="text-sm bg-purple-500/20 text-purple-400 rounded p-2">
-                      <span className="font-medium">Émergence:</span>
+                      <span className="font-medium">Émergence :</span>
                       <span className="ml-1">{phenomenon}</span>
                     </div>
                   ))}
                   
                   {state.coalitions.slice(-2).map((coalition, index) => (
                     <div key={index} className="text-sm bg-slate-700/50 rounded p-2">
-                      <span className="text-cyan-400">Nouvelle coalition:</span>
+                      <span className="text-cyan-400">Nouvelle coalition :</span>
                       <span className="text-gray-300 ml-1">{coalition.name}</span>
                     </div>
                   ))}
                   
                   {state.globalKnowledge.slice(-1).map((knowledge, index) => (
                     <div key={index} className="text-sm bg-slate-700/50 rounded p-2">
-                      <span className="text-green-400">Connaissance:</span>
+                      <span className="text-green-400">Connaissance :</span>
                       <span className="text-gray-300 ml-1">{knowledge.split('-')[0]}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Selected Primatom Quick Info */}
+              {/* Informations sur le Primatom sélectionné */}
               {selectedPrimatom && (
                 <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-700">
                   <h3 className="text-lg font-semibold text-white mb-2">Focus Actuel</h3>
@@ -475,11 +470,11 @@ function App() {
                       <h4 className="font-medium text-white">{selectedPrimatom.name}</h4>
                       <p className="text-sm text-gray-400">{selectedPrimatom.behaviorType}</p>
                       {selectedPrimatom.stressLevel && selectedPrimatom.stressLevel > 30 && (
-                        <p className="text-xs text-red-400">Stress élevé: {selectedPrimatom.stressLevel.toFixed(0)}%</p>
+                        <p className="text-xs text-red-400">Stress élevé : {selectedPrimatom.stressLevel.toFixed(0)}%</p>
                       )}
                       {selectedPrimatom.coalition && (
                         <p className="text-xs text-cyan-400">
-                          Coalition: {state.coalitions.find(c => c.id === selectedPrimatom.coalition)?.name}
+                          Coalition : {state.coalitions.find(c => c.id === selectedPrimatom.coalition)?.name}
                         </p>
                       )}
                     </div>
@@ -496,18 +491,18 @@ function App() {
                 </div>
               )}
 
-              {/* Navigation Help */}
+              {/* Aide à la navigation */}
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-3">Navigation</h3>
                 <div className="space-y-2 text-xs text-gray-400">
-                  <div>🖱️ <span className="text-gray-300">Clic + Glisser:</span> Déplacer la vue</div>
-                  <div>🔍 <span className="text-gray-300">Molette:</span> Zoom avant/arrière</div>
-                  <div>👆 <span className="text-gray-300">Clic sur Primatom:</span> Focus intelligent</div>
-                  <div>⚡ <span className="text-gray-300">Analytics Pro:</span> Logs temps réel</div>
-                  <div>🤖 <span className="text-gray-300">IA Disruption:</span> Mode automatique</div>
-                  <div>🔬 <span className="text-gray-300">Analyse Quantique:</span> Recherche avancée</div>
-                  <div>🧠 <span className="text-gray-300">Intelligence Émergente:</span> Détection IA</div>
-                  <div>🌊 <span className="text-gray-300">Résonance Cognitive:</span> Patterns mentaux</div>
+                  <div>🖱️ <span className="text-gray-300">Clic + Glisser :</span> Déplacer la vue</div>
+                  <div>🔍 <span className="text-gray-300">Molette :</span> Zoom avant/arrière</div>
+                  <div>👆 <span className="text-gray-300">Clic sur Primatom :</span> Focus intelligent</div>
+                  <div>⚡ <span className="text-gray-300">Analytics Pro :</span> Logs temps réel</div>
+                  <div>🤖 <span className="text-gray-300">IA Disruption :</span> Mode automatique</div>
+                  <div>🔬 <span className="text-gray-300">Analyse Quantique :</span> Recherche avancée</div>
+                  <div>🧠 <span className="text-gray-300">Intelligence Émergente :</span> Détection IA</div>
+                  <div>🌊 <span className="text-gray-300">Résonance Cognitive :</span> Patterns mentaux</div>
                 </div>
               </div>
             </div>
