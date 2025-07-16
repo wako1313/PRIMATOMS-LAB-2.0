@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SimulationState } from '../types';
+import { SimulationState, Primatom, Coalition } from '../types';
 import { PoliSynthCore } from '../engine/PoliSynthCore';
 import { Waves, Brain, Zap, TrendingUp, Target, Activity, Users, Radio, Cpu, Eye } from 'lucide-react';
 
@@ -67,7 +67,8 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
         try {
           mapCognitiveResonance();
           updateCognitiveWaves();
-          console.log("🌊 Mapping cognitive resonance patterns");
+          const recentEvents = poliSynthCore.getRecentEvents(10);
+          console.log("🌊 Mapping cognitive resonance with events:", recentEvents.map(e => e.type));
         } catch (error) {
           console.error("Error mapping cognitive resonance:", error);
         }
@@ -75,25 +76,30 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
 
       return () => clearInterval(interval);
     }
-  }, [isRunning, state]);
+  }, [isRunning, state, poliSynthCore]);
 
   const mapCognitiveResonance = () => {
     setIsMapping(true);
     
+    // Integrate engine's analysis
+    const analysisEvents = poliSynthCore.analyzeSystemState(state);
+    const prediction = poliSynthCore.predictNext(state);
+    const anomalies = poliSynthCore.detectAnomalies(state);
+
     // Détection des champs de résonance
-    const fields = detectResonanceFields();
+    const fields = detectResonanceFields(state.primatoms, state.coalitions);
     
     // Détection des patterns de résonance
-    const patterns = detectResonancePatterns(fields);
+    const patterns = detectResonancePatterns(fields, analysisEvents, anomalies);
     
     // Génération des ondes cognitives
-    const waves = generateCognitiveWaves();
+    const waves = generateCognitiveWaves(state.primatoms, prediction);
     
     // Calcul de la résonance globale
-    const globalRes = calculateGlobalResonance(fields, patterns, waves);
+    const globalRes = calculateGlobalResonance(fields, patterns, waves, anomalies);
     
     // Calcul des métriques
-    const metrics = calculateResonanceMetrics(fields, patterns);
+    const metrics = calculateResonanceMetrics(fields, patterns, anomalies);
     
     setResonanceFields(fields);
     setResonancePatterns(patterns);
@@ -104,11 +110,11 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     setTimeout(() => setIsMapping(false), 800);
   };
 
-  const detectResonanceFields = (): ResonanceField[] => {
+  const detectResonanceFields = (primatoms: Primatom[], coalitions: Coalition[]): ResonanceField[] => {
     const fields: ResonanceField[] = [];
     
-    // Champs cognitifs basés sur l'innovation
-    const innovatorGroups = groupPrimatomsByBehavior('innovator');
+    // Champs cognitifs basés sur l'innovation et anomalies
+    const innovatorGroups = groupPrimatomsByBehavior(primatoms, 'innovator');
     innovatorGroups.forEach(group => {
       if (group.length >= 3) {
         const center = calculateGroupCenter(group);
@@ -118,7 +124,7 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
           id: `cognitive-${Date.now()}-${Math.random()}`,
           centerX: center.x,
           centerY: center.y,
-          frequency: 0.8 + (avgInnovation / 100) * 0.4, // 0.8-1.2 Hz
+          frequency: 0.8 + (avgInnovation / 100) * 0.4,
           amplitude: avgInnovation,
           phase: Math.random() * 2 * Math.PI,
           type: 'cognitive',
@@ -129,7 +135,7 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     });
     
     // Champs émotionnels basés sur la confiance
-    const trustGroups = groupPrimatomsByTrust();
+    const trustGroups = groupPrimatomsByTrust(primatoms);
     trustGroups.forEach(group => {
       if (group.length >= 4) {
         const center = calculateGroupCenter(group);
@@ -139,7 +145,7 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
           id: `emotional-${Date.now()}-${Math.random()}`,
           centerX: center.x,
           centerY: center.y,
-          frequency: 0.3 + (avgTrust / 100) * 0.5, // 0.3-0.8 Hz
+          frequency: 0.3 + (avgTrust / 100) * 0.5,
           amplitude: avgTrust,
           phase: Math.random() * 2 * Math.PI,
           type: 'emotional',
@@ -150,7 +156,7 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     });
     
     // Champs comportementaux basés sur la coopération
-    const cooperationGroups = groupPrimatomsByCooperation();
+    const cooperationGroups = groupPrimatomsByCooperation(primatoms);
     cooperationGroups.forEach(group => {
       if (group.length >= 3) {
         const center = calculateGroupCenter(group);
@@ -160,7 +166,7 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
           id: `behavioral-${Date.now()}-${Math.random()}`,
           centerX: center.x,
           centerY: center.y,
-          frequency: 0.5 + (avgCooperation / 100) * 0.6, // 0.5-1.1 Hz
+          frequency: 0.5 + (avgCooperation / 100) * 0.6,
           amplitude: avgCooperation,
           phase: Math.random() * 2 * Math.PI,
           type: 'behavioral',
@@ -171,16 +177,16 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     });
     
     // Champs sociaux basés sur les coalitions
-    state.coalitions.forEach(coalition => {
+    coalitions.forEach(coalition => {
       if (coalition.members.length >= 5) {
-        const members = state.primatoms.filter(p => coalition.members.includes(p.id));
+        const members = primatoms.filter(p => coalition.members.includes(p.id));
         const center = calculateGroupCenter(members);
         
         fields.push({
           id: `social-${coalition.id}`,
           centerX: center.x,
           centerY: center.y,
-          frequency: 0.2 + (coalition.cohesion / 100) * 0.4, // 0.2-0.6 Hz
+          frequency: 0.2 + (coalition.cohesion / 100) * 0.4,
           amplitude: coalition.cohesion,
           phase: Math.random() * 2 * Math.PI,
           type: 'social',
@@ -193,23 +199,23 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     return fields;
   };
 
-  const groupPrimatomsByBehavior = (behaviorType: string) => {
-    const primatoms = state.primatoms.filter(p => p.behaviorType === behaviorType);
-    return groupByProximity(primatoms, 150);
+  const groupPrimatomsByBehavior = (primatoms: Primatom[], behaviorType: string) => {
+    const filtered = primatoms.filter(p => p.behaviorType === behaviorType);
+    return groupByProximity(filtered, 150);
   };
 
-  const groupPrimatomsByTrust = () => {
-    const highTrustPrimatoms = state.primatoms.filter(p => p.trust > 70);
+  const groupPrimatomsByTrust = (primatoms: Primatom[]) => {
+    const highTrustPrimatoms = primatoms.filter(p => p.trust > 70);
     return groupByProximity(highTrustPrimatoms, 120);
   };
 
-  const groupPrimatomsByCooperation = () => {
-    const cooperativePrimatoms = state.primatoms.filter(p => p.cooperation > 75);
+  const groupPrimatomsByCooperation = (primatoms: Primatom[]) => {
+    const cooperativePrimatoms = primatoms.filter(p => p.cooperation > 75);
     return groupByProximity(cooperativePrimatoms, 130);
   };
 
-  const groupByProximity = (primatoms: any[], maxDistance: number) => {
-    const groups: any[][] = [];
+  const groupByProximity = (primatoms: Primatom[], maxDistance: number) => {
+    const groups: Primatom[][] = [];
     const processed = new Set<string>();
     
     primatoms.forEach(primatom => {
@@ -218,13 +224,12 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
       const group = [primatom];
       processed.add(primatom.id);
       
-      const findNearby = (current: any) => {
+      const findNearby = (current: Primatom) => {
         primatoms.forEach(other => {
           if (processed.has(other.id)) return;
           
           const distance = Math.sqrt(
-            Math.pow(current.x - other.x, 2) + 
-            Math.pow(current.y - other.y, 2)
+            Math.pow(current.x - other.x, 2) + Math.pow(current.y - other.y, 2)
           );
           
           if (distance < maxDistance) {
@@ -245,13 +250,13 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     return groups;
   };
 
-  const calculateGroupCenter = (group: any[]) => {
+  const calculateGroupCenter = (group: Primatom[]) => {
     const x = group.reduce((sum, p) => sum + p.x, 0) / group.length;
     const y = group.reduce((sum, p) => sum + p.y, 0) / group.length;
     return { x, y };
   };
 
-  const detectResonancePatterns = (fields: ResonanceField[]): ResonancePattern[] => {
+  const detectResonancePatterns = (fields: ResonanceField[], analysisEvents: any[], anomalies: any[]): ResonancePattern[] => {
     const patterns: ResonancePattern[] = [];
     
     // Détection de synchronisation
@@ -263,7 +268,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
         const frequencyDiff = Math.abs(field1.frequency - field2.frequency);
         const phaseDiff = Math.abs(field1.phase - field2.phase);
         
-        // Synchronisation si fréquences et phases similaires
         if (frequencyDiff < 0.1 && phaseDiff < Math.PI / 4) {
           patterns.push({
             id: `sync-${field1.id}-${field2.id}`,
@@ -276,12 +280,11 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
           });
         }
         
-        // Interférence si fréquences proches mais phases opposées
         if (frequencyDiff < 0.05 && phaseDiff > 3 * Math.PI / 4) {
           patterns.push({
             id: `interference-${field1.id}-${field2.id}`,
             type: 'interference',
-            description: `Interférence destructive entre champs ${field1.type} et ${field2.type}`,
+            description: `Interférence destructrice entre champs ${field1.type} et ${field2.type}`,
             strength: 80 - (frequencyDiff * 1000),
             frequency: (field1.frequency + field2.frequency) / 2,
             affectedFields: [field1.id, field2.id],
@@ -289,7 +292,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
           });
         }
         
-        // Amplification si fréquences harmoniques
         const harmonicRatio = field1.frequency / field2.frequency;
         if (Math.abs(harmonicRatio - Math.round(harmonicRatio)) < 0.1) {
           patterns.push({
@@ -305,15 +307,28 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
       }
     }
     
-    return patterns.slice(0, 20); // Limiter à 20 patterns
+    // Integrate anomalies into patterns
+    anomalies.forEach(anomaly => {
+      if (anomaly.type === 'anomaly_detected' && anomaly.metrics.averageStress > 70) {
+        patterns.push({
+          id: `dampening-${anomaly.id}`,
+          type: 'dampening',
+          description: `Atténuation due à un pic de stress (${anomaly.metrics.averageStress.toFixed(1)}%)`,
+          strength: 60,
+          frequency: 0.1,
+          affectedFields: anomaly.affectedPrimatoms,
+          emergenceTime: anomaly.timestamp
+        });
+      }
+    });
+
+    return patterns.slice(0, 20);
   };
 
-  const generateCognitiveWaves = (): CognitiveWave[] => {
+  const generateCognitiveWaves = (primatoms: Primatom[], prediction: any): CognitiveWave[] => {
     const waves: CognitiveWave[] = [];
     
-    // Génération d'ondes basées sur les actions des Primatoms
-    state.primatoms.forEach(primatom => {
-      // Onde de pensée pour les innovateurs
+    primatoms.forEach(primatom => {
       if (primatom.behaviorType === 'innovator' && primatom.innovation > 80 && Math.random() < 0.3) {
         waves.push({
           id: `thought-${primatom.id}-${Date.now()}`,
@@ -328,7 +343,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
         });
       }
       
-      // Onde émotionnelle pour les médiateurs
       if (primatom.behaviorType === 'mediator' && primatom.trust > 75 && Math.random() < 0.25) {
         waves.push({
           id: `emotion-${primatom.id}-${Date.now()}`,
@@ -343,7 +357,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
         });
       }
       
-      // Onde de décision pour les leaders
       if (primatom.behaviorType === 'leader' && (primatom.influence || 50) > 70 && Math.random() < 0.2) {
         waves.push({
           id: `decision-${primatom.id}-${Date.now()}`,
@@ -354,6 +367,21 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
           propagationSpeed: 2.5,
           currentRadius: 0,
           maxRadius: 250,
+          timestamp: Date.now()
+        });
+      }
+      
+      // Predictive wave based on engine prediction
+      if (prediction.probability > 0.5 && prediction.eventType === 'innovation_emergence' && Math.random() < 0.1) {
+        waves.push({
+          id: `intention-${primatom.id}-${Date.now()}`,
+          sourceId: primatom.id,
+          waveType: 'intention',
+          frequency: 0.9 + (primatom.innovation / 100) * 0.3,
+          amplitude: 70,
+          propagationSpeed: 1.8,
+          currentRadius: 0,
+          maxRadius: 220,
           timestamp: Date.now()
         });
       }
@@ -371,37 +399,37 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     );
   };
 
-  const calculateGlobalResonance = (fields: ResonanceField[], patterns: ResonancePattern[], waves: CognitiveWave[]): number => {
+  const calculateGlobalResonance = (fields: ResonanceField[], patterns: ResonancePattern[], waves: CognitiveWave[], anomalies: any[]): number => {
     if (fields.length === 0 && patterns.length === 0 && waves.length === 0) return 0;
     
     const avgFieldAmplitude = fields.length > 0 ? fields.reduce((sum, f) => sum + f.amplitude, 0) / fields.length : 0;
     const avgFieldStability = fields.length > 0 ? fields.reduce((sum, f) => sum + f.stability, 0) / fields.length : 0;
     const patternStrength = patterns.length > 0 ? patterns.reduce((sum, p) => sum + p.strength, 0) / patterns.length : 0;
     const waveAmplitude = waves.length > 0 ? waves.reduce((sum, w) => sum + w.amplitude, 0) / waves.length : 0;
+    const anomalyImpact = anomalies.length > 0 ? anomalies.reduce((sum, a) => sum + (a.metrics.averageStress || 0), 0) / anomalies.length / 100 : 0;
     
-    const baseResonance = (avgFieldAmplitude + avgFieldStability + patternStrength + waveAmplitude) / 4;
-    const dynamicFactor = (fields.length + patterns.length + waves.length) * 0.5; // Influence de la densité
+    const baseResonance = (avgFieldAmplitude + avgFieldStability + patternStrength + waveAmplitude + anomalyImpact) / 5;
+    const dynamicFactor = (fields.length + patterns.length + waves.length + anomalies.length) * 0.4;
     
     return Math.min(100, baseResonance + dynamicFactor);
   };
 
-  const calculateResonanceMetrics = (fields: ResonanceField[], patterns: ResonancePattern[]) => {
-    const coherenceLevel = patterns.filter(p => p.type === 'synchronization').length * 10;
+  const calculateResonanceMetrics = (fields: ResonanceField[], patterns: ResonancePattern[], anomalies: any[]) => {
+    const coherenceLevel = patterns.filter(p => p.type === 'synchronization').length * 10 + (anomalies.length > 0 ? 5 : 0);
     
     const synchronizationIndex = patterns
       .filter(p => p.type === 'synchronization')
       .reduce((sum, p) => sum + p.strength, 0) / Math.max(1, patterns.length);
     
-    const interferenceLevel = patterns.filter(p => p.type === 'interference').length * 15;
+    const interferenceLevel = patterns.filter(p => p.type === 'interference').length * 15 + (anomalies.length > 0 ? 10 : 0);
     
     const amplificationFactor = patterns
       .filter(p => p.type === 'amplification')
       .reduce((sum, p) => sum + p.strength, 0) / Math.max(1, patterns.length);
     
-    // Entropie cognitive basée sur la diversité des fréquences
     const frequencies = fields.map(f => f.frequency);
     const uniqueFrequencies = new Set(frequencies.map(f => Math.round(f * 10) / 10)).size;
-    const cognitiveEntropy = (uniqueFrequencies / Math.max(1, frequencies.length)) * 100;
+    const cognitiveEntropy = (uniqueFrequencies / Math.max(1, frequencies.length)) * 100 + (anomalies.length > 0 ? 10 : 0);
     
     return {
       coherenceLevel: Math.min(100, coherenceLevel),
@@ -454,7 +482,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -535,7 +562,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Champs de résonance */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
           <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Radio className="w-5 h-5 text-blue-400" />
@@ -589,7 +615,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
           )}
         </div>
 
-        {/* Patterns de résonance */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
           <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Activity className="w-5 h-5 text-yellow-400" />
@@ -636,7 +661,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
         </div>
       </div>
 
-      {/* Ondes cognitives */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
         <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Zap className="w-5 h-5 text-purple-400" />
@@ -666,7 +690,7 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
                 </div>
                 
                 <div className="text-xs text-gray-400 mb-2">
-                  Source: {sourcePrimatom?.name}
+                  Source: {sourcePrimatom?.name || 'Inconnu'}
                 </div>
                 
                 <div className="w-full bg-slate-600 rounded-full h-1">
@@ -692,7 +716,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
         )}
       </div>
 
-      {/* Métriques détaillées */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
         <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-green-400" />
@@ -762,7 +785,6 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
         </div>
       </div>
 
-      {/* Fondements théoriques */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
         <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Brain className="w-5 h-5 text-cyan-400" />
