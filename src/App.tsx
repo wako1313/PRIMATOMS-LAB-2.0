@@ -482,7 +482,16 @@ function App() {
                   
                   {!isIntelligentZoom && (
                     <button
-                      onClick={() => setActiveTab('details')}
+                      onClick={activeTab === 'details' && (
+  <IntelligentZoom
+    primatoms={state.primatoms}
+    coalitions={state.coalitions}
+    selectedPrimatom={selectedPrimatom}
+    onSelectPrimatom={handleSelectPrimatom}
+    onZoomOut={handleZoomOut}
+    isRunning={state.isRunning} // Ajout de cette prop
+  />
+)}
                       className="w-full mt-3 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       Zoom Intelligent
