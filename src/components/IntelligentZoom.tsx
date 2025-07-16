@@ -1,3 +1,4 @@
+// IntelligentZoom.tsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Primatom, Coalition } from '../types';
 import { 
@@ -53,6 +54,62 @@ interface NetworkMetrics {
   communityCount: number;
 }
 
+// Définition de buildIntelligentNetwork en haut pour éviter l'erreur d'initialisation
+const buildIntelligentNetwork = (centerPrimatom: Primatom, primatoms: Primatom[]): NetworkNode[] => {
+  const network: NetworkNode[] = [];
+  const visited = new Set<string>();
+
+  // Niveau 1 : Connexions directes
+  Object.entries(centerPrimatom.relationships).forEach(([id, strength]) => {
+    if (strength > 30) {
+      const primatom = primatoms.find(p => p.id === id);
+      if (primatom && !visited.has(id)) {
+        network.push({
+          primatom,
+          distance: 1,
+          relationshipStrength: strength,
+          isDirectConnection: true,
+          betweennessCentrality: calculateBetweennessCentrality(primatom),
+          closenessCentrality: calculateClosenessCentrality(primatom),
+          influenceScore: calculateInfluenceScore(primatom),
+          predictedEvolution: predictEvolution(primatom),
+          compatibilityScore: calculateCompatibility(centerPrimatom, primatom),
+          riskLevel: assessRiskLevel(primatom)
+        });
+        visited.add(id);
+      }
+    }
+  });
+
+  // Niveau 2 : Réseau étendu (amis des amis)
+  network.slice().forEach(node => {
+    if (node.distance === 1) {
+      Object.entries(node.primatom.relationships).forEach(([id, strength]) => {
+        if (strength > 50 && !visited.has(id) && id !== centerPrimatom.id) {
+          const primatom = primatoms.find(p => p.id === id);
+          if (primatom) {
+            network.push({
+              primatom,
+              distance: 2,
+              relationshipStrength: strength * 0.7,
+              isDirectConnection: false,
+              betweennessCentrality: calculateBetweennessCentrality(primatom),
+              closenessCentrality: calculateClosenessCentrality(primatom),
+              influenceScore: calculateInfluenceScore(primatom),
+              predictedEvolution: predictEvolution(primatom),
+              compatibilityScore: calculateCompatibility(centerPrimatom, primatom),
+              riskLevel: assessRiskLevel(primatom)
+            });
+            visited.add(id);
+          }
+        }
+      });
+    }
+  });
+
+  return network.sort((a, b) => b.influenceScore - a.influenceScore);
+};
+
 const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
   primatoms,
   coalitions,
@@ -71,27 +128,24 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [networkMetrics, setNetworkMetrics] = useState<NetworkMetrics | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['network']));
-  const [autoRefresh, setAutoRefresh] = useState(false); // DÉSACTIVÉ par défaut
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
-  // Optimized network calculation with memoization
+  // Calcul du réseau avec memoization
   const calculatedNetwork = useMemo(() => {
-    if (!selectedPrimatom) return [];
-    return buildIntelligentNetwork(selectedPrimatom);
+    return selectedPrimatom ? buildIntelligentNetwork(selectedPrimatom, primatoms) : [];
   }, [selectedPrimatom, primatoms]);
 
-  // Debounced search
+  // Filtrage des nœuds avec memoization
   const filteredNodes = useMemo(() => {
     let nodes = calculatedNetwork;
-    
-    // Apply search filter
+
     if (searchQuery) {
-      nodes = nodes.filter(node => 
+      nodes = nodes.filter(node =>
         node.primatom.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         node.primatom.behaviorType.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
-    // Apply category filter
+
     switch (activeFilter) {
       case 'direct':
         nodes = nodes.filter(n => n.isDirectConnection);
@@ -106,15 +160,14 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
         nodes = nodes.filter(n => n.relationshipStrength < 50);
         break;
     }
-    
+
     return nodes;
   }, [calculatedNetwork, searchQuery, activeFilter]);
 
   useEffect(() => {
     if (selectedPrimatom) {
       setNetworkNodes(calculatedNetwork);
-      
-      // Update navigation history (OPTIMIZED)
+
       setNavigationHistory(prev => {
         const newHistory = [...prev];
         if (newHistory[newHistory.length - 1]?.id !== selectedPrimatom.id) {
@@ -122,92 +175,32 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
         }
         return newHistory.slice(-10);
       });
-      
-      // Only generate predictions once per selection
+
       generateAIPredictions(selectedPrimatom, calculatedNetwork);
       generateTimelineEvents(selectedPrimatom, calculatedNetwork);
       calculateNetworkMetrics(calculatedNetwork);
     }
-  }, [selectedPrimatom?.id, calculatedNetwork.length]); // Only trigger on ID change
+  }, [selectedPrimatom?.id, calculatedNetwork.length]);
 
-  // Auto-refresh predictions (DÉSACTIVÉ par défaut pour éviter le spam)
   useEffect(() => {
     if (autoRefresh && selectedPrimatom && networkNodes.length > 0) {
       const interval = setInterval(() => {
-        // Only refresh if we have stable data
         if (networkNodes.length > 0) {
           generateAIPredictions(selectedPrimatom, networkNodes);
         }
-      }, 60000); // Augmenté à 60 secondes
-      
+      }, 60000);
+
       return () => clearInterval(interval);
     }
-  }, [autoRefresh, selectedPrimatom?.id]); // Only depend on ID, not full objects
-
-  const buildIntelligentNetwork = useCallback((centerPrimatom: Primatom): NetworkNode[] => {
-    const network: NetworkNode[] = [];
-    const visited = new Set<string>();
-    
-    // Level 1: Direct connections
-    Object.entries(centerPrimatom.relationships).forEach(([id, strength]) => {
-      if (strength > 30) {
-        const primatom = primatoms.find(p => p.id === id);
-        if (primatom && !visited.has(id)) {
-          network.push({
-            primatom,
-            distance: 1,
-            relationshipStrength: strength,
-            isDirectConnection: true,
-            betweennessCentrality: calculateBetweennessCentrality(primatom),
-            closenessCentrality: calculateClosenessCentrality(primatom),
-            influenceScore: calculateInfluenceScore(primatom),
-            predictedEvolution: predictEvolution(primatom),
-            compatibilityScore: calculateCompatibility(centerPrimatom, primatom),
-            riskLevel: assessRiskLevel(primatom)
-          });
-          visited.add(id);
-        }
-      }
-    });
-
-    // Level 2: Extended network (friends of friends)
-    network.slice().forEach(node => {
-      if (node.distance === 1) {
-        Object.entries(node.primatom.relationships).forEach(([id, strength]) => {
-          if (strength > 50 && !visited.has(id) && id !== centerPrimatom.id) {
-            const primatom = primatoms.find(p => p.id === id);
-            if (primatom) {
-              network.push({
-                primatom,
-                distance: 2,
-                relationshipStrength: strength * 0.7,
-                isDirectConnection: false,
-                betweennessCentrality: calculateBetweennessCentrality(primatom),
-                closenessCentrality: calculateClosenessCentrality(primatom),
-                influenceScore: calculateInfluenceScore(primatom),
-                predictedEvolution: predictEvolution(primatom),
-                compatibilityScore: calculateCompatibility(centerPrimatom, primatom),
-                riskLevel: assessRiskLevel(primatom)
-              });
-              visited.add(id);
-            }
-          }
-        });
-      }
-    });
-
-    return network.sort((a, b) => b.influenceScore - a.influenceScore);
-  }, [primatoms]);
+  }, [autoRefresh, selectedPrimatom?.id, networkNodes.length]);
 
   const calculateBetweennessCentrality = (primatom: Primatom): number => {
-    // Simplified betweenness centrality calculation
     const connections = Object.values(primatom.relationships).filter(r => r > 30).length;
-    const avgRelationship = Object.values(primatom.relationships).reduce((a, b) => a + b, 0) / Object.keys(primatom.relationships).length;
+    const avgRelationship = Object.values(primatom.relationships).reduce((a, b) => a + b, 0) / Object.keys(primatom.relationships).length || 0;
     return (connections * avgRelationship) / 100;
   };
 
   const calculateClosenessCentrality = (primatom: Primatom): number => {
-    // Simplified closeness centrality
     const totalConnections = Object.keys(primatom.relationships).length;
     const avgDistance = totalConnections > 0 ? primatoms.length / totalConnections : 0;
     return avgDistance > 0 ? 1 / avgDistance : 0;
@@ -216,10 +209,9 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
   const calculateInfluenceScore = (primatom: Primatom): number => {
     const baseInfluence = primatom.influence || 50;
     const networkBonus = Object.values(primatom.relationships).filter(r => r > 70).length * 5;
-    const behaviorBonus = primatom.behaviorType === 'leader' ? 20 : 
-                         primatom.behaviorType === 'innovator' ? 15 : 10;
+    const behaviorBonus = primatom.behaviorType === 'leader' ? 20
+      : primatom.behaviorType === 'innovator' ? 15 : 10;
     const trustFactor = primatom.trust * 0.3;
-    
     return Math.min(100, baseInfluence + networkBonus + behaviorBonus + trustFactor);
   };
 
@@ -227,19 +219,14 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     const energy = primatom.energy;
     const innovation = primatom.innovation;
     const stress = primatom.stressLevel || 0;
-    
     const score = (energy + innovation - stress) / 3;
-    
-    if (score > 70) return 'rising';
-    if (score < 40) return 'declining';
-    return 'stable';
+    return score > 70 ? 'rising' : score < 40 ? 'declining' : 'stable';
   };
 
   const calculateCompatibility = (center: Primatom, target: Primatom): number => {
     const trustDiff = Math.abs(center.trust - target.trust);
     const energyDiff = Math.abs(center.energy - target.energy);
     const cooperationDiff = Math.abs(center.cooperation - target.cooperation);
-    
     const avgDiff = (trustDiff + energyDiff + cooperationDiff) / 3;
     return Math.max(0, 100 - avgDiff);
   };
@@ -248,7 +235,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     const stress = primatom.stressLevel || 0;
     const trust = primatom.trust;
     const energy = primatom.energy;
-    
     if (stress > 70 || trust < 30) return 'high';
     if (stress > 40 || trust < 60 || energy < 40) return 'medium';
     return 'low';
@@ -256,8 +242,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
 
   const generateAIPredictions = useCallback((center: Primatom, network: NetworkNode[]) => {
     const predictions: AIPrediction[] = [];
-    
-    // High compatibility suggestions
     const highCompatNodes = network.filter(n => n.compatibilityScore > 85 && n.isDirectConnection);
     highCompatNodes.forEach(node => {
       predictions.push({
@@ -270,7 +254,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       });
     });
 
-    // Risk warnings
     const riskNodes = network.filter(n => n.riskLevel === 'high');
     riskNodes.forEach(node => {
       predictions.push({
@@ -283,7 +266,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       });
     });
 
-    // Rising stars
     const risingNodes = network.filter(n => n.predictedEvolution === 'rising' && n.influenceScore > 70);
     risingNodes.forEach(node => {
       predictions.push({
@@ -296,7 +278,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       });
     });
 
-    // Bridge opportunities
     const bridgeNodes = network.filter(n => n.betweennessCentrality > 0.7);
     bridgeNodes.forEach(node => {
       predictions.push({
@@ -309,21 +290,17 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       });
     });
 
-    setAiPredictions(predictions.slice(0, 8)); // Limit to 8 predictions
+    setAiPredictions(predictions.slice(0, 8));
   }, []);
 
   const generateTimelineEvents = useCallback((center: Primatom, network: NetworkNode[]) => {
     const events: TimelineEvent[] = [];
     const now = Date.now();
-    
-    // Predict future connections
-    const potentialConnections = network.filter(n => 
-      !n.isDirectConnection && n.compatibilityScore > 75
-    );
-    
+
+    const potentialConnections = network.filter(n => !n.isDirectConnection && n.compatibilityScore > 75);
     potentialConnections.forEach((node, index) => {
       events.push({
-        timestamp: now + (index + 1) * 24 * 60 * 60 * 1000, // Next few days
+        timestamp: now + (index + 1) * 24 * 60 * 60 * 1000,
         type: 'connection',
         description: `Connexion probable avec ${node.primatom.name}`,
         probability: node.compatibilityScore / 100,
@@ -331,11 +308,10 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       });
     });
 
-    // Predict stress-related events
     const stressedNodes = network.filter(n => n.riskLevel === 'high');
     stressedNodes.forEach((node, index) => {
       events.push({
-        timestamp: now + (index + 1) * 12 * 60 * 60 * 1000, // Next 12-24 hours
+        timestamp: now + (index + 1) * 12 * 60 * 60 * 1000,
         type: 'conflict',
         description: `Risque de conflit avec ${node.primatom.name}`,
         probability: 0.6,
@@ -343,11 +319,10 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       });
     });
 
-    // Predict behavior changes
     const evolvingNodes = network.filter(n => n.predictedEvolution !== 'stable');
     evolvingNodes.forEach((node, index) => {
       events.push({
-        timestamp: now + (index + 2) * 48 * 60 * 60 * 1000, // Next few days
+        timestamp: now + (index + 2) * 48 * 60 * 60 * 1000,
         type: 'behavior_shift',
         description: `${node.primatom.name} pourrait changer de comportement (${node.predictedEvolution})`,
         probability: 0.7,
@@ -363,14 +338,12 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     const actualConnections = network.reduce((sum, node) => 
       sum + Object.values(node.primatom.relationships).filter(r => r > 30).length, 0
     ) / 2;
-    
     const density = totalPossibleConnections > 0 ? actualConnections / totalPossibleConnections : 0;
-    
+
     const centralNodes = network
       .filter(n => n.betweennessCentrality > 0.6)
       .map(n => n.primatom)
       .slice(0, 3);
-      
     const bridgeNodes = network
       .filter(n => n.betweennessCentrality > 0.8)
       .map(n => n.primatom)
@@ -378,8 +351,8 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
 
     setNetworkMetrics({
       density,
-      clustering: Math.random() * 0.3 + 0.4, // Simplified
-      avgPathLength: Math.random() * 2 + 1.5, // Simplified
+      clustering: Math.random() * 0.3 + 0.4,
+      avgPathLength: Math.random() * 2 + 1.5,
       centralNodes,
       bridgeNodes,
       communityCount: coalitions.length
@@ -409,11 +382,8 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(section)) {
-        newSet.delete(section);
-      } else {
-        newSet.add(section);
-      }
+      if (newSet.has(section)) newSet.delete(section);
+      else newSet.add(section);
       return newSet;
     });
   };
@@ -464,12 +434,9 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     const date = new Date(timestamp);
     const now = new Date();
     const diff = timestamp - now.getTime();
-    
-    if (diff < 24 * 60 * 60 * 1000) {
-      return `${Math.round(diff / (60 * 60 * 1000))}h`;
-    } else {
-      return `${Math.round(diff / (24 * 60 * 60 * 1000))}j`;
-    }
+    return diff < 24 * 60 * 60 * 1000
+      ? `${Math.round(diff / (60 * 60 * 1000))}h`
+      : `${Math.round(diff / (24 * 60 * 60 * 1000))}j`;
   };
 
   if (!selectedPrimatom) {
@@ -482,12 +449,12 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     );
   }
 
-  const coalition = selectedPrimatom.coalition ? 
-    coalitions.find(c => c.id === selectedPrimatom.coalition) : null;
+  const coalition = selectedPrimatom.coalition
+    ? coalitions.find(c => c.id === selectedPrimatom.coalition)
+    : null;
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700 h-full overflow-hidden flex flex-col">
-      {/* Header with navigation and controls */}
       <div className="p-4 border-b border-slate-700 bg-slate-900/50 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -524,7 +491,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
           </div>
         </div>
 
-        {/* Search and filters */}
         <div className="flex gap-2 mb-3">
           <div className="flex-1 relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -549,7 +515,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
           </select>
         </div>
 
-        {/* View mode tabs */}
         <div className="flex gap-1 mb-3">
           {[
             { id: 'network', label: 'Réseau', icon: <Network className="w-4 h-4" /> },
@@ -561,8 +526,8 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
               key={tab.id}
               onClick={() => setViewMode(tab.id as any)}
               className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                viewMode === tab.id 
-                  ? 'bg-cyan-600 text-white' 
+                viewMode === tab.id
+                  ? 'bg-cyan-600 text-white'
                   : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
               }`}
             >
@@ -572,7 +537,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
           ))}
         </div>
 
-        {/* Central primatom info */}
         <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center">
@@ -614,9 +578,7 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
         </div>
       </div>
 
-      {/* Main content area */}
       <div className="flex-1 overflow-hidden">
-        {/* Network View */}
         {viewMode === 'network' && (
           <div className="p-4 h-full overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
@@ -661,7 +623,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
                     </div>
                   </div>
 
-                  {/* Advanced metrics */}
                   <div className="flex justify-between items-center">
                     <div className="flex gap-4 text-xs">
                       <span className="text-red-400">T:{node.primatom.trust.toFixed(0)}</span>
@@ -682,7 +643,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
           </div>
         )}
 
-        {/* AI Predictions View */}
         {viewMode === 'predictions' && (
           <div className="p-4 h-full overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
@@ -703,9 +663,9 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
                 <div
                   key={prediction.id}
                   className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-slate-700/50 ${
-                    prediction.type === 'warning' ? 'border-red-400/50 bg-red-900/20' :
-                    prediction.type === 'opportunity' ? 'border-yellow-400/50 bg-yellow-900/20' :
-                    'border-blue-400/50 bg-blue-900/20'
+                    prediction.type === 'warning' ? 'border-red-400/50 bg-red-900/20'
+                    : prediction.type === 'opportunity' ? 'border-yellow-400/50 bg-yellow-900/20'
+                    : 'border-blue-400/50 bg-blue-900/20'
                   }`}
                   onClick={() => prediction.targetPrimatom && navigateToNode(networkNodes.find(n => n.primatom.id === prediction.targetPrimatom!.id)!)}
                 >
@@ -716,9 +676,9 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          prediction.priority === 'high' ? 'bg-red-500/20 text-red-400' :
-                          prediction.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-blue-500/20 text-blue-400'
+                          prediction.priority === 'high' ? 'bg-red-500/20 text-red-400'
+                          : prediction.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-blue-500/20 text-blue-400'
                         }`}>
                           {prediction.priority}
                         </span>
@@ -737,7 +697,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
           </div>
         )}
 
-        {/* Timeline View */}
         {viewMode === 'timeline' && (
           <div className="p-4 h-full overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
@@ -753,10 +712,10 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
                 <div
                   key={`${event.timestamp}-${index}`}
                   className={`relative p-3 rounded-lg border ${
-                    event.type === 'conflict' ? 'border-red-400/50 bg-red-900/20' :
-                    event.type === 'connection' ? 'border-green-400/50 bg-green-900/20' :
-                    event.type === 'coalition_change' ? 'border-blue-400/50 bg-blue-900/20' :
-                    'border-yellow-400/50 bg-yellow-900/20'
+                    event.type === 'conflict' ? 'border-red-400/50 bg-red-900/20'
+                    : event.type === 'connection' ? 'border-green-400/50 bg-green-900/20'
+                    : event.type === 'coalition_change' ? 'border-blue-400/50 bg-blue-900/20'
+                    : 'border-yellow-400/50 bg-yellow-900/20'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -773,9 +732,9 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
                         </span>
                         <div className="flex items-center gap-2">
                           <span className={`text-xs px-2 py-1 rounded-full ${
-                            event.impact === 'major' ? 'bg-red-500/20 text-red-400' :
-                            event.impact === 'moderate' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-green-500/20 text-green-400'
+                            event.impact === 'major' ? 'bg-red-500/20 text-red-400'
+                            : event.impact === 'moderate' ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-green-500/20 text-green-400'
                           }`}>
                             {event.impact}
                           </span>
@@ -795,7 +754,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
           </div>
         )}
 
-        {/* Metrics View */}
         {viewMode === 'metrics' && networkMetrics && (
           <div className="p-4 h-full overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
@@ -807,7 +765,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
             </div>
 
             <div className="space-y-4">
-              {/* Network Overview */}
               <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
                 <h5 className="text-sm font-medium text-white mb-3">Vue d'ensemble</h5>
                 <div className="grid grid-cols-2 gap-4">
@@ -838,7 +795,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
                 </div>
               </div>
 
-              {/* Central Nodes */}
               <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
                 <h5 className="text-sm font-medium text-white mb-3">Nœuds Centraux</h5>
                 <div className="space-y-2">
@@ -863,7 +819,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
                 </div>
               </div>
 
-              {/* Bridge Nodes */}
               <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
                 <h5 className="text-sm font-medium text-white mb-3">Connecteurs Clés</h5>
                 <div className="space-y-2">
@@ -892,7 +847,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
         )}
       </div>
 
-      {/* Footer with statistics */}
       <div className="p-3 border-t border-slate-700 bg-slate-900/50 flex-shrink-0">
         <div className="grid grid-cols-4 gap-2 text-xs text-center">
           <div>
