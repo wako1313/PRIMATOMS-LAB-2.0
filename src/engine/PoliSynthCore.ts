@@ -3,7 +3,7 @@ import { Primatom, Coalition, SimulationState, DisruptiveEvent } from '../types'
 export interface AnalysisEvent {
   id: string;
   timestamp: number;
-  type: 'coalition_formation' | 'disruption_trigger' | 'behavior_shift' | 'innovation_emergence' | 'conflict_resolution' | 'cultural_evolution';
+  type: 'coalition_formation' | 'disruption_trigger' | 'behavior_shift' | 'innovation_emergence' | 'conflict_resolution' | 'cultural_evolution' | 'anomaly_detected';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   affectedPrimatoms: string[];
@@ -44,35 +44,184 @@ export interface SessionReport {
   confidenceLevel: number;
 }
 
+interface PredictionResult {
+  eventType: AnalysisEvent['type'];
+  probability: number;
+  potentialImpact: string;
+}
+
+interface CachedResult {
+  result: any;
+  timestamp: number;
+  ttl: number;
+}
+
 export class PoliSynthCore {
   private events: AnalysisEvent[] = [];
   private sessionStartTime: number = Date.now();
   private disruptionQueue: DisruptiveEvent[] = [];
   private analysisBuffer: any[] = [];
-  
-  // Protocole anti-hallucination intégré
+  private analysisCache = new Map<string, CachedResult>();
+  private predictionEngine = {
+    patterns: new Map<string, number>(),
+    accuracy: new Map<string, number>(),
+  };
+  private anomalyDetector = {
+    baselines: new Map<string, number>(),
+    thresholds: new Map<string, number>(),
+  };
+
   private validateData(data: any, source: string): boolean {
     if (!data || typeof data !== 'object') return false;
-    
-    // Vérification de cohérence temporelle
     if (data.timestamp && (data.timestamp > Date.now() || data.timestamp < this.sessionStartTime)) {
       console.warn(`Données temporelles incohérentes détectées - Source: ${source}`);
       return false;
     }
-    
     return true;
   }
 
-  // Analyse contextuelle avancée
-  analyzeSystemState(state: SimulationState): AnalysisEvent[] {
+  private getCachedOrAnalyze<T>(key: string, ttl: number, analyzer: () => T): T {
+    const cached = this.analysisCache.get(key);
+    if (cached && cached.timestamp + cached.ttl > Date.now()) {
+      return cached.result;
+    }
+    const result = analyzer();
+    this.analysisCache.set(key, { result, timestamp: Date.now(), ttl });
+    return result;
+  }
+
+  private predictNext(state: SimulationState): PredictionResult {
+    const recentEvents = this.getRecentEvents(50);
+    const eventCounts = recentEvents.reduce((acc, e) => {
+      acc[e.type] = (acc[e.type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    let maxProbability = 0;
+    let predictedType: AnalysisEvent['type'] = 'coalition_formation';
+    let potentialImpact = 'Impact modéré prévu';
+
+    for (const [type, count] of Object.entries(eventCounts)) {
+      const probability = count / recentEvents.length;
+      if (probability > maxProbability) {
+        maxProbability = probability;
+        predictedType = type as AnalysisEvent['type'];
+        potentialImpact = this.estimateImpactFromType(predictedType, state);
+      }
+    }
+
+    this.predictionEngine.patterns.set(predictedType, (this.predictionEngine.patterns.get(predictedType) || 0) + 1);
+    this.predictionEngine.accuracy.set(predictedType, maxProbability);
+
+    return { eventType: predictedType, probability: maxProbability, potentialImpact };
+  }
+
+  private estimateImpactFromType(type: AnalysisEvent['type'], state: SimulationState): string {
+    switch (type) {
+      case 'coalition_formation':
+        return state.coalitions.length > 5 ? 'Forte consolidation sociale' : 'Renforcement local';
+      case 'behavior_shift':
+        return 'Changements comportementaux significatifs';
+      case 'innovation_emergence':
+        return 'Accélération des transformations systémiques';
+      default:
+        return 'Impact modéré prévu';
+    }
+  }
+
+  private detectAnomalies(state: SimulationState): AnalysisEvent[] {
+    const events: AnalysisEvent[] = [];
+    const avgStress = state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / state.primatoms.length;
+    const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
+
+    const stressBaseline = this.anomalyDetector.baselines.get('stress') || avgStress;
+    const innovationBaseline = this.anomalyDetector.baselines.get('innovation') || avgInnovation;
+
+    this.anomalyDetector.baselines.set('stress', (stressBaseline * 0.9 + avgStress * 0.1));
+    this.anomalyDetector.baselines.set('innovation', (innovationBaseline * 0.9 + avgInnovation * 0.1));
+
+    const stressThreshold = this.anomalyDetector.thresholds.get('stress') || 30;
+    const innovationThreshold = this.anomalyDetector.thresholds.get('innovation') || 30;
+
+    if (Math.abs(avgStress - stressBaseline) > stressThreshold) {
+      events.push({
+        id: `anomaly-stress-${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'anomaly_detected',
+        severity: avgStress > stressBaseline ? 'high' : 'medium',
+        description: `Anomalie de stress détectée: ${avgStress.toFixed(1)}% vs baseline ${stressBaseline.toFixed(1)}%`,
+        affectedPrimatoms: state.primatoms.filter(p => Math.abs((p.stressLevel || 0) - stressBaseline) > stressThreshold).map(p => p.id),
+        metrics: { currentStress: avgStress, baselineStress: stressBaseline },
+        predictedImpact: {
+          shortTerm: 'Perturbations comportementales probables',
+          mediumTerm: 'Risque de fragmentation sociale',
+          longTerm: 'Adaptation ou instabilité prolongée'
+        },
+        recommendations: ['Investiguer les causes de l\'anomalie', 'Mettre en place des mesures de stabilisation']
+      });
+    }
+
+    if (Math.abs(avgInnovation - innovationBaseline) > innovationThreshold) {
+      events.push({
+        id: `anomaly-innovation-${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'anomaly_detected',
+        severity: avgInnovation > innovationBaseline ? 'high' : 'medium',
+        description: `Anomalie d'innovation détectée: ${avgInnovation.toFixed(1)}% vs baseline ${innovationBaseline.toFixed(1)}%`,
+        affectedPrimatoms: state.primatoms.filter(p => Math.abs(p.innovation - innovationBaseline) > innovationThreshold).map(p => p.id),
+        metrics: { currentInnovation: avgInnovation, baselineInnovation: innovationBaseline },
+        predictedImpact: {
+          shortTerm: 'Sursaut créatif ou ralentissement inattendu',
+          mediumTerm: 'Diffusion ou perte d\'innovations',
+          longTerm: 'Transformation ou retour à la baseline'
+        },
+        recommendations: ['Analyser les catalyseurs d\'innovation', 'Protéger les innovateurs clés']
+      });
+    }
+
+    return events;
+  }
+
+  async analyzeSystemState(state: SimulationState): Promise<AnalysisEvent[]> {
+    const cacheKey = `state-${state.generation}-${state.primatoms.length}`;
+    return this.getCachedOrAnalyze(cacheKey, 5000, async () => {
+      const [coalitionEvents, behaviorEvents, innovationEvents, anomalyEvents] = await Promise.all([
+        this.analyzeCoalitions(state),
+        this.detectBehaviorShifts(state),
+        this.detectInnovationPatterns(state),
+        this.detectAnomalies(state)
+      ]);
+
+      const newEvents = [...coalitionEvents, ...behaviorEvents, ...innovationEvents, ...anomalyEvents];
+      const prediction = this.predictNext(state);
+      if (prediction.probability > 0.3) {
+        newEvents.push({
+          id: `prediction-${Date.now()}`,
+          timestamp: Date.now(),
+          type: prediction.eventType,
+          severity: prediction.probability > 0.7 ? 'high' : 'medium',
+          description: `Prédiction: ${prediction.eventType} (${(prediction.probability * 100).toFixed(1)}% probabilité)`,
+          affectedPrimatoms: [],
+          metrics: { predictionProbability: prediction.probability },
+          predictedImpact: {
+            shortTerm: prediction.potentialImpact,
+            mediumTerm: 'Observation recommandée',
+            longTerm: 'Impact à évaluer'
+          },
+          recommendations: ['Surveiller les indicateurs associés', 'Préparer des mesures d\'adaptation']
+        });
+      }
+
+      this.events.push(...newEvents);
+      return newEvents;
+    });
+  }
+
+  private async analyzeCoalitions(state: SimulationState): Promise<AnalysisEvent[]> {
     const newEvents: AnalysisEvent[] = [];
-    
-    // Détection de formations de coalitions
-    const recentCoalitions = state.coalitions.filter(c => 
-      Date.now() - c.created < 10000 // Dernières 10 secondes
-    );
-    
-    recentCoalitions.forEach(coalition => {
+    const recentCoalitions = state.coalitions.filter(c => Date.now() - c.created < 10000);
+
+    for (const coalition of recentCoalitions) {
       const event: AnalysisEvent = {
         id: `coalition-${coalition.id}-${Date.now()}`,
         timestamp: Date.now(),
@@ -88,21 +237,12 @@ export class PoliSynthCore {
         predictedImpact: this.predictCoalitionImpact(coalition, state),
         recommendations: this.generateCoalitionRecommendations(coalition, state)
       };
-      
+
       if (this.validateData(event, 'coalition_analysis')) {
         newEvents.push(event);
       }
-    });
+    }
 
-    // Détection de changements comportementaux significatifs
-    const behaviorShifts = this.detectBehaviorShifts(state);
-    newEvents.push(...behaviorShifts);
-
-    // Analyse des innovations émergentes
-    const innovations = this.detectInnovationPatterns(state);
-    newEvents.push(...innovations);
-
-    this.events.push(...newEvents);
     return newEvents;
   }
 
@@ -157,8 +297,6 @@ export class PoliSynthCore {
 
   private detectBehaviorShifts(state: SimulationState): AnalysisEvent[] {
     const events: AnalysisEvent[] = [];
-    
-    // Analyse des changements de stress collectif
     const avgStress = state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / state.primatoms.length;
     
     if (avgStress > 60) {
@@ -188,7 +326,6 @@ export class PoliSynthCore {
 
   private detectInnovationPatterns(state: SimulationState): AnalysisEvent[] {
     const events: AnalysisEvent[] = [];
-    
     const innovators = state.primatoms.filter(p => p.behaviorType === 'innovator');
     const avgInnovation = innovators.reduce((sum, p) => sum + p.innovation, 0) / Math.max(1, innovators.length);
     
@@ -266,14 +403,12 @@ export class PoliSynthCore {
     return overlapCount / Math.max(1, state.coalitions.length - 1);
   }
 
-  // Génération de disruptions intelligentes
   generateIntelligentDisruption(state: SimulationState): DisruptiveEvent | null {
     const systemStability = state.systemStability || 75;
     const coalitionCount = state.coalitions.length;
     const avgStress = state.primatoms.reduce((sum, p) => sum + (p.stressLevel || 0), 0) / state.primatoms.length;
     const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
     
-    // Logique adaptative de génération de disruptions
     if (systemStability > 85 && coalitionCount > 3 && Math.random() < 0.15) {
       return this.createStabilityChallenge(state);
     }
@@ -286,7 +421,6 @@ export class PoliSynthCore {
       return this.createGovernanceChallenge(state);
     }
     
-    // Nouveau: Catalyseur d'innovation si potentiel détecté
     if (avgInnovation > 80 && coalitionCount > 2 && Math.random() < 0.10) {
       return this.createInnovationCatalyst(state);
     }
@@ -395,7 +529,6 @@ export class PoliSynthCore {
     };
   }
 
-  // Génération de rapport de session
   generateSessionReport(state: SimulationState): SessionReport {
     const endTime = Date.now();
     const sessionDuration = endTime - this.sessionStartTime;
@@ -435,9 +568,9 @@ export class PoliSynthCore {
       findings.push(`Période de forte activité coalitionnelle avec ${coalitionEvents.length} formations`);
     }
     
-    const innovationEvents = this.events.filter(e => e.type === 'innovation_emergence');
-    if (innovationEvents.length > 2) {
-      findings.push(`Émergence significative d'innovations collectives (${innovationEvents.length} clusters détectés)`);
+    const anomalyEvents = this.events.filter(e => e.type === 'anomaly_detected');
+    if (anomalyEvents.length > 0) {
+      findings.push(`${anomalyEvents.length} anomalies significatives détectées`);
     }
     
     return findings;
@@ -446,13 +579,11 @@ export class PoliSynthCore {
   private identifyEmergentPatterns(state: SimulationState): string[] {
     const patterns: string[] = [];
     
-    // Analyse des patterns de formation de coalitions
     const avgCoalitionSize = state.coalitions.reduce((sum, c) => sum + c.members.length, 0) / Math.max(1, state.coalitions.length);
     if (avgCoalitionSize > 12) {
       patterns.push("Tendance vers la formation de méga-coalitions");
     }
     
-    // Analyse des patterns comportementaux
     const leaderCount = state.primatoms.filter(p => p.behaviorType === 'leader').length;
     const followerCount = state.primatoms.filter(p => p.behaviorType === 'follower').length;
     
@@ -460,12 +591,17 @@ export class PoliSynthCore {
       patterns.push("Émergence d'une société à leadership distribué");
     }
     
+    const anomalyEvents = this.events.filter(e => e.type === 'anomaly_detected');
+    if (anomalyEvents.length > 2) {
+      patterns.push("Fréquence élevée d'événements anormaux");
+    }
+    
     return patterns;
   }
 
   private analyzeStabilityEvolution(state: SimulationState) {
     return {
-      initialStability: 75, // Valeur par défaut, à tracker réellement
+      initialStability: 75,
       finalStability: state.systemStability || 75,
       volatilityPeriods: this.identifyVolatilityPeriods()
     };
@@ -474,11 +610,11 @@ export class PoliSynthCore {
   private identifyVolatilityPeriods() {
     const periods: Array<{ start: number; end: number; cause: string }> = [];
     
-    const stressEvents = this.events.filter(e => e.type === 'behavior_shift' && e.severity === 'high');
+    const stressEvents = this.events.filter(e => e.type === 'behavior_shift' || e.type === 'anomaly_detected');
     stressEvents.forEach(event => {
       periods.push({
         start: event.timestamp,
-        end: event.timestamp + 30000, // 30 secondes de volatilité estimée
+        end: event.timestamp + 30000,
         cause: event.description
       });
     });
@@ -491,8 +627,8 @@ export class PoliSynthCore {
     
     return {
       formed: coalitionEvents.length,
-      dissolved: 0, // À implémenter avec tracking des dissolutions
-      merged: 0, // À implémenter avec tracking des fusions
+      dissolved: 0,
+      merged: 0,
       averageLifespan: this.calculateAverageCoalitionLifespan(state.coalitions)
     };
   }
@@ -503,7 +639,7 @@ export class PoliSynthCore {
     const currentTime = Date.now();
     const totalLifespan = coalitions.reduce((sum, c) => sum + (currentTime - c.created), 0);
     
-    return totalLifespan / coalitions.length / 1000; // En secondes
+    return totalLifespan / coalitions.length / 1000;
   }
 
   private extractBehavioralInsights(state: SimulationState) {
@@ -515,7 +651,7 @@ export class PoliSynthCore {
     const dominantBehaviors = Object.entries(behaviorCounts)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 2)
-      .map(([type]) => type);
+      #.map(([type]) => type);
     
     return {
       dominantBehaviors,
@@ -528,11 +664,11 @@ export class PoliSynthCore {
     const patterns: string[] = [];
     
     const adaptationEvents = this.events.filter(e => 
-      e.description.includes('adaptation') || e.description.includes('évolution')
+      e.description.includes('adaptation') || e.description.includes('évolution') || e.type === 'anomaly_detected'
     );
     
     if (adaptationEvents.length > 3) {
-      patterns.push("Adaptation rapide aux changements environnementaux");
+      patterns.push("Adaptation rapide aux changements environnementaux et anomalies");
     }
     
     return patterns;
@@ -565,18 +701,20 @@ export class PoliSynthCore {
       recommendations.push("Capitaliser sur le potentiel d'innovation élevé pour des transformations positives");
     }
     
+    const anomalyEvents = this.events.filter(e => e.type === 'anomaly_detected');
+    if (anomalyEvents.length > 0) {
+      recommendations.push("Investiguer les anomalies détectées pour prévenir les instabilités");
+    }
+    
     return recommendations;
   }
 
   private assessDataQuality(state: SimulationState): number {
-    // Évaluation de la qualité des données basée sur la cohérence et la complétude
     let qualityScore = 100;
     
-    // Vérification de la cohérence des données de base
     if (state.primatoms.length === 0) qualityScore -= 50;
     if (state.metrics.length === 0) qualityScore -= 20;
     
-    // Vérification de la cohérence des métriques
     const invalidPrimatoms = state.primatoms.filter(p => 
       p.trust < 0 || p.trust > 100 || 
       p.cooperation < 0 || p.cooperation > 100 ||
@@ -589,7 +727,6 @@ export class PoliSynthCore {
       qualityScore -= (invalidEvents.length / this.events.length) * 20;
     }
     
-    // Bonus pour la richesse des données
     if (state.coalitions.length > 0) qualityScore += 5;
     if (state.globalKnowledge.length > 0) qualityScore += 5;
     if (state.emergentPhenomena && state.emergentPhenomena.length > 0) qualityScore += 10;
@@ -598,32 +735,27 @@ export class PoliSynthCore {
   }
 
   private calculateConfidenceLevel(state: SimulationState): number {
-    // Calcul du niveau de confiance basé sur la quantité et la qualité des données
     const eventCount = this.events.length;
     const dataQuality = this.assessDataQuality(state);
     const sessionDuration = Date.now() - this.sessionStartTime;
     const populationSize = state.primatoms.length;
     
-    let confidence = Math.min(70, eventCount * 3); // Base sur le nombre d'événements
+    let confidence = Math.min(70, eventCount * 3);
     
-    // Bonus pour la durée de session
-    if (sessionDuration > 60000) confidence += 10; // Plus d'1 minute
-    if (sessionDuration > 300000) confidence += 10; // Plus de 5 minutes
+    if (sessionDuration > 60000) confidence += 10;
+    if (sessionDuration > 300000) confidence += 10;
     
-    // Bonus pour la taille de population
     if (populationSize > 100) confidence += 5;
     if (populationSize > 200) confidence += 5;
     
-    // Bonus pour la richesse des données
     if (state.coalitions.length > 0) confidence += 5;
     if (state.generation > 10) confidence += 5;
     
-    confidence = (confidence + dataQuality) / 2; // Pondération avec la qualité
+    confidence = (confidence + dataQuality) / 2;
     
     return Math.max(60, Math.min(95, confidence));
   }
 
-  // Méthodes publiques pour l'interface
   getRecentEvents(limit: number = 10): AnalysisEvent[] {
     return this.events
       .sort((a, b) => b.timestamp - a.timestamp)
@@ -647,5 +779,10 @@ export class PoliSynthCore {
     this.sessionStartTime = Date.now();
     this.disruptionQueue = [];
     this.analysisBuffer = [];
+    this.analysisCache.clear();
+    this.predictionEngine.patterns.clear();
+    this.predictionEngine.accuracy.clear();
+    this.anomalyDetector.baselines.clear();
+    this.anomalyDetector.thresholds.clear();
   }
 }
