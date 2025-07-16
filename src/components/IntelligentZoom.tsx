@@ -71,7 +71,7 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [networkMetrics, setNetworkMetrics] = useState<NetworkMetrics | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['network']));
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false); // DÉSACTIVÉ par défaut
 
   // Optimized network calculation with memoization
   const calculatedNetwork = useMemo(() => {
@@ -130,7 +130,7 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     }
   }, [selectedPrimatom?.id, calculatedNetwork.length]); // Only trigger on ID change
 
-  // Auto-refresh predictions (FIXED - no infinite loop)
+  // Auto-refresh predictions (DÉSACTIVÉ par défaut pour éviter le spam)
   useEffect(() => {
     if (autoRefresh && selectedPrimatom && networkNodes.length > 0) {
       const interval = setInterval(() => {
@@ -138,7 +138,7 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
         if (networkNodes.length > 0) {
           generateAIPredictions(selectedPrimatom, networkNodes);
         }
-      }, 30000); // Reduced to 30 seconds to avoid spam
+      }, 60000); // Augmenté à 60 secondes
       
       return () => clearInterval(interval);
     }
