@@ -42,7 +42,7 @@ const PrimatomDetails: React.FC<PrimatomDetailsProps> = ({ primatom }) => {
         <div className="w-full bg-slate-700 rounded-full h-2">
           <div 
             className={`h-2 rounded-full transition-all duration-300 ${color}`}
-            style={{ width: `${value}%` }}
+            style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
           />
         </div>
       </div>
@@ -55,9 +55,9 @@ const PrimatomDetails: React.FC<PrimatomDetailsProps> = ({ primatom }) => {
           <User className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-white">{primatom.name}</h2>
-          <p className={`text-sm font-medium ${getBehaviorColor(primatom.behaviorType)}`}>
-            {primatom.behaviorType.charAt(0).toUpperCase() + primatom.behaviorType.slice(1)}
+          <h2 className="text-xl font-bold text-white">{primatom.name || 'Primatom Inconnu'}</h2>
+          <p className={`text-sm font-medium ${getBehaviorColor(primatom.behaviorType || 'default')}`}>
+            {(primatom.behaviorType || 'inconnu').charAt(0).toUpperCase() + (primatom.behaviorType || 'inconnu').slice(1)}
           </p>
         </div>
       </div>
@@ -65,25 +65,25 @@ const PrimatomDetails: React.FC<PrimatomDetailsProps> = ({ primatom }) => {
       <div className="space-y-4 mb-6">
         <StatBar 
           label="Confiance" 
-          value={primatom.trust} 
+          value={primatom.trust || 0} 
           icon={<Heart className="w-4 h-4 text-red-400" />}
           color="bg-red-500"
         />
         <StatBar 
           label="Énergie" 
-          value={primatom.energy} 
+          value={primatom.energy || 0} 
           icon={<Zap className="w-4 h-4 text-yellow-400" />}
           color="bg-yellow-500"
         />
         <StatBar 
           label="Coopération" 
-          value={primatom.cooperation} 
+          value={primatom.cooperation || 0} 
           icon={<Users className="w-4 h-4 text-blue-400" />}
           color="bg-blue-500"
         />
         <StatBar 
           label="Innovation" 
-          value={primatom.innovation} 
+          value={primatom.innovation || 0} 
           icon={<Brain className="w-4 h-4 text-purple-400" />}
           color="bg-purple-500"
         />
@@ -95,28 +95,35 @@ const PrimatomDetails: React.FC<PrimatomDetailsProps> = ({ primatom }) => {
             <Clock className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-300">Âge</span>
           </div>
-          <span className="text-lg font-bold text-white">{primatom.age.toFixed(1)}</span>
+          <span className="text-lg font-bold text-white">{(primatom.age || 0).toFixed(1)}</span>
         </div>
         <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
           <div className="flex items-center gap-2 mb-1">
             <BookOpen className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-300">Mémoires</span>
           </div>
-          <span className="text-lg font-bold text-white">{primatom.memories.length}</span>
+          <span className="text-lg font-bold text-white">{primatom.memories?.length || 0}</span>
         </div>
       </div>
 
       <div className="space-y-4">
         <div>
           <h3 className="text-sm font-medium text-gray-300 mb-2">Comportement</h3>
-          <p className="text-sm text-gray-400">{getBehaviorDescription(primatom.behaviorType)}</p>
+          <p className="text-sm text-gray-400">{getBehaviorDescription(primatom.behaviorType || 'default')}</p>
         </div>
 
-        {primatom.coalition && (
+        {primatom.coalition ? (
           <div>
             <h3 className="text-sm font-medium text-gray-300 mb-2">Coalition</h3>
             <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
               <span className="text-sm text-cyan-400">Membre actif d'une coalition</span>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h3 className="text-sm font-medium text-gray-300 mb-2">Coalition</h3>
+            <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
+              <span className="text-sm text-gray-400">Aucune coalition active</span>
             </div>
           </div>
         )}
@@ -124,27 +131,27 @@ const PrimatomDetails: React.FC<PrimatomDetailsProps> = ({ primatom }) => {
         <div>
           <h3 className="text-sm font-medium text-gray-300 mb-2">Relations</h3>
           <div className="space-y-2">
-            {Object.entries(primatom.relationships)
+            {Object.entries(primatom.relationships || {})
               .filter(([_, strength]) => strength > 30)
               .slice(0, 3)
               .map(([id, strength]) => (
                 <div key={id} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">{id.split('-')[1]}</span>
+                  <span className="text-sm text-gray-400">{id.split('-')[1] || id}</span>
                   <div className="flex items-center gap-2">
                     <div className="w-20 bg-slate-700 rounded-full h-1">
                       <div 
                         className="bg-cyan-500 h-1 rounded-full"
-                        style={{ width: `${strength}%` }}
+                        style={{ width: `${Math.min(100, Math.max(0, strength))}%` }}
                       />
                     </div>
                     <span className="text-xs text-gray-500">{strength.toFixed(0)}%</span>
                   </div>
                 </div>
-              ))}
+              )) || <p className="text-sm text-gray-400">Aucune relation significative</p>}
           </div>
         </div>
 
-        {primatom.culturalNorms.length > 0 && (
+        {primatom.culturalNorms && primatom.culturalNorms.length > 0 ? (
           <div>
             <h3 className="text-sm font-medium text-gray-300 mb-2">Normes Culturelles</h3>
             <div className="space-y-1">
@@ -153,6 +160,15 @@ const PrimatomDetails: React.FC<PrimatomDetailsProps> = ({ primatom }) => {
                   {norm}
                 </div>
               ))}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h3 className="text-sm font-medium text-gray-300 mb-2">Normes Culturelles</h3>
+            <div className="space-y-1">
+              <div className="text-xs text-gray-400 bg-slate-700/50 rounded px-2 py-1">
+                Aucune norme culturelle définie
+              </div>
             </div>
           </div>
         )}
