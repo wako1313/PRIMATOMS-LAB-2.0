@@ -90,7 +90,7 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     const waves = generateCognitiveWaves();
     
     // Calcul de la résonance globale
-    const globalRes = calculateGlobalResonance(fields);
+    const globalRes = calculateGlobalResonance(fields, patterns, waves);
     
     // Calcul des métriques
     const metrics = calculateResonanceMetrics(fields, patterns);
@@ -371,14 +371,18 @@ const CognitiveResonanceMapper: React.FC<CognitiveResonanceMapperProps> = ({
     );
   };
 
-  const calculateGlobalResonance = (fields: ResonanceField[]): number => {
-    if (fields.length === 0) return 0;
+  const calculateGlobalResonance = (fields: ResonanceField[], patterns: ResonancePattern[], waves: CognitiveWave[]): number => {
+    if (fields.length === 0 && patterns.length === 0 && waves.length === 0) return 0;
     
-    const avgAmplitude = fields.reduce((sum, f) => sum + f.amplitude, 0) / fields.length;
-    const avgStability = fields.reduce((sum, f) => sum + f.stability, 0) / fields.length;
-    const fieldDensity = fields.length / 10; // Normalisation
+    const avgFieldAmplitude = fields.length > 0 ? fields.reduce((sum, f) => sum + f.amplitude, 0) / fields.length : 0;
+    const avgFieldStability = fields.length > 0 ? fields.reduce((sum, f) => sum + f.stability, 0) / fields.length : 0;
+    const patternStrength = patterns.length > 0 ? patterns.reduce((sum, p) => sum + p.strength, 0) / patterns.length : 0;
+    const waveAmplitude = waves.length > 0 ? waves.reduce((sum, w) => sum + w.amplitude, 0) / waves.length : 0;
     
-    return Math.min(100, (avgAmplitude + avgStability) / 2 + fieldDensity * 5);
+    const baseResonance = (avgFieldAmplitude + avgFieldStability + patternStrength + waveAmplitude) / 4;
+    const dynamicFactor = (fields.length + patterns.length + waves.length) * 0.5; // Influence de la densité
+    
+    return Math.min(100, baseResonance + dynamicFactor);
   };
 
   const calculateResonanceMetrics = (fields: ResonanceField[], patterns: ResonancePattern[]) => {
