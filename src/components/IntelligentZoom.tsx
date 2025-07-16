@@ -13,7 +13,7 @@ interface IntelligentZoomProps {
   selectedPrimatom: Primatom | null;
   onSelectPrimatom: (primatom: Primatom) => void;
   onZoomOut: () => void;
-  isRunning?: boolean; // Ajouté pour détecter si la simulation est active
+  isRunning?: boolean;
 }
 
 interface NetworkNode {
@@ -55,7 +55,54 @@ interface NetworkMetrics {
   communityCount: number;
 }
 
-// Définition de buildIntelligentNetwork en haut
+// Déplacement des fonctions de calcul avant buildIntelligentNetwork
+const calculateBetweennessCentrality = (primatom: Primatom): number => {
+  const connections = Object.values(primatom.relationships || {}).filter(r => r > 30).length;
+  const avgRelationship = Object.values(primatom.relationships || {}).reduce((a, b) => a + b, 0) / Object.keys(primatom.relationships || {}).length || 0;
+  return (connections * avgRelationship) / 100;
+};
+
+const calculateClosenessCentrality = (primatom: Primatom): number => {
+  const totalConnections = Object.keys(primatom.relationships || {}).length;
+  const avgDistance = totalConnections > 0 ? primatoms.length / totalConnections : 0;
+  return avgDistance > 0 ? 1 / avgDistance : 0;
+};
+
+const calculateInfluenceScore = (primatom: Primatom): number => {
+  const baseInfluence = primatom.influence || 50;
+  const networkBonus = Object.values(primatom.relationships || {}).filter(r => r > 70).length * 5;
+  const behaviorBonus = primatom.behaviorType === 'leader' ? 20
+    : primatom.behaviorType === 'innovator' ? 15 : 10;
+  const trustFactor = (primatom.trust || 0) * 0.3;
+  return Math.min(100, baseInfluence + networkBonus + behaviorBonus + trustFactor);
+};
+
+const predictEvolution = (primatom: Primatom): 'rising' | 'stable' | 'declining' => {
+  const energy = primatom.energy || 0;
+  const innovation = primatom.innovation || 0;
+  const stress = primatom.stressLevel || 0;
+  const score = (energy + innovation - stress) / 3;
+  return score > 70 ? 'rising' : score < 40 ? 'declining' : 'stable';
+};
+
+const calculateCompatibility = (center: Primatom, target: Primatom): number => {
+  const trustDiff = Math.abs((center.trust || 0) - (target.trust || 0));
+  const energyDiff = Math.abs((center.energy || 0) - (target.energy || 0));
+  const cooperationDiff = Math.abs((center.cooperation || 0) - (target.cooperation || 0));
+  const avgDiff = (trustDiff + energyDiff + cooperationDiff) / 3;
+  return Math.max(0, 100 - avgDiff);
+};
+
+const assessRiskLevel = (primatom: Primatom): 'low' | 'medium' | 'high' => {
+  const stress = primatom.stressLevel || 0;
+  const trust = primatom.trust || 0;
+  const energy = primatom.energy || 0;
+  if (stress > 70 || trust < 30) return 'high';
+  if (stress > 40 || trust < 60 || energy < 40) return 'medium';
+  return 'low';
+};
+
+// Définition de buildIntelligentNetwork
 const buildIntelligentNetwork = (centerPrimatom: Primatom, primatoms: Primatom[]): NetworkNode[] => {
   const network: NetworkNode[] = [];
   const visited = new Set<string>();
@@ -129,15 +176,13 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
   const [networkMetrics, setNetworkMetrics] = useState<NetworkMetrics | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['network']));
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Gestion d'erreur locale
+  const [error, setError] = useState<string | null>(null);
 
-  // Calcul du réseau avec memoization, désactivé pendant la simulation
   const calculatedNetwork = useMemo(() => {
     if (isRunning || !selectedPrimatom) return [];
     return buildIntelligentNetwork(selectedPrimatom, primatoms);
   }, [selectedPrimatom, primatoms, isRunning]);
 
-  // Filtrage des nœuds avec memoization
   const filteredNodes = useMemo(() => {
     let nodes = calculatedNetwork;
 
@@ -200,52 +245,6 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       return () => clearInterval(interval);
     }
   }, [autoRefresh, selectedPrimatom?.id, networkNodes.length, isRunning]);
-
-  const calculateBetweennessCentrality = (primatom: Primatom): number => {
-    const connections = Object.values(primatom.relationships || {}).filter(r => r > 30).length;
-    const avgRelationship = Object.values(primatom.relationships || {}).reduce((a, b) => a + b, 0) / Object.keys(primatom.relationships || {}).length || 0;
-    return (connections * avgRelationship) / 100;
-  };
-
-  const calculateClosenessCentrality = (primatom: Primatom): number => {
-    const totalConnections = Object.keys(primatom.relationships || {}).length;
-    const avgDistance = totalConnections > 0 ? primatoms.length / totalConnections : 0;
-    return avgDistance > 0 ? 1 / avgDistance : 0;
-  };
-
-  const calculateInfluenceScore = (primatom: Primatom): number => {
-    const baseInfluence = primatom.influence || 50;
-    const networkBonus = Object.values(primatom.relationships || {}).filter(r => r > 70).length * 5;
-    const behaviorBonus = primatom.behaviorType === 'leader' ? 20
-      : primatom.behaviorType === 'innovator' ? 15 : 10;
-    const trustFactor = (primatom.trust || 0) * 0.3;
-    return Math.min(100, baseInfluence + networkBonus + behaviorBonus + trustFactor);
-  };
-
-  const predictEvolution = (primatom: Primatom): 'rising' | 'stable' | 'declining' => {
-    const energy = primatom.energy || 0;
-    const innovation = primatom.innovation || 0;
-    const stress = primatom.stressLevel || 0;
-    const score = (energy + innovation - stress) / 3;
-    return score > 70 ? 'rising' : score < 40 ? 'declining' : 'stable';
-  };
-
-  const calculateCompatibility = (center: Primatom, target: Primatom): number => {
-    const trustDiff = Math.abs((center.trust || 0) - (target.trust || 0));
-    const energyDiff = Math.abs((center.energy || 0) - (target.energy || 0));
-    const cooperationDiff = Math.abs((center.cooperation || 0) - (target.cooperation || 0));
-    const avgDiff = (trustDiff + energyDiff + cooperationDiff) / 3;
-    return Math.max(0, 100 - avgDiff);
-  };
-
-  const assessRiskLevel = (primatom: Primatom): 'low' | 'medium' | 'high' => {
-    const stress = primatom.stressLevel || 0;
-    const trust = primatom.trust || 0;
-    const energy = primatom.energy || 0;
-    if (stress > 70 || trust < 30) return 'high';
-    if (stress > 40 || trust < 60 || energy < 40) return 'medium';
-    return 'low';
-  };
 
   const generateAIPredictions = useCallback((center: Primatom, network: NetworkNode[]) => {
     const predictions: AIPrediction[] = [];
