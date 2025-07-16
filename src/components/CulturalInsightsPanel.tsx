@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SimulationState } from '../types';
 import { 
   Globe, TrendingUp, Users, Zap, Brain, Eye, Wifi, RefreshCw, BarChart3,
@@ -124,6 +124,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   const [predictiveAnalytics, setPredictiveAnalytics] = useState<PredictiveAnalytics | null>(null);
   const [marketImplications, setMarketImplications] = useState<MarketImplications | null>(null);
   const [coalitionRecommendations, setCoalitionRecommendations] = useState<Map<string, RecommendationItem[]>>(new Map());
+  
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<number>(0);
   const [realTimeInsights, setRealTimeInsights] = useState<string[]>([]);
@@ -134,8 +135,7 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     systemHealth: 100
   });
 
-  const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const cachedRecommendationsRef = useRef<Map<string, RecommendationItem[]>>(new Map());
+  const updateIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const updateLiveMetrics = useCallback(() => {
     setLiveMetrics(prev => ({
@@ -146,10 +146,30 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     }));
   }, [state.primatoms.length, state.coalitions.length, isRunning]);
 
-  const updateCulturalIntelligence = useCallback(async () => {
+  useEffect(() => {
+    if (updateIntervalRef.current) clearInterval(updateIntervalRef.current);
+
+    if (isRunning) {
+      updateCulturalIntelligence();
+      
+      updateIntervalRef.current = setInterval(() => {
+        updateCulturalIntelligence();
+        generateRealTimeInsights();
+        updateLiveMetrics();
+      }, 4000);
+    }
+
+    return () => {
+      if (updateIntervalRef.current) clearInterval(updateIntervalRef.current);
+    };
+  }, [isRunning, state.primatoms.length, state.coalitions.length, updateLiveMetrics]);
+
+  const updateCulturalIntelligence = async () => {
     setIsLoading(true);
+    
     try {
       const currentTime = Date.now();
+      
       const sentiment = generateGlobalSentiment(state, currentTime);
       setGlobalSentiment(sentiment);
 
@@ -166,7 +186,6 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
       setMarketImplications(implications);
 
       const recommendations = generateCoalitionRecommendations(state, currentTime);
-      cachedRecommendationsRef.current = recommendations;
       setCoalitionRecommendations(recommendations);
 
       setLastUpdate(currentTime);
@@ -175,10 +194,10 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     } finally {
       setIsLoading(false);
     }
-  }, [state]);
+  };
 
-  const generateGlobalSentiment = useCallback((state: SimulationState, timestamp: number): GlobalSentiment => {
-    const population = Math.min(state.primatoms.length, 100); // Cap population impact
+  const generateGlobalSentiment = (state: SimulationState, timestamp: number): GlobalSentiment => {
+    const population = Math.min(state.primatoms.length, 100);
     const avgTrust = state.primatoms.reduce((sum, p) => sum + p.trust, 0) / Math.max(population, 1);
     const avgCooperation = state.primatoms.reduce((sum, p) => sum + p.cooperation, 0) / Math.max(population, 1);
     const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / Math.max(population, 1);
@@ -197,9 +216,9 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
       trust_index: Math.min(95, Math.max(10, avgTrust + (coalitionDensity * 10) + timeVariation)),
       timestamp
     };
-  }, []);
+  };
 
-  const generateTrendingEntities = useCallback((state: SimulationState, timestamp: number): TrendingEntity[] => {
+  const generateTrendingEntities = (state: SimulationState, timestamp: number): TrendingEntity[] => {
     const population = Math.min(state.primatoms.length, 100);
     const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / Math.max(population, 1);
 
@@ -228,15 +247,16 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
         timestamp
       };
     });
-  }, []);
+  };
 
-  const generateCulturalProfiles = useCallback((state: SimulationState, timestamp: number): Map<string, CulturalProfile> => {
+  const generateCulturalProfiles = (state: SimulationState, timestamp: number): Map<string, CulturalProfile> => {
     const profiles = new Map<string, CulturalProfile>();
-    const sampleSize = Math.min(state.primatoms.length, 15); // Fixed sample size
-    const samplePrimatoms = state.primatoms.slice(0, sampleSize).map(p => ({ ...p })); // Shallow copy to avoid mutation
+    
+    const sampleSize = Math.min(state.primatoms.length, 15);
+    const samplePrimatoms = state.primatoms.slice(0, sampleSize);
 
     samplePrimatoms.forEach((primatom, index) => {
-      const isNew = !culturalProfiles.has(primatom.id);
+      const isNew = !profiles.has(primatom.id);
       const timeVariation = Math.sin((timestamp + index * 500) / 8000) * 5;
       
       const profile: CulturalProfile = {
@@ -269,9 +289,9 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     });
 
     return profiles;
-  }, []);
+  };
 
-  const generatePredictiveAnalytics = useCallback((state: SimulationState, timestamp: number): PredictiveAnalytics => {
+  const generatePredictiveAnalytics = (state: SimulationState, timestamp: number): PredictiveAnalytics => {
     const population = Math.min(state.primatoms.length, 100);
     const coalitions = Math.min(state.coalitions.length, 10);
     const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / Math.max(population, 1);
@@ -306,9 +326,9 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
       emergence_patterns: generateEmergencePatterns(state),
       timestamp
     };
-  }, []);
+  };
 
-  const generateMarketImplications = useCallback((state: SimulationState, timestamp: number): MarketImplications => {
+  const generateMarketImplications = (state: SimulationState, timestamp: number): MarketImplications => {
     const population = Math.min(state.primatoms.length, 100);
     const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / Math.max(population, 1);
     
@@ -342,21 +362,21 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
       ],
       timestamp
     };
-  }, []);
+  };
 
-  const generateCoalitionRecommendations = useCallback((state: SimulationState, timestamp: number): Map<string, RecommendationItem[]> => {
+  const generateCoalitionRecommendations = (state: SimulationState, timestamp: number): Map<string, RecommendationItem[]> => {
     const recommendations = new Map<string, RecommendationItem[]>();
-    const stableTrendingEntities = useMemo(() => trendingEntities.slice(0, 5), [trendingEntities]);
-
+    
     state.coalitions.forEach(coalition => {
-      const numRecommendations = Math.min(3, Math.max(2, 2)); // Fixed to 2-3 recommendations
+      const numRecommendations = Math.min(3, Math.max(2, Math.floor(coalition.members.length / 5) + 1));
       const coalitionTrends: RecommendationItem[] = [];
-
+      
       for (let i = 0; i < numRecommendations; i++) {
-        const trendEntity = stableTrendingEntities[i % stableTrendingEntities.length] || stableTrendingEntities[0];
+        const trendEntity = trendingEntities[i % trendingEntities.length] || trendingEntities[0];
+        
         const timeBonus = Math.sin((timestamp + i * 2000) / 10000) * 0.1;
-        const cohesionBonus = Math.min(coalition.cohesion, 80) / 1000; // Cap cohesion impact
-
+        const cohesionBonus = Math.min(coalition.cohesion, 80) / 1000;
+        
         coalitionTrends.push({
           id: `rec-${coalition.id}-${i}-${timestamp}`,
           entity: {
@@ -389,9 +409,9 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     });
 
     return recommendations;
-  }, [trendingEntities]);
+  };
 
-  const generateRealTimeInsights = useCallback(() => {
+  const generateRealTimeInsights = () => {
     const population = Math.min(state.primatoms.length, 100);
     const coalitions = Math.min(state.coalitions.length, 10);
     const avgTrust = state.primatoms.reduce((sum, p) => sum + p.trust, 0) / Math.max(population, 1);
@@ -406,21 +426,21 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     ];
 
     setRealTimeInsights(insights.slice(0, 3));
-  }, [state.primatoms.length, state.coalitions.length, globalSentiment]);
+  };
 
-  const calculateLeadershipPotential = useCallback((primatom: any, state: SimulationState, timeVariation: number): number => {
+  const calculateLeadershipPotential = (primatom: any, state: SimulationState, timeVariation: number): number => {
     const baseScore = (primatom.influence || 50) + primatom.trust + primatom.innovation;
     const coalitionBonus = state.coalitions.some(c => c.members.includes(primatom.id)) ? 15 : 0;
     return Math.min(95, Math.max(15, (baseScore / 3) + coalitionBonus + timeVariation + (Math.random() * 10)));
-  }, []);
+  };
 
-  const calculateCoalitionProbability = useCallback((primatom: any, state: SimulationState, timeVariation: number): number => {
+  const calculateCoalitionProbability = (primatom: any, state: SimulationState, timeVariation: number): number => {
     const isInCoalition = state.coalitions.some(c => c.members.includes(primatom.id));
     const baseProb = primatom.cooperation + (primatom.trust * 0.5);
     return Math.min(95, Math.max(20, baseProb + (isInCoalition ? 20 : 0) + timeVariation + (Math.random() * 15)));
-  }, []);
+  };
 
-  const generateBehavioralInsights = useCallback((primatom: any) => {
+  const generateBehavioralInsights = (primatom: any) => {
     const styles = ['Analytique', 'Intuitif', 'Collaboratif', 'Disruptif'];
     const stressPatterns = ['Resilient', 'Adaptatif', 'Proactif', 'Zen'];
     const innovationTypes = ['Incrémental', 'Radical', 'Synthétique', 'Émergent'];
@@ -432,9 +452,9 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
       innovation_catalyst_type: innovationTypes[Math.floor(Math.random() * innovationTypes.length)],
       social_connectivity_pattern: socialPatterns[Math.floor(Math.random() * socialPatterns.length)]
     };
-  }, []);
+  };
 
-  const generateEmergencePatterns = useCallback((state: SimulationState): string[] => {
+  const generateEmergencePatterns = (state: SimulationState): string[] => {
     const patterns = [
       'Auto-organisation spontanée détectée',
       'Synchronisation comportementale en cours',
@@ -444,38 +464,21 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
     ];
     
     return patterns.slice(0, Math.min(patterns.length, Math.floor(Math.min(state.primatoms.length, 50) / 10) + 2));
-  }, [state.primatoms.length]);
+  };
 
-  const getPerformanceIcon = useCallback((value: number) => {
+  const getPerformanceIcon = (value: number) => {
     if (value > 80) return <ArrowUpRight className="w-4 h-4 text-emerald-400" />;
     if (value > 60) return <ArrowUpRight className="w-4 h-4 text-green-400" />;
     if (value > 40) return <Minus className="w-4 h-4 text-yellow-400" />;
     return <ArrowDownRight className="w-4 h-4 text-red-400" />;
-  }, []);
+  };
 
-  const getAIPredictionBadge = useCallback((score: number) => {
+  const getAIPredictionBadge = (score: number) => {
     if (score > 90) return { icon: <Crown className="w-3 h-3" />, text: 'Elite', color: 'bg-gradient-to-r from-yellow-500 to-orange-500' };
     if (score > 80) return { icon: <Gem className="w-3 h-3" />, text: 'High', color: 'bg-gradient-to-r from-emerald-500 to-teal-500' };
     if (score > 60) return { icon: <Star className="w-3 h-3" />, text: 'Good', color: 'bg-gradient-to-r from-blue-500 to-cyan-500' };
     return { icon: <Sparkles className="w-3 h-3" />, text: 'Avg', color: 'bg-gradient-to-r from-gray-500 to-slate-500' };
-  }, []);
-
-  useEffect(() => {
-    if (updateIntervalRef.current) clearInterval(updateIntervalRef.current);
-
-    if (isRunning) {
-      updateCulturalIntelligence();
-      updateIntervalRef.current = setInterval(() => {
-        updateCulturalIntelligence();
-        generateRealTimeInsights();
-        updateLiveMetrics();
-      }, 5000); // Increased to 5s for stability
-    }
-
-    return () => {
-      if (updateIntervalRef.current) clearInterval(updateIntervalRef.current);
-    };
-  }, [isRunning, updateCulturalIntelligence, generateRealTimeInsights, updateLiveMetrics]);
+  };
 
   return (
     <div className="space-y-6">
@@ -829,8 +832,14 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
               const coalition = state.coalitions.find(c => c.id === coalitionId);
               if (!coalition) return null;
 
-              // Fallback to cached recommendations if current is empty
-              const stableRecommendations = recommendations.length > 0 ? recommendations : cachedRecommendationsRef.current.get(coalitionId) || recommendations;
+              // Select recommended profiles
+              const recommendedProfiles = Array.from(culturalProfiles.values())
+                .filter(profile => 
+                  profile.ai_predictions.leadership_potential > 80 && 
+                  profile.ai_predictions.coalition_formation_probability > 70
+                )
+                .sort((a, b) => b.ai_predictions.leadership_potential - a.ai_predictions.leadership_potential)
+                .slice(0, 2);
 
               return (
                 <div key={coalitionId} className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl p-5 border border-slate-600">
@@ -840,12 +849,12 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
                       <p className="text-xs text-slate-400">{coalition.members.length} membres • Cohésion: {coalition.cohesion.toFixed(0)}%</p>
                     </div>
                     <div className="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs font-bold rounded">
-                      {stableRecommendations.length} recs
+                      {recommendations.length} recs
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    {stableRecommendations.slice(0, 2).map((rec, index) => (
+                    {recommendations.slice(0, 2).map((rec, index) => (
                       <div key={rec.id} className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
                         <div className="flex items-center justify-between mb-2">
                           <div className="text-sm font-medium text-white">{rec.entity.name}</div>
@@ -872,6 +881,29 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
                         </div>
                       </div>
                     ))}
+
+                    {recommendedProfiles.length > 0 && (
+                      <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
+                        <h5 className="text-sm font-bold text-violet-400 mb-2">Profils Recommandés</h5>
+                        <div className="space-y-2">
+                          {recommendedProfiles.map((profile, index) => {
+                            const badge = getAIPredictionBadge(profile.ai_predictions.leadership_potential);
+                            return (
+                              <div key={profile.id} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1 h-1 bg-violet-400 rounded-full"></div>
+                                  <span>Primatom #{profile.id.slice(-4)}</span>
+                                </div>
+                                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-white ${badge.color}`}>
+                                  {badge.icon}
+                                  {badge.text}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -1025,4 +1057,4 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
   );
 };
 
-export default React.memo(CulturalInsightsPanel);
+export default CulturalInsightsPanel;
