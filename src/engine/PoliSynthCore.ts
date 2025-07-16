@@ -649,9 +649,9 @@ export class PoliSynthCore {
     }, {} as Record<string, number>);
     
     const dominantBehaviors = Object.entries(behaviorCounts)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 2)
-      #.map(([type]) => type);
+  .sort(([a], [b]) => b - a)
+  .slice(0, 2)
+  .map(([type]) => type);
     
     return {
       dominantBehaviors,
