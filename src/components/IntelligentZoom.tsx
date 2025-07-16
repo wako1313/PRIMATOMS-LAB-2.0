@@ -1,4 +1,3 @@
-// IntelligentZoom.tsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Primatom, Coalition } from '../types';
 import { 
@@ -62,7 +61,7 @@ const calculateBetweennessCentrality = (primatom: Primatom): number => {
   return (connections * avgRelationship) / 100;
 };
 
-const calculateClosenessCentrality = (primatom: Primatom): number => {
+const calculateClosenessCentrality = (primatom: Primatom, primatoms: Primatom[]): number => {
   const totalConnections = Object.keys(primatom.relationships || {}).length;
   const avgDistance = totalConnections > 0 ? primatoms.length / totalConnections : 0;
   return avgDistance > 0 ? 1 / avgDistance : 0;
@@ -117,7 +116,7 @@ const buildIntelligentNetwork = (centerPrimatom: Primatom, primatoms: Primatom[]
           relationshipStrength: strength,
           isDirectConnection: true,
           betweennessCentrality: calculateBetweennessCentrality(primatom),
-          closenessCentrality: calculateClosenessCentrality(primatom),
+          closenessCentrality: calculateClosenessCentrality(primatom, primatoms),
           influenceScore: calculateInfluenceScore(primatom),
           predictedEvolution: predictEvolution(primatom),
           compatibilityScore: calculateCompatibility(centerPrimatom, primatom),
@@ -140,7 +139,7 @@ const buildIntelligentNetwork = (centerPrimatom: Primatom, primatoms: Primatom[]
               relationshipStrength: strength * 0.7,
               isDirectConnection: false,
               betweennessCentrality: calculateBetweennessCentrality(primatom),
-              closenessCentrality: calculateClosenessCentrality(primatom),
+              closenessCentrality: calculateClosenessCentrality(primatom, primatoms),
               influenceScore: calculateInfluenceScore(primatom),
               predictedEvolution: predictEvolution(primatom),
               compatibilityScore: calculateCompatibility(centerPrimatom, primatom),
