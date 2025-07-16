@@ -10,7 +10,7 @@ import {
   BarChart3, PieChart, LineChart, Network, Waves, Radio, Lightbulb,
   Atom, Wifi, Zap as Lightning, Circle, Search, Telescope, Beaker,
   Microscope, Dna, Fingerprint, Layers, Radar, Binary, Database,
-  Wand2, Satellite, Orbit, Galaxy, ArrowUpRight, TrendingDown,
+  Wand2, Satellite, Orbit, ArrowUpRight, TrendingDown,
   Shield, Crosshair, Compass, Navigation, Map, Hexagon, Triangle
 } from 'lucide-react';
 
@@ -702,7 +702,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-xl shadow-lg animate-pulse">
-              <Galaxy className="w-8 h-8 text-white" />
+              <Atom className="w-8 h-8 text-white" />
             </div>
             <div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
@@ -773,7 +773,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
 
           <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg p-4 border border-purple-500/30">
             <div className="flex items-center gap-2 mb-2">
-              <Galaxy className="w-4 h-4 text-purple-400" />
+              <Atom className="w-4 h-4 text-purple-400" />
               <span className="text-sm font-medium text-gray-300">AI Engine</span>
             </div>
             <div className="text-xl font-bold text-purple-400">
@@ -888,7 +888,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
         <div className="flex flex-wrap border-b border-slate-700">
           {[
-            { id: 'dashboard', label: 'Dashboard Quantique', icon: <Galaxy className="w-4 h-4" /> },
+            { id: 'dashboard', label: 'Dashboard Quantique', icon: <Atom className="w-4 h-4" /> },
             { id: 'analysis', label: 'Analyse IA', icon: <Brain className="w-4 h-4" /> },
             { id: 'predictions', label: 'Prédictions', icon: <Telescope className="w-4 h-4" /> },
             { id: 'dna', label: 'ADN Culturel', icon: <Dna className="w-4 h-4" /> },
@@ -916,7 +916,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
           {activeView === 'dashboard' && (
             <div className="space-y-6">
               <h4 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Galaxy className="w-5 h-5 text-purple-400" />
+                <Atom className="w-5 h-5 text-purple-400" />
                 Intelligence Collective Quantique Temps Réel
               </h4>
               
@@ -1025,7 +1025,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-400">
-                  <Galaxy className="w-12 h-12 mx-auto mb-3 opacity-50 animate-pulse" />
+                  <Atom className="w-12 h-12 mx-auto mb-3 opacity-50 animate-pulse" />
                   <p>Initialisation intelligence collective quantique...</p>
                 </div>
               )}
@@ -1054,7 +1054,7 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                 <div className="space-y-4">
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-6 border border-purple-500/30">
                     <h5 className="font-medium text-white mb-3 flex items-center gap-2">
-                      <Galaxy className="w-4 h-4" />
+                      <Atom className="w-4 h-4" />
                       Résumé Exécutif Quantique
                     </h5>
                     <p className="text-gray-300 text-sm">{analysisResult.executiveSummary}</p>
