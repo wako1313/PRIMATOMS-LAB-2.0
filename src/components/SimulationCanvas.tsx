@@ -443,7 +443,7 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
+          onWheel={(e) => { handleWheel(e); }} // Correction ici
         >
           {/* Grille de fond subtile */}
           <defs>
