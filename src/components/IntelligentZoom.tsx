@@ -114,7 +114,7 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     if (selectedPrimatom) {
       setNetworkNodes(calculatedNetwork);
       
-      // Update navigation history
+      // Update navigation history (OPTIMIZED)
       setNavigationHistory(prev => {
         const newHistory = [...prev];
         if (newHistory[newHistory.length - 1]?.id !== selectedPrimatom.id) {
@@ -122,29 +122,27 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
         }
         return newHistory.slice(-10);
       });
-      setCurrentIndex(navigationHistory.length);
       
-      // Generate AI predictions
+      // Only generate predictions once per selection
       generateAIPredictions(selectedPrimatom, calculatedNetwork);
-      
-      // Generate timeline events
       generateTimelineEvents(selectedPrimatom, calculatedNetwork);
-      
-      // Calculate network metrics
       calculateNetworkMetrics(calculatedNetwork);
     }
-  }, [selectedPrimatom, calculatedNetwork]);
+  }, [selectedPrimatom?.id, calculatedNetwork.length]); // Only trigger on ID change
 
-  // Auto-refresh predictions
+  // Auto-refresh predictions (FIXED - no infinite loop)
   useEffect(() => {
-    if (autoRefresh && selectedPrimatom) {
+    if (autoRefresh && selectedPrimatom && networkNodes.length > 0) {
       const interval = setInterval(() => {
-        generateAIPredictions(selectedPrimatom, networkNodes);
-      }, 10000); // Every 10 seconds
+        // Only refresh if we have stable data
+        if (networkNodes.length > 0) {
+          generateAIPredictions(selectedPrimatom, networkNodes);
+        }
+      }, 30000); // Reduced to 30 seconds to avoid spam
       
       return () => clearInterval(interval);
     }
-  }, [autoRefresh, selectedPrimatom, networkNodes]);
+  }, [autoRefresh, selectedPrimatom?.id]); // Only depend on ID, not full objects
 
   const buildIntelligentNetwork = useCallback((centerPrimatom: Primatom): NetworkNode[] => {
     const network: NetworkNode[] = [];
@@ -256,7 +254,7 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     return 'low';
   };
 
-  const generateAIPredictions = (center: Primatom, network: NetworkNode[]) => {
+  const generateAIPredictions = useCallback((center: Primatom, network: NetworkNode[]) => {
     const predictions: AIPrediction[] = [];
     
     // High compatibility suggestions
@@ -312,9 +310,9 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     });
 
     setAiPredictions(predictions.slice(0, 8)); // Limit to 8 predictions
-  };
+  }, []);
 
-  const generateTimelineEvents = (center: Primatom, network: NetworkNode[]) => {
+  const generateTimelineEvents = useCallback((center: Primatom, network: NetworkNode[]) => {
     const events: TimelineEvent[] = [];
     const now = Date.now();
     
@@ -358,9 +356,9 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
     });
 
     setTimelineEvents(events.sort((a, b) => a.timestamp - b.timestamp).slice(0, 10));
-  };
+  }, []);
 
-  const calculateNetworkMetrics = (network: NetworkNode[]) => {
+  const calculateNetworkMetrics = useCallback((network: NetworkNode[]) => {
     const totalPossibleConnections = network.length * (network.length - 1) / 2;
     const actualConnections = network.reduce((sum, node) => 
       sum + Object.values(node.primatom.relationships).filter(r => r > 30).length, 0
@@ -386,7 +384,7 @@ const IntelligentZoom: React.FC<IntelligentZoomProps> = ({
       bridgeNodes,
       communityCount: coalitions.length
     });
-  };
+  }, [coalitions.length]);
 
   const navigateToNode = (node: NetworkNode) => {
     onSelectPrimatom(node.primatom);
