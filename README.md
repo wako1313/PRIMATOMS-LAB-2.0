@@ -115,6 +115,7 @@ Moteur IA : PoliSynth Disruptor
 Contact : [à compléter]
 Documentation, démos et support : [liens à compléter]
 
+
 # PRIMATOMS SOCIETY LAB 1.0
 
 ## 🔬 Qloo Hackathon - Méthodologie de Debugging Systématique
