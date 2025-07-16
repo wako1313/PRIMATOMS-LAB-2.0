@@ -814,22 +814,22 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
         </div>
       )}
 
-      {coalitionRecommendations.size > 0 && (
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-xl">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-white flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg">
-                <Lightbulb className="w-5 h-5 text-white" />
-              </div>
-              Recommandations Stratégiques IA
-              <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-sm font-bold rounded-full">
-                {Array.from(coalitionRecommendations.values()).reduce((sum, recs) => sum + recs.length, 0)} ACTIVES
-              </span>
-            </h3>
-          </div>
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-white flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg">
+              <Lightbulb className="w-5 h-5 text-white" />
+            </div>
+            Recommandations Stratégiques IA
+            <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-sm font-bold rounded-full">
+              {Array.from(coalitionRecommendations.values()).reduce((sum, recs) => sum + recs.length, 0)} ACTIVES
+            </span>
+          </h3>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {Array.from(coalitionRecommendations.entries()).slice(0, 4).map(([coalitionId, recommendations]) => {
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from(coalitionRecommendations.entries()).length > 0 ? (
+            Array.from(coalitionRecommendations.entries()).slice(0, 4).map(([coalitionId, recommendations]) => {
               const coalition = state.coalitions.find(c => c.id === coalitionId);
               if (!coalition) return null;
 
@@ -876,10 +876,14 @@ const CulturalInsightsPanel: React.FC<CulturalInsightsPanelProps> = ({ state, is
                   </div>
                 </div>
               );
-            })}
-          </div>
+            })
+          ) : (
+            <div className="text-center text-slate-400 py-6">
+              Aucune recommandation active pour le moment.
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {marketImplications && (
         <div className="bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/50 backdrop-blur-sm rounded-xl p-6 border border-slate-600/50 shadow-2xl">
