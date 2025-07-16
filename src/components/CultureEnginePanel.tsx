@@ -126,7 +126,69 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
     }
   }, [isRunning, state.primatoms.length, isAnalyzing, deepAnalysisMode]);
 
-  // FONCTIONS AVANCÉES
+  // FONCTIONS DE CALCUL AVANCÉES
+  const calculateViralCoefficient = (trust: number, cooperation: number, coalitions: number): number => {
+    const baseViral = (trust + cooperation) / 2;
+    const networkEffect = Math.min(50, coalitions * 8);
+    const amplification = Math.log(Math.max(1, coalitions)) * 15;
+    return Math.min(100, baseViral + networkEffect + amplification);
+  };
+
+  const calculateMemePropagation = (innovation: number, energy: number, population: number): number => {
+    const creativeForce = innovation * 0.7;
+    const energyMultiplier = energy * 0.4;
+    const populationBoost = Math.min(30, population * 0.3);
+    return Math.min(100, creativeForce + energyMultiplier + populationBoost);
+  };
+
+  const calculateCulturalGravity = (coalitions: number, population: number, trust: number): number => {
+    const massEffect = (coalitions * population) / 10;
+    const trustGravity = trust * 0.6;
+    const gravitationalConstant = 0.667;
+    return Math.min(100, (massEffect * trustGravity * gravitationalConstant) / 10);
+  };
+
+  const calculateSociogenicMutation = (innovation: number, disruptions: number): number => {
+    const mutationPressure = innovation * 0.8;
+    const disruptionCatalyst = disruptions * 15;
+    const randomMutation = Math.random() * 20;
+    return Math.min(100, mutationPressure + disruptionCatalyst + randomMutation);
+  };
+
+  const calculateCollectiveIQ = (innovation: number, cooperation: number, coalitions: number): number => {
+    const baseIQ = (innovation + cooperation) / 2;
+    const networkIQ = Math.min(40, coalitions * 5);
+    const emergentIQ = Math.log(Math.max(1, coalitions)) * 12;
+    const synergisticBonus = (innovation * cooperation) / 1000;
+    return Math.min(100, baseIQ + networkIQ + emergentIQ + synergisticBonus);
+  };
+
+  const calculateQuantumCohesion = (trust: number, cooperation: number, coalitions: number): number => {
+    const entanglement = trust * cooperation / 100;
+    const superposition = Math.min(30, coalitions * 4);
+    const coherence = (trust + cooperation) / 2;
+    return Math.min(100, entanglement + superposition + coherence * 0.6);
+  };
+
+  const calculateNetworkResilience = (coalitions: number, trust: number, population: number): number => {
+    const redundancy = Math.min(35, coalitions * 3);
+    const trustBuffer = trust * 0.5;
+    const populationStability = Math.min(25, population * 0.2);
+    return Math.min(100, redundancy + trustBuffer + populationStability);
+  };
+
+  const calculateAdaptiveCapacity = (innovation: number, energy: number, mutation: number): number => {
+    const innovationCapacity = innovation * 0.6;
+    const energyReserve = energy * 0.3;
+    const mutationPotential = mutation * 0.4;
+    return Math.min(100, innovationCapacity + energyReserve + mutationPotential);
+  };
+
+  const calculateEmergenceLevel = (metrics: AdvancedCulturalMetrics): number => {
+    return (metrics.viralCoefficient + metrics.collectiveIQAmplification + metrics.quantumCohesion) / 3;
+  };
+
+  // FONCTION PRINCIPALE DE MISE À JOUR
   const updateAdvancedCulturalData = () => {
     const population = state.primatoms.length;
     const coalitions = state.coalitions.length;
@@ -178,70 +240,11 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
         collective_intelligence: Math.min(98, collectiveIQAmplification + Math.random() * 8)
       },
       advanced_metrics: advanced,
-      emergence_level: calculateEmergenceLevel(advanced),
-      cultural_evolution: calculateCulturalEvolution(state),
-      future_trajectory: predictFutureTrajectory(advanced, population, coalitions)
+      emergence_level: calculateEmergenceLevel(advanced)
     };
 
     setCulturalData(dynamicData);
     setLastUpdate(Date.now());
-  };
-
-  const calculateViralCoefficient = (trust: number, cooperation: number, coalitions: number): number => {
-    const baseViral = (trust + cooperation) / 2;
-    const networkEffect = Math.min(50, coalitions * 8);
-    const amplification = Math.log(Math.max(1, coalitions)) * 15;
-    return Math.min(100, baseViral + networkEffect + amplification);
-  };
-
-  const calculateMemePropagation = (innovation: number, energy: number, population: number): number => {
-    const creativeForce = innovation * 0.7;
-    const energyMultiplier = energy * 0.4;
-    const populationBoost = Math.min(30, population * 0.3);
-    return Math.min(100, creativeForce + energyMultiplier + populationBoost);
-  };
-
-  const calculateCulturalGravity = (coalitions: number, population: number, trust: number): number => {
-    const massEffect = (coalitions * population) / 10;
-    const trustGravity = trust * 0.6;
-    const gravitationalConstant = 0.667; // Inspiration physique
-    return Math.min(100, (massEffect * trustGravity * gravitationalConstant) / 10);
-  };
-
-  const calculateSociogenicMutation = (innovation: number, disruptions: number): number => {
-    const mutationPressure = innovation * 0.8;
-    const disruptionCatalyst = disruptions * 15;
-    const randomMutation = Math.random() * 20;
-    return Math.min(100, mutationPressure + disruptionCatalyst + randomMutation);
-  };
-
-  const calculateCollectiveIQ = (innovation: number, cooperation: number, coalitions: number): number => {
-    const baseIQ = (innovation + cooperation) / 2;
-    const networkIQ = Math.min(40, coalitions * 5);
-    const emergentIQ = Math.log(Math.max(1, coalitions)) * 12;
-    const synergisticBonus = (innovation * cooperation) / 1000;
-    return Math.min(100, baseIQ + networkIQ + emergentIQ + synergisticBonus);
-  };
-
-  const calculateQuantumCohesion = (trust: number, cooperation: number, coalitions: number): number => {
-    const entanglement = trust * cooperation / 100;
-    const superposition = Math.min(30, coalitions * 4);
-    const coherence = (trust + cooperation) / 2;
-    return Math.min(100, entanglement + superposition + coherence * 0.6);
-  };
-
-  const calculateNetworkResilience = (coalitions: number, trust: number, population: number): number => {
-    const redundancy = Math.min(35, coalitions * 3);
-    const trustBuffer = trust * 0.5;
-    const populationStability = Math.min(25, population * 0.2);
-    return Math.min(100, redundancy + trustBuffer + populationStability);
-  };
-
-  const calculateAdaptiveCapacity = (innovation: number, energy: number, mutation: number): number => {
-    const innovationCapacity = innovation * 0.6;
-    const energyReserve = energy * 0.3;
-    const mutationPotential = mutation * 0.4;
-    return Math.min(100, innovationCapacity + energyReserve + mutationPotential);
   };
 
   const generateEmergentNarratives = (innovation: number, trust: number, coalitions: number, population: number): string[] => {
@@ -290,8 +293,8 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
       .slice(0, 3)
       .map(([type]) => type);
 
-    const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / state.primatoms.length;
-    const avgTrust = state.primatoms.reduce((sum, p) => sum + p.trust, 0) / state.primatoms.length;
+    const avgInnovation = state.primatoms.reduce((sum, p) => sum + p.innovation, 0) / Math.max(state.primatoms.length, 1);
+    const avgTrust = state.primatoms.reduce((sum, p) => sum + p.trust, 0) / Math.max(state.primatoms.length, 1);
     
     return {
       dominantGenes,
@@ -423,9 +426,9 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
     }, {} as Record<string, number>);
 
     const evolution = {
-      generation: state.generation,
+      generation: state.generation || 0,
       diversity: Object.keys(behaviorCounts).length / 5,
-      dominantSpecies: Object.entries(behaviorCounts).sort(([,a], [,b]) => b - a)[0]?.[0],
+      dominantSpecies: Object.entries(behaviorCounts).sort(([,a], [,b]) => b - a)[0]?.[0] || 'none',
       evolutionRate: advancedMetrics ? advancedMetrics.sociogenicMutation / 100 : 0,
       adaptiveFitness: advancedMetrics ? advancedMetrics.adaptiveCapacity / 100 : 0,
       selectionPressure: (state.activeDisruptions?.length || 0) / 10
@@ -434,12 +437,12 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
     const dnaData: CulturalDNA = {
       helix: Object.entries(behaviorCounts).map(([trait, count]) => ({
         trait,
-        expression: (count / population) * 100,
+        expression: (count / Math.max(population, 1)) * 100,
         dominance: count > population / 5 ? 1 : 0.5,
         mutation: Math.random() * 20
       })),
       evolution: {
-        generation: state.generation,
+        generation: state.generation || 0,
         fitness: evolution.adaptiveFitness,
         diversity: evolution.diversity,
         selection_pressure: evolution.selectionPressure
@@ -450,29 +453,7 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
     setCulturalEvolution(prev => [...prev, evolution].slice(-20));
   };
 
-  const calculateEmergenceLevel = (metrics: AdvancedCulturalMetrics): number => {
-    return (metrics.viralCoefficient + metrics.collectiveIQAmplification + metrics.quantumCohesion) / 3;
-  };
-
-  const calculateCulturalEvolution = (state: SimulationState): any => {
-    return {
-      phase: state.generation < 50 ? 'Formation' : state.generation < 100 ? 'Expansion' : 'Transcendance',
-      trajectory: 'ascendant',
-      nextMilestone: 'Singularité Coopérative',
-      evolutionSpeed: 'exponentielle'
-    };
-  };
-
-  const predictFutureTrajectory = (metrics: AdvancedCulturalMetrics, population: number, coalitions: number): any => {
-    return {
-      shortTerm: 'Consolidation réseaux existants',
-      mediumTerm: 'Émergence méta-structures',
-      longTerm: 'Transcendance collective',
-      probability: Math.min(0.95, metrics.viralCoefficient / 100 + 0.2)
-    };
-  };
-
-  // Analyse complète renforcée
+  // ANALYSES COMPLÈTES
   const runHyperAnalysis = async () => {
     setIsAnalyzing(true);
     
@@ -551,19 +532,19 @@ const CultureEnginePanel: React.FC<CultureEnginePanelProps> = ({
           scenario: `Injection massive super-innovateurs`,
           prediction: `Accélération mutation ${Math.floor(avgInnovation * 1.8)}% - Singularité en ${Math.max(1, 10 - population / 5)} minutes`,
           confidence: 0.89,
-          impact: 'revolutionary'
+          impact: 'high'
         },
         {
           scenario: `Disruption quantique coordonnée`,
           prediction: `Émergence méta-structures ${Math.floor(coalitions * 1.5)} - Civilisation post-humaine probable`,
           confidence: 0.76,
-          impact: 'transformative'
+          impact: 'high'
         },
         {
           scenario: `Résonance harmonique maximale`,
           prediction: `Conscience collective ${Math.floor(avgTrust * 1.3)}% - Transcendance garantie`,
           confidence: 0.94,
-          impact: 'revolutionary'
+          impact: 'high'
         }
       ],
       
@@ -1009,3 +990,462 @@ Cette simulation révèle l'émergence d'une forme d'intelligence collective tra
                         <span className="text-green-400 font-bold">
                           {advancedMetrics.sociogenicMutation.toFixed(1)}%
                         </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Capacité Adaptive</span>
+                        <span className="text-emerald-400 font-bold">
+                          {advancedMetrics.adaptiveCapacity.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Gènes Dominants</span>
+                        <span className="text-yellow-400 font-bold">
+                          {advancedMetrics.culturalDNA.dominantGenes.length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Narratifs Émergents */}
+                  {advancedMetrics.emergentNarratives.length > 0 && (
+                    <div className="md:col-span-2 lg:col-span-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-4 border border-orange-500/30">
+                      <h5 className="font-medium text-white mb-3 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        Narratifs Émergents Transcendants
+                      </h5>
+                      <div className="space-y-2">
+                        {advancedMetrics.emergentNarratives.map((narrative, i) => (
+                          <p key={i} className="text-orange-300 text-sm font-medium">
+                            • {narrative}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-400">
+                  <Galaxy className="w-12 h-12 mx-auto mb-3 opacity-50 animate-pulse" />
+                  <p>Initialisation intelligence collective quantique...</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Analysis View */}
+          {activeView === 'analysis' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-400" />
+                  Analyse Comportementale IA Hyperdimensionnelle
+                </h4>
+                <button
+                  onClick={runHyperAnalysis}
+                  disabled={isAnalyzing}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 text-white rounded-lg text-sm"
+                >
+                  <Rocket className="w-4 h-4" />
+                  {isAnalyzing ? 'IA Quantique...' : 'Hyper-Analyse'}
+                </button>
+              </div>
+
+              {analysisResult ? (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-6 border border-purple-500/30">
+                    <h5 className="font-medium text-white mb-3 flex items-center gap-2">
+                      <Galaxy className="w-4 h-4" />
+                      Résumé Exécutif Quantique
+                    </h5>
+                    <p className="text-gray-300 text-sm">{analysisResult.executiveSummary}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                      <h5 className="font-medium text-white mb-2 flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-yellow-400" />
+                        Insights Culturels Transcendants
+                      </h5>
+                      <ul className="space-y-1 max-h-40 overflow-y-auto">
+                        {analysisResult.culturalInsights.map((insight, i) => (
+                          <li key={i} className="text-sm text-gray-300">• {insight}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                      <h5 className="font-medium text-white mb-2 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-green-400" />
+                        Recommandations Stratégiques
+                      </h5>
+                      <ul className="space-y-1 max-h-40 overflow-y-auto">
+                        {analysisResult.recommendations.map((rec, i) => (
+                          <li key={i} className="text-sm text-gray-300">• {rec}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-400">
+                  <Brain className="w-16 h-16 mx-auto mb-4 opacity-50 animate-pulse" />
+                  <p className="text-lg mb-2">IA Quantique Prête pour Hyper-Analyse</p>
+                  <p className="text-sm">Population: {state.primatoms.length} • Coalitions: {state.coalitions.length} • Mode: {deepAnalysisMode}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Predictions View */}
+          {activeView === 'predictions' && (
+            <div className="space-y-6">
+              <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Telescope className="w-5 h-5 text-purple-400" />
+                Prédictions Révolutionnaires Multi-Dimensionnelles
+              </h4>
+              
+              {predictiveScenarios.length > 0 ? (
+                <div className="space-y-4">
+                  {predictiveScenarios.map((scenario, i) => (
+                    <div key={scenario.id} className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-6 border border-slate-600">
+                      <div className="flex items-center justify-between mb-4">
+                        <h5 className="text-lg font-semibold text-white">{scenario.name}</h5>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            scenario.impact === 'revolutionary' ? 'bg-red-500/20 text-red-400' :
+                            scenario.impact === 'transformative' ? 'bg-orange-500/20 text-orange-400' :
+                            'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {scenario.impact}
+                          </span>
+                          <span className="text-sm text-gray-400">{(scenario.probability * 100).toFixed(0)}%</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-gray-300 mb-4">{scenario.description}</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h6 className="font-medium text-green-400 mb-2">Conséquences Prédites</h6>
+                          <ul className="space-y-1">
+                            {scenario.consequences.map((cons, j) => (
+                              <li key={j} className="text-sm text-gray-300">• {cons}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h6 className="font-medium text-blue-400 mb-2">Prérequis Détectés</h6>
+                          <ul className="space-y-1">
+                            {scenario.prerequisites.map((req, j) => (
+                              <li key={j} className="text-sm text-gray-300">• {req}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 p-3 bg-slate-700/50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-400">Raisonnement IA</span>
+                          <span className="text-sm text-purple-400">Confiance: {(scenario.confidence * 100).toFixed(0)}%</span>
+                        </div>
+                        <p className="text-xs text-gray-300 mt-1">{scenario.aiReasoning}</p>
+                        <p className="text-xs text-blue-300 mt-1">Horizon temporel: {scenario.timeframe}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-400">
+                  <Telescope className="w-16 h-16 mx-auto mb-4 opacity-50 animate-pulse" />
+                  <p className="text-lg mb-2">Génération Prédictions Quantiques</p>
+                  <p className="text-sm">Population: {state.primatoms.length} • Seuil prédictif: 5+ entités</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* DNA View */}
+          {activeView === 'dna' && (
+            <div className="space-y-6">
+              <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Dna className="w-5 h-5 text-purple-400" />
+                ADN Culturel & Évolution Génétique
+              </h4>
+              
+              {culturalDNA ? (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg p-6 border border-green-500/30">
+                    <h5 className="font-medium text-white mb-4 flex items-center gap-2">
+                      <Dna className="w-4 h-4" />
+                      Hélice Génétique Culturelle
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {culturalDNA.helix.map((gene, i) => (
+                        <div key={i} className="bg-slate-800/50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-white">{gene.trait}</span>
+                            <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+                              {gene.expression.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+                            <div 
+                              className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full"
+                              style={{ width: `${gene.expression}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-400">
+                            <span>Dominance: {gene.dominance}</span>
+                            <span>Mutation: {gene.mutation.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg p-6 border border-blue-500/30">
+                    <h5 className="font-medium text-white mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4" />
+                      Métriques Évolutionnaires
+                    </h5>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-400 mb-1">
+                          {culturalDNA.evolution.generation}
+                        </div>
+                        <div className="text-xs text-gray-400">Génération</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-cyan-400 mb-1">
+                          {(culturalDNA.evolution.fitness * 100).toFixed(0)}%
+                        </div>
+                        <div className="text-xs text-gray-400">Fitness</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-400 mb-1">
+                          {(culturalDNA.evolution.diversity * 100).toFixed(0)}%
+                        </div>
+                        <div className="text-xs text-gray-400">Diversité</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-orange-400 mb-1">
+                          {(culturalDNA.evolution.selection_pressure * 100).toFixed(0)}%
+                        </div>
+                        <div className="text-xs text-gray-400">Pression Sélective</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-400">
+                  <Dna className="w-16 h-16 mx-auto mb-4 opacity-50 animate-pulse" />
+                  <p className="text-lg mb-2">Séquençage ADN Culturel</p>
+                  <p className="text-sm">Analyse génétique comportementale en cours...</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quantum Lab View */}
+          {activeView === 'quantum' && (
+            <div className="space-y-6">
+              <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Atom className="w-5 h-5 text-purple-400" />
+                Laboratoire Quantique - Intrication Sociale
+              </h4>
+              
+              {advancedMetrics && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg p-6 border border-purple-500/30">
+                      <h5 className="font-medium text-white mb-4 flex items-center gap-2">
+                        <Atom className="w-4 h-4" />
+                        États Quantiques Sociaux
+                      </h5>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-300">Cohésion Quantique</span>
+                          <span className="text-purple-400 font-bold">
+                            {advancedMetrics.quantumCohesion.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-700 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                            style={{ width: `${advancedMetrics.quantumCohesion}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-400">
+                          Intrication sociale détectée - {state.coalitions.length} réseaux enchevêtrés
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg p-6 border border-blue-500/30">
+                      <h5 className="font-medium text-white mb-4 flex items-center gap-2">
+                        <Waves className="w-4 h-4" />
+                        Fonction d'Onde Collective
+                      </h5>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-300">Coefficient Viral</span>
+                          <span className="text-blue-400 font-bold">
+                            {advancedMetrics.viralCoefficient.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-700 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full"
+                            style={{ width: `${advancedMetrics.viralCoefficient}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-400">
+                          Propagation memétique optimale - Résonance harmonique
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg p-6 border border-green-500/30">
+                    <h5 className="font-medium text-white mb-4 flex items-center gap-2">
+                      <Radar className="w-4 h-4" />
+                      Champ Quantique Social
+                    </h5>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-br from-green-400 to-emerald-400 flex items-center justify-center">
+                          <span className="text-white font-bold">
+                            {advancedMetrics.memePropagationVelocity.toFixed(0)}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400">Vélocité Memétique</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center">
+                          <span className="text-white font-bold">
+                            {advancedMetrics.culturalGravity.toFixed(0)}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400">Gravité Culturelle</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                          <span className="text-white font-bold">
+                            {advancedMetrics.sociogenicMutation.toFixed(0)}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400">Mutation Sociogénique</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-br from-cyan-400 to-blue-400 flex items-center justify-center">
+                          <span className="text-white font-bold">
+                            {advancedMetrics.adaptiveCapacity.toFixed(0)}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400">Capacité Adaptive</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* What-If Lab */}
+          {activeView === 'whatif' && (
+            <div className="space-y-6">
+              <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Wand2 className="w-5 h-5 text-purple-400" />
+                Laboratoire de Simulation Quantique
+              </h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Paramètre d'Intervention</label>
+                  <select
+                    value={selectedParameter}
+                    onChange={(e) => setSelectedParameter(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+                  >
+                    <option value="cultural_resonance">🌊 Résonance Culturelle Quantique</option>
+                    <option value="innovation_catalyst">⚡ Catalyseur d'Innovation Viral</option>
+                    <option value="trust_amplifier">🤝 Amplificateur de Confiance</option>
+                    <option value="network_optimizer">🕸️ Optimiseur de Réseaux</option>
+                    <option value="quantum_coherence">⚛️ Cohérence Quantique</option>
+                    <option value="memetic_accelerator">🚀 Accélérateur Memétique</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Configuration Transcendante</label>
+                  <input
+                    type="text"
+                    value={parameterValue}
+                    onChange={(e) => setParameterValue(e.target.value)}
+                    placeholder="ex: collective_singularity_mode"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={runWhatIfAnalysis}
+                disabled={isAnalyzing}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white rounded-lg transition-all shadow-lg"
+              >
+                <Wand2 className="w-4 h-4" />
+                {isAnalyzing ? 'IA Quantique Simule...' : 'Simuler Impact Quantique'}
+              </button>
+
+              {whatIfResult && (
+                <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg p-6 border border-blue-500/30">
+                  <h5 className="font-medium text-white mb-3 flex items-center gap-2">
+                    <Telescope className="w-4 h-4" />
+                    Prédiction Quantique Multi-Dimensionnelle
+                  </h5>
+                  <pre className="whitespace-pre-wrap text-sm text-gray-300 font-sans">{whatIfResult}</pre>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Report View */}
+          {activeView === 'report' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Download className="w-5 h-5 text-purple-400" />
+                  Rapport Intelligence Collective Transcendante
+                </h4>
+                {sessionReport && (
+                  <button
+                    onClick={exportReport}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exporter Rapport Transcendant
+                  </button>
+                )}
+              </div>
+
+              {sessionReport ? (
+                <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600">
+                  <pre className="whitespace-pre-wrap text-sm text-gray-300 font-sans">{sessionReport}</pre>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-400">
+                  <Download className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg mb-2">Rapport Transcendant en Attente</p>
+                  <p className="text-sm">Lancez une analyse hyperdimensionnelle pour générer le rapport</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CultureEnginePanel;
