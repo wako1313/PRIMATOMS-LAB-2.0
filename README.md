@@ -283,7 +283,7 @@ VITE_SIMULATION=true
 
 ### **🚀 Quick Start**
 - **Live Demo**: https://youtu.be/C9eBikXHa_s
-- **GitHub**: https://github.com/wako1313/PrimtAtomsLAB1.0
+- **GitHub**: https://github.com/wako1313/PRIMATOMS-LAB-2.0
 
 ### **🤝 Business & Partnerships**
 - **Contact**: contact@singlairity.com
