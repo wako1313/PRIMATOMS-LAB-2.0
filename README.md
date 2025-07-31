@@ -286,7 +286,7 @@ VITE_SIMULATION=true
 - **GitHub**: [Complete repository with examples]
 
 ### **🤝 Business & Partnerships**
-- **Contact**: [business@primatoms-society.com]
+- **Contact**: contact@singlairity.com
 
 ---
 
