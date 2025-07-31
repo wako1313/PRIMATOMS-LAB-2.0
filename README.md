@@ -1,65 +1,64 @@
 # Primatoms Society  
-## 🔬 Laboratoire de Disruption Cognitive - Hackathon Qloo 2025
+## 🔬 Cognitive Disruption Laboratory - Qloo Hackathon 2025
 
+## 🎯 Overview
 
-## 🎯 Présentation
+**Primatoms Society** is an advanced analytics and simulation platform for social, cultural, and behavioral dynamics powered by **Qloo's cultural intelligence**.
 
-**Primatoms Society** est une plateforme d'analyse avancée et de simulation des dynamiques sociales, culturelles et comportementales utilisant l'**intelligence culturelle Qloo**.
+It serves enterprises, decision-makers, innovation agencies, and institutions seeking to **anticipate, understand, and influence** collective reactions to products, messaging, strategies, or transformations.
 
-Elle s'adresse aux entreprises, décideurs, agences d'innovation et institutions souhaitant **anticiper, comprendre et influencer** les réactions collectives face à un produit, un message, une stratégie ou une transformation.
-
-Basée sur un moteur IA propriétaire (**PoliSynth Disruptor**) via un LLM et l'intégration **Qloo API**, la solution permet de simuler des scénarios, d'identifier les signaux faibles, de cartographier l'acceptabilité ou la disruption, et de générer des insights actionnables — tout cela avec une visualisation claire et une confidentialité totale.
-
----
-
-## ✨ Fonctionnalités Principales
-
-### 🧠 **Simulation Sociale Avancée**
-- **Écosystème de 200+ agents intelligents** (Primatoms) avec 5 comportements distincts
-- **Formation dynamique de coalitions** et alliances stratégiques
-- **Territoires d'influence** géographiques en temps réel
-- **Réactions authentiques** aux événements disruptifs
-
-### 🌊 **Intelligence Culturelle Qloo**
-- **Profils culturels personnalisés** basés sur les affinités Qloo
-- **Tendances globales** intégrées en temps réel
-- **Prédictions comportementales** alimentées par l'IA culturelle
-- **Recommandations stratégiques** contextualisées
-
-### 📊 **Dashboard Interactif & Analytics**
-- **Visualisation temps réel** : cartes, timeline, mapping d'influence
-- **15+ métriques avancées** : stabilité, résilience, innovation collective
-- **Détection automatique** de phénomènes émergents
-- **Scoring d'acceptabilité** et d'impact prédictif
-
-### ⚡ **Système de Disruption Intelligent**
-- **6 types d'événements** : pénurie, innovation, conflit, gouvernance...
-- **IA adaptive** : disruptions automatiques basées sur le contexte
-- **Mode "What-If"** : simulation de scénarios personnalisés
-- **Mesure de résilience** sociale et culturelle
+Built on a proprietary AI engine (**PoliSynth Disruptor**) via LLM and **Qloo API integration**, the solution enables scenario simulation, weak signal identification, acceptability and disruption mapping, and actionable insights generation — all with clear visualization and complete confidentiality.
 
 ---
 
-## 🎮 Utilisation Rapide
+## ✨ Key Features
 
-### 🚀 **Démarrage Express**
+### 🧠 **Advanced Social Simulation**
+- **Ecosystem of 200+ intelligent agents** (Primatoms) with 5 distinct behaviors
+- **Dynamic coalition formation** and strategic alliances
+- **Geographic influence territories** in real-time
+- **Authentic reactions** to disruptive events
+
+### 🌊 **Qloo Cultural Intelligence**
+- **Personalized cultural profiles** based on Qloo affinities
+- **Global trends** integrated in real-time
+- **Behavioral predictions** powered by cultural AI
+- **Contextualized strategic recommendations**
+
+### 📊 **Interactive Dashboard & Analytics**
+- **Real-time visualization**: maps, timeline, influence mapping
+- **15+ advanced metrics**: stability, resilience, collective innovation
+- **Automatic detection** of emerging phenomena
+- **Acceptability scoring** and predictive impact
+
+### ⚡ **Intelligent Disruption System**
+- **6 event types**: scarcity, innovation, conflict, governance...
+- **Adaptive AI**: context-based automatic disruptions
+- **"What-If" mode**: custom scenario simulation
+- **Social and cultural resilience** measurement
+
+---
+
+## 🎮 Quick Start
+
+### 🚀 **Express Setup**
 ```bash
 # Installation
-git clone [votre-repo]
+git clone [your-repo]
 cd primatoms-society-lab
 npm install
-cp .env.example .env  # Renseigner clé Qloo
+cp .env.example .env  # Add Qloo key
 npm run dev           # http://localhost:5173
 ```
 
-### 📋 **Workflow Simple**
-1. **Lancer l'app** et accéder au dashboard
-2. **Configurer la population** (taille, distribution comportementale)
-3. **Définir votre scénario** d'analyse ou hypothèse
-4. **Observer les dynamiques** en temps réel
-5. **Injecter des disruptions** pour tester la résilience
-6. **Analyser les insights** culturels Qloo
-7. **Exporter les résultats** et recommandations
+### 📋 **Simple Workflow**
+1. **Launch the app** and access the dashboard
+2. **Configure population** (size, behavioral distribution)
+3. **Define your analysis scenario** or hypothesis
+4. **Observe dynamics** in real-time
+5. **Inject disruptions** to test resilience
+6. **Analyze Qloo cultural insights**
+7. **Export results** and recommendations
 
 ---
 
@@ -70,11 +69,11 @@ npm run dev           # http://localhost:5173
 React 18 + TypeScript + Vite
 ├── Tailwind CSS (Design System)
 ├── Lucide React (Icons)
-├── Recharts (Visualisations)
-└── Composants modulaires
+├── Recharts (Visualizations)
+└── Modular Components
 ```
 
-### **Moteur IA Propriétaire**
+### **Proprietary AI Engine**
 ```
 PoliSynth Disruptor Engine
 ├── Social Dynamics Engine
@@ -83,135 +82,135 @@ PoliSynth Disruptor Engine
 └── Qloo API Service
 ```
 
-### **Services Culturels**
+### **Cultural Services**
 ```
 Qloo Intelligence Integration
-├── Profils Consommateurs
-├── Tendances Globales
-├── Affinités Culturelles
-└── Recommandations Stratégiques
+├── Consumer Profiles
+├── Global Trends
+├── Cultural Affinities
+└── Strategic Recommendations
 ```
 
 ---
 
-## 💼 Cas d'Usage Business
+## 💼 Business Use Cases
 
 ### **Marketing & Innovation**
-- **Lancement de produits** : Prédire l'adoption par segment culturel
-- **Campagnes publicitaires** : Optimiser le message selon les affinités Qloo
-- **Innovation** : Identifier les catalyseurs culturels d'adoption
+- **Product launches**: Predict adoption by cultural segment
+- **Advertising campaigns**: Optimize messaging based on Qloo affinities
+- **Innovation**: Identify cultural adoption catalysts
 
-### **Stratégie & Transformation**
-- **Conduite du changement** : Anticiper les résistances culturelles  
-- **Expansion géographique** : Comprendre les spécificités locales
-- **Gestion de crise** : Simuler les réactions sociales aux événements
+### **Strategy & Transformation**
+- **Change management**: Anticipate cultural resistance  
+- **Geographic expansion**: Understand local specificities
+- **Crisis management**: Simulate social reactions to events
 
-### **Recherche & Analyse**
-- **Études de marché** augmentées par l'IA culturelle
-- **Veille stratégique** : Détection de signaux faibles
-- **Benchmarking culturel** : Comparaison avec les tendances Qloo
+### **Research & Analysis**
+- **Market research** enhanced by cultural AI
+- **Strategic intelligence**: Weak signal detection
+- **Cultural benchmarking**: Comparison with Qloo trends
 
 ---
 
-## 🔬 Méthodologie de Debugging Qloo
+## 🔬 Qloo Debugging Methodology
 
-### **🎯 Approche Systématique en 7 Étapes**
+### **🎯 Systematic 7-Step Approach**
 
-Le système inclut un **débogueur automatique** pour diagnostiquer les problèmes API :
+The system includes an **automatic debugger** for API diagnostics:
 
 ```javascript
-// Dans la console DevTools
+// In DevTools console
 await qlooService.systematicDebugging();
 ```
 
-**Diagnostic complet** :
-- ✅ Validation des prérequis (clé API, format, URL)
-- 🌐 Test de connectivité réseau
-- 🔑 Validation authentification (4 méthodes testées)
-- 📡 Test endpoints multiples
-- 📋 Analyse headers et CORS
-- 📦 Test payloads avec paramètres
-- 🎯 Diagnostic final et recommandations
+**Complete diagnosis**:
+- ✅ Prerequisites validation (API key, format, URL)
+- 🌐 Network connectivity testing
+- 🔑 Authentication validation (4 methods tested)
+- 📡 Multiple endpoint testing
+- 📋 Headers and CORS analysis
+- 📦 Payload testing with parameters
+- 🎯 Final diagnosis and recommendations
 
-### **🔧 Mode Simulation Avancé**
+### **🔧 Advanced Simulation Mode**
 
-En cas d'indisponibilité API, **fallback automatique** avec :
-- 📊 Données culturelles réalistes basées sur patterns Qloo
-- 🎯 Algorithmes prédictifs calibrés
-- 🔄 Continuité d'expérience garantie
-- ✅ Résultats cohérents pour les démos
-
----
-
-## 🔋 Types de Primatoms (Agents Intelligents)
-
-| Type | % Pop | Caractéristiques | Métriques Clés | Rôle Social |
-|------|-------|------------------|----------------|-------------|
-| **Alpha (Leaders)** | 8% | Influence élevée, territorial | Énergie 75, Innovation 65 | Direction coalitions |
-| **Sigma (Innovateurs)** | 15% | Innovation max, nomade | Innovation 90, Adaptabilité 95 | Catalyseurs changement |
-| **Omega (Médiateurs)** | 12% | Coopération max, social | Confiance 85, Coopération 90 | Résolution conflits |
-| **Delta (Explorateurs)** | 20% | Nomade, adaptable | Énergie 85, Innovation 75 | Expansion frontières |
-| **Beta (Suiveurs)** | 45% | Social, coopératif | Confiance 70, Coopération 80 | Base stable société |
+In case of API unavailability, **automatic fallback** with:
+- 📊 Realistic cultural data based on Qloo patterns
+- 🎯 Calibrated predictive algorithms
+- 🔄 Guaranteed experience continuity
+- ✅ Consistent results for demos
 
 ---
 
-## 📈 Métriques & KPIs
+## 🔋 Primatoms Types (Intelligent Agents)
 
-### **📊 Indicateurs Principaux**
-- **Stabilité Système** : Équilibre global de l'écosystème
-- **Intelligence Collective** : Synergie cognitive de la population
-- **Résilience Culturelle** : Capacité d'adaptation aux changements
-- **Vélocité d'Innovation** : Vitesse de propagation des nouveautés
-
-### **🎯 Analytics Culturels Qloo**
-- **Score d'Affinité** : Compatibilité culturelle entre segments
-- **Index d'Adoption** : Probabilité d'acceptation par segment
-- **Friction Culturelle** : Points de résistance identifiés
-- **Momentum Viral** : Potentiel de propagation sociale
-
-### **⚡ Phénomènes Émergents Détectés**
-- Renaissance Cognitive Collective
-- Solidarité de Crise Transcendante  
-- Émergence de Super-Structures Sociales
-- Fusion Territoriale Multi-Coalitions
+| Type | % Pop | Characteristics | Key Metrics | Social Role |
+|------|-------|-----------------|-------------|-------------|
+| **Alpha (Leaders)** | 8% | High influence, territorial | Energy 75, Innovation 65 | Coalition leadership |
+| **Sigma (Innovators)** | 15% | Max innovation, nomadic | Innovation 90, Adaptability 95 | Change catalysts |
+| **Omega (Mediators)** | 12% | Max cooperation, social | Trust 85, Cooperation 90 | Conflict resolution |
+| **Delta (Explorers)** | 20% | Nomadic, adaptable | Energy 85, Innovation 75 | Frontier expansion |
+| **Beta (Followers)** | 45% | Social, cooperative | Trust 70, Cooperation 80 | Stable society base |
 
 ---
 
-## 🛡️ Sécurité & Gouvernance
+## 📈 Metrics & KPIs
+
+### **📊 Primary Indicators**
+- **System Stability**: Global ecosystem balance
+- **Collective Intelligence**: Population cognitive synergy
+- **Cultural Resilience**: Adaptation capacity to changes
+- **Innovation Velocity**: Speed of novelty propagation
+
+### **🎯 Qloo Cultural Analytics**
+- **Affinity Score**: Cultural compatibility between segments
+- **Adoption Index**: Acceptance probability by segment
+- **Cultural Friction**: Identified resistance points
+- **Viral Momentum**: Social propagation potential
+
+### **⚡ Detected Emerging Phenomena**
+- Collective Cognitive Renaissance
+- Transcendent Crisis Solidarity  
+- Super-Social Structure Emergence
+- Multi-Coalition Territorial Fusion
+
+---
+
+## 🛡️ Security & Governance
 
 ### **🔒 Privacy by Design**
-- ✅ **Aucune donnée personnelle** collectée ou stockée
-- ✅ **Architecture stateless**, logs techniques anonymisés
-- ✅ **Conformité RGPD** et standards sectoriels
-- ✅ **Modèles auditables**, recommandations traçables
+- ✅ **No personal data** collected or stored
+- ✅ **Stateless architecture**, anonymized technical logs
+- ✅ **GDPR compliance** and industry standards
+- ✅ **Auditable models**, traceable recommendations
 
-### **🏛️ Gouvernance IA**
-- **Transparence** : Toutes les prédictions sont explicables
-- **Éthique** : Respect des biais culturels et sociaux
-- **Contrôle** : Paramètres ajustables selon le contexte
-- **Responsabilité** : Logs complets des décisions IA
+### **🏛️ AI Governance**
+- **Transparency**: All predictions are explainable
+- **Ethics**: Respect for cultural and social biases
+- **Control**: Adjustable parameters based on context
+- **Accountability**: Complete logs of AI decisions
 
 ---
 
-## 🚀 Demo Impact & Différenciation
+## 🚀 Demo Impact & Differentiation
 
-### **⚡ Rapidité de Simulation**
-Anticiper l'effet d'une décision stratégique ou d'un lancement **en quelques minutes**
+### **⚡ Simulation Speed**
+Anticipate the effect of a strategic decision or launch **in minutes**
 
-### **🔬 Effet "Laboratoire Virtuel"**  
-Tester des scénarios impossibles à modéliser rapidement dans le réel
+### **🔬 "Virtual Laboratory" Effect**  
+Test scenarios impossible to model quickly in reality
 
-### **🧠 Compréhension Augmentée**
-Visualiser, expliquer, convaincre avec des insights visuels et argumentés
+### **🧠 Augmented Understanding**
+Visualize, explain, convince with visual and reasoned insights
 
-### **💰 ROI Optimisé**
-Limiter les coûts d'études, maximiser la pertinence des actions
+### **💰 Optimized ROI**
+Limit study costs, maximize action relevance
 
 ---
 
 ## 🎯 Configuration & API
 
-### **🌍 Endpoints Qloo Supportés**
+### **🌍 Supported Qloo Endpoints**
 ```typescript
 const QLOO_CONFIG = {
   baseUrl: 'https://hackathon.api.qloo.com',
@@ -221,16 +220,16 @@ const QLOO_CONFIG = {
 };
 ```
 
-### **🔧 Variables d'Environnement**
+### **🔧 Environment Variables**
 ```env
-# Qloo API (Requis pour fonctionnalités avancées)
+# Qloo API (Required for advanced features)
 VITE_QLOO_API_KEY=your_qloo_hackathon_key
 
-# LLM APIs (Optionnel - améliore l'analyse)
+# LLM APIs (Optional - enhances analysis)
 VITE_OPENAI_API_KEY=your_openai_key
 VITE_GEMINI_API_KEY=your_gemini_key
 
-# Mode simulation (pour tests sans API)
+# Simulation mode (for testing without API)
 VITE_SIMULATION=true
 ```
 
@@ -238,86 +237,73 @@ VITE_SIMULATION=true
 
 ## 📋 Roadmap & Perspectives
 
-### **Phase 1 : Hackathon Qloo ✅**
-- [x] Intégration complète API Qloo
-- [x] Simulation sociale multi-agents
-- [x] Dashboard interactif temps réel
-- [x] Système de debugging automatique
+### **Phase 1: Qloo Hackathon ✅**
+- [x] Complete Qloo API integration
+- [x] Multi-agent social simulation
+- [x] Real-time interactive dashboard
+- [x] Automatic debugging system
 
-### **Phase 2 : Extension Intelligence 🚧**
-- [ ] **Modules sectoriels** (santé, mobilité, culture, éducation)
-- [ ] **Intégration multi-sources** (réseaux sociaux, open data)
-- [ ] **Machine Learning** automatique des patterns
-- [ ] **API REST** complète pour intégrations
+### **Phase 2: Intelligence Extension 🚧**
+- [ ] **Sector modules** (healthcare, mobility, culture, education)
+- [ ] **Multi-source integration** (social networks, open data)
+- [ ] **Automatic machine learning** of patterns
+- [ ] **Complete REST API** for integrations
 
-### **Phase 3 : Plateforme Universelle 🔮**
-- [ ] **Mode collaboratif** multi-utilisateurs
-- [ ] **Marketplace de scénarios** pré-configurés
-- [ ] **Interface 3D immersive**
-- [ ] **Prédiction événements** sociaux automatique
+### **Phase 3: Universal Platform 🔮**
+- [ ] **Collaborative mode** multi-user
+- [ ] **Scenario marketplace** pre-configured
+- [ ] **Immersive 3D interface**
+- [ ] **Automatic social event** prediction
 
 ---
 
-## 🏆 Hackathon Qloo 2025 - Innovation Clés
+## 🏆 Qloo Hackathon 2025 - Key Innovations
 
-### **🎯 Objectifs Démontrados**
-- **Première intégration complète** Qloo dans simulation sociale
-- **Méthodologie reproductible** pour l'industrie
-- **Proof-of-concept** de l'intelligence culturelle prédictive
-- **Standards production-ready** avec tests et documentation
+### **🎯 Demonstrated Objectives**
+- **First complete integration** of Qloo in social simulation
+- **Reproducible methodology** for industry
+- **Proof-of-concept** of predictive cultural intelligence
+- **Production-ready standards** with testing and documentation
 
-### **💡 Différenciation Technologique**
-- **Agents culturellement intelligents** alimentés par Qloo
-- **Debugging systématique** pour APIs externes
-- **Fallback simulation** garantissant la continuité
-- **Visualisation temps réel** de phénomènes sociaux complexes
+### **💡 Technological Differentiation**
+- **Culturally intelligent agents** powered by Qloo
+- **Systematic debugging** for external APIs
+- **Simulation fallback** ensuring continuity
+- **Real-time visualization** of complex social phenomena
 
-### **🌟 Impact Business Attendu**
-- **3x amélioration** de la précision prédictive
-- **50% réduction** des coûts d'études de marché  
-- **Accélération 5x** des analyses culturelles
-- **ROI mesurable** sur les stratégies d'adoption
+### **🌟 Expected Business Impact**
+- **3x improvement** in predictive accuracy
+- **50% reduction** in market research costs  
+- **5x acceleration** of cultural analysis
+- **Measurable ROI** on adoption strategies
 
 ---
 
 ## 📞 Support & Contact
 
-### **🚀 Démarrage Rapide**
-- **Demo Live** : [URL à compléter]
-- **Documentation** : [docs.primatoms-society.com]
-- **GitHub** : [Repository complet avec exemples]
+### **🚀 Quick Start**
+- **Live Demo**: [URL to be completed]
+- **GitHub**: [Complete repository with examples]
 
-### **💬 Community & Support**
-- **Discord** : Support temps réel développeurs
-- **Issues** : Rapports bugs et améliorations
-- **Wiki** : Documentation technique approfondie
-
-### **🤝 Business & Partenariats**
-- **Contact** : [business@primatoms-society.com]
-- **Demos** : Présentation personnalisée sur demande
-- **Licensing** : Options académiques et entreprise
+### **🤝 Business & Partnerships**
+- **Contact**: [business@primatoms-society.com]
 
 ---
 
-## 📄 Licence & Crédits
+## 📄 License & Credits
 
-**MIT License** - Voir [LICENSE](LICENSE)
+**MIT License** - See [LICENSE](LICENSE)
 
-### **🙏 Remerciements**
-- **Qloo Team** : Accès API et intelligence culturelle
-- **Hackathon 2025** : Opportunité d'innovation
-- **Open Source Community** : Frameworks et outils
+### **🙏 Acknowledgments**
+- **Qloo Team**: API access and cultural intelligence
+- **Hackathon 2025**: Innovation opportunity
+- **Open Source Community**: Frameworks and tools
 
-### **🏆 Équipe**
-Développé avec passion pour repousser les limites de la **simulation sociale** et de l'**intelligence culturelle**.
-
----
-
-*"Simuler aujourd'hui la société de demain"* - **Primatoms Society Lab**
-
-![PRIMATOMS](https://img.shields.io/badge/PRIMATOMS-Society_Lab-purple?style=for-the-badge)
-![QLOO](https://img.shields.io/badge/QLOO-Cultural_Intelligence-blue?style=for-the-badge)
+### **🏆 Team**
+Developed with passion to push the boundaries of **social simulation** and **cultural intelligence**.
 
 ---
+
+*"Simulating tomorrow's society today"* - **Primatoms Society Lab**
 
 **🎪 Ready for Qloo Hackathon 2025 !** 🚀
