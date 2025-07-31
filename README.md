@@ -14,7 +14,7 @@
 
 Elle s'adresse aux entreprises, décideurs, agences d'innovation et institutions souhaitant **anticiper, comprendre et influencer** les réactions collectives face à un produit, un message, une stratégie ou une transformation.
 
-Basée sur un moteur IA propriétaire (**PoliSynth Disruptor**) et l'intégration **Qloo API**, la solution permet de simuler des scénarios, d'identifier les signaux faibles, de cartographier l'acceptabilité ou la disruption, et de générer des insights actionnables — tout cela avec une visualisation claire et une confidentialité totale.
+Basée sur un moteur IA propriétaire (**PoliSynth Disruptor**) via un LLM et l'intégration **Qloo API**, la solution permet de simuler des scénarios, d'identifier les signaux faibles, de cartographier l'acceptabilité ou la disruption, et de générer des insights actionnables — tout cela avec une visualisation claire et une confidentialité totale.
 
 ---
 
