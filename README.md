@@ -1,12 +1,6 @@
 # Primatoms Society  
 ## 🔬 Laboratoire de Disruption Cognitive - Hackathon Qloo 2025
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Platform](https://img.shields.io/badge/platform-Web-orange)
-![Qloo](https://img.shields.io/badge/Qloo-API_Integrated-purple)
-
----
 
 ## 🎯 Présentation
 
