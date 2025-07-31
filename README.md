@@ -282,8 +282,8 @@ VITE_SIMULATION=true
 ## 📞 Support & Contact
 
 ### **🚀 Quick Start**
-- **Live Demo**: [URL to be completed]
-- **GitHub**: [Complete repository with examples]
+- **Live Demo**: https://youtu.be/C9eBikXHa_s
+- **GitHub**: https://github.com/waks132/PRIMATOMS-SOCIETY
 
 ### **🤝 Business & Partnerships**
 - **Contact**: contact@singlairity.com
@@ -292,7 +292,7 @@ VITE_SIMULATION=true
 
 ## 📄 License & Credits
 
-**MIT License** - See [LICENSE](LICENSE)
+**MIT License** -
 
 ### **🙏 Acknowledgments**
 - **Qloo Team**: API access and cultural intelligence
